@@ -19,7 +19,6 @@
       --insucesso:#e23b3b;
     }
 
-    /* ===== Base ===== */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -34,7 +33,6 @@
 
     .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px; width:100%; flex:1}
 
-    /* ===== Header ===== */
     .app-header{
       background: linear-gradient(90deg,var(--primary),var(--primary-2));
       color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
@@ -42,7 +40,6 @@
     }
     .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
-    /* ===== Legenda ===== */
     .legenda{
       display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
       margin:16px 0 8px;
@@ -60,14 +57,11 @@
     .cor.finalizado{background:var(--finalizado)}
     .cor.insucesso{background:var(--insucesso)}
 
-    /* ===== Formulário ===== */
     .form-container{
       background:var(--card); border:1px solid var(--border);
       padding:20px; margin:18px 0; border-radius:14px;
       box-shadow:0 10px 24px rgba(0,0,0,.08);
-      transition:box-shadow .25s ease, transform .25s ease;
     }
-    .form-container:hover{ transform:translateY(-1px); box-shadow:0 16px 32px rgba(0,0,0,.12)}
     .form-container h2{margin:0 0 12px; color:var(--primary)}
     .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
     .form-grid > .full{grid-column:1 / -1}
@@ -77,15 +71,11 @@
       background:#fff; color:var(--text); font-size:14px;
       transition:border-color .2s ease, box-shadow .2s ease, transform .1s ease;
     }
-    input:focus,select:focus{outline:none;border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15)}
     button{
       background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer;
       letter-spacing:.2px;
     }
-    button:hover{transform:translateY(-1px)}
-    button:active{transform:translateY(0)}
 
-    /* ===== Grid (mesma estrutura e ids) ===== */
     .table-card{
       background:var(--card); border:1px solid var(--border); border-radius:14px;
       box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden;
@@ -101,45 +91,36 @@
       border-bottom:1px solid var(--border);
       padding:12px; min-height:72px; background:#fff;
     }
-    .grid > div:last-child{border-right:0}
     .header{
       background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase;
-      letter-spacing:.5px; text-align:center;
+      text-align:center;
     }
-    .subtle{color:var(--muted); font-weight:600}
 
-    /* ===== Cartões ===== */
     .disparo{
-      position:relative;
       border-radius:12px;
-      padding:12px 12px 10px;
+      padding:12px;
       margin:8px 0;
       color:#fff;
       box-shadow:0 6px 16px rgba(0,0,0,.15);
       cursor:pointer;
-      transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
-      animation:pop .18s ease-out both;
+      transition:transform .15s ease, box-shadow .2s ease;
     }
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
-    .disparo:active{ transform:translateY(0) scale(.995) }
 
     .status-andamento{ background:var(--andamento) }
     .status-finalizado{ background:var(--finalizado) }
     .status-insucesso{ background:var(--insucesso) }
 
     .badge{
-      display:inline-block; font-size:11px; font-weight:800; letter-spacing:.2px;
-      padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.18);
-      backdrop-filter:saturate(120%) blur(2px);
-      border:1px solid rgba(255,255,255,.35);
+      font-size:11px; font-weight:800;
+      padding:4px 8px; border-radius:999px;
+      background:rgba(255,255,255,.25);
       margin-bottom:6px;
+      display:inline-block;
     }
-    .meta{font-size:12px; opacity:.95}
     .title{font-weight:800; font-size:14px; margin-bottom:4px}
+    .meta{font-size:12px; opacity:.95}
 
-    @keyframes pop{from{opacity:0; transform:translateY(3px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
-
-    /* ===== Footer ===== */
     .footer{
       width:100%;
       background:#fff;
@@ -149,12 +130,6 @@
       text-align:center;
       padding:14px 12px;
     }
-
-    /* ===== Responsivo ===== */
-    @media (max-width: 980px){
-      .form-grid{grid-template-columns:1fr}
-      .grid{ grid-template-columns: 130px repeat(4, minmax(160px,1fr)); overflow:auto }
-    }
   </style>
 </head>
 <body>
@@ -163,15 +138,12 @@
   </header>
 
   <div class="wrap">
-
-    <!-- Legenda -->
     <div class="legenda">
       <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
       <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
       <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
     </div>
 
-    <!-- Form -->
     <div class="form-container">
       <h2>Novo Disparo</h2>
       <form id="formDisparo" class="form-grid">
@@ -179,17 +151,14 @@
           <label for="tipo">Tipo de Disparo</label>
           <input type="text" id="tipo" required />
         </div>
-
         <div>
           <label for="tempo">Tempo Médio (minutos)</label>
           <input type="number" id="tempo" min="0" required />
         </div>
-
         <div>
           <label for="potes">Quantidade de Potes</label>
           <input type="number" id="potes" min="1" required />
         </div>
-
         <div>
           <label for="horario">Horário</label>
           <select id="horario" required>
@@ -199,14 +168,12 @@
             <option value="20:00">20:00</option>
           </select>
         </div>
-
         <div class="full">
           <button type="submit">Adicionar</button>
         </div>
       </form>
     </div>
 
-    <!-- Tabela -->
     <div class="table-card">
       <div class="grid" id="painel">
         <div class="header">Horário</div>
@@ -214,8 +181,7 @@
         <div class="header">12:00</div>
         <div class="header">16:00</div>
         <div class="header">20:00</div>
-
-        <div class="header subtle">Disparos</div>
+        <div class="header">Disparos</div>
         <div id="col-08"></div>
         <div id="col-12"></div>
         <div id="col-16"></div>
@@ -224,25 +190,14 @@
     </div>
   </div>
 
-  <!-- Rodapé -->
   <footer class="footer">
     Desenvolvido por Leahpar Code &copy; 2025
   </footer>
 
   <script>
-  // ===== CONFIG =====
-  // Coloque aqui o domínio do Fly (sempre HTTPS). Ex.: "https://seu-app.fly.dev"
   const API_BASE = "https://SEU-APP.fly.dev";
-  // Para testar sem backend/Airtable, ligue o modo offline:
   const OFFLINE_MODE = false;
 
-  const STATUS_SEQUENCE = [
-    { cls: "status-andamento", label: "Em andamento" },
-    { cls: "status-finalizado", label: "Finalizado" },
-    { cls: "status-insucesso", label: "Insucesso" }
-  ];
-
-  // ===== Utils =====
   function clsForStatus(status){
     switch((status||"").toLowerCase()){
       case "finalizado": return "status-finalizado";
@@ -257,7 +212,6 @@
   }
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
 
-  // ===== Render =====
   function clearColumns(){
     ["08","12","16","20"].forEach(h => {
       const el = document.getElementById("col-"+h);
@@ -270,7 +224,7 @@
     div.className = `disparo ${clsForStatus(r.status)}`;
     div.dataset.id = r.id || uid();
     div.dataset.status = r.status || "Em andamento";
-    div.dataset.horario = r.horario || "08:00";
+    div.dataset.horario = r["horario"] || "08:00";
     if (optimistic) div.dataset.optimistic = "1";
 
     div.innerHTML = `
@@ -279,20 +233,9 @@
       <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
 
-    // Alternar status (grava no Airtable se online)
     div.addEventListener("click", async () => {
-      const current = div.dataset.status || "Em andamento";
+      const current = div.dataset.status;
       const next = nextStatus(current);
-
-      if (OFFLINE_MODE) {
-        // Atualiza só na UI
-        div.querySelector(".badge").textContent = next;
-        div.classList.remove("status-andamento","status-finalizado","status-insucesso");
-        div.classList.add(clsForStatus(next));
-        div.dataset.status = next;
-        return;
-      }
-
       try{
         const id = div.dataset.id;
         const res = await fetch(`${API_BASE}/api/disparos/${id}`, {
@@ -300,114 +243,65 @@
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify({ status: next })
         });
-        if (!res.ok) throw new Error(res.status);
-        // Atualização otimista:
-        div.querySelector(".badge").textContent = next;
-        div.classList.remove("status-andamento","status-finalizado","status-insucesso");
-        div.classList.add(clsForStatus(next));
-        div.dataset.status = next;
-      }catch(e){
-        console.error("Erro ao atualizar status:", e);
-        alert("Não consegui atualizar no servidor. Confira seu backend e o API_BASE.");
-      }
+        if (res.ok){
+          div.querySelector(".badge").textContent = next;
+          div.className = `disparo ${clsForStatus(next)}`;
+          div.dataset.status = next;
+        }
+      }catch(e){ console.error(e); }
     });
-
     return div;
   }
 
   function placeRecord(r, opts){
-    const hh = (r.horario || "08:00").split(":")[0];
+    const hh = (r["horario"] || "08:00").split(":")[0];
     const col = document.getElementById("col-"+hh);
-    if (!col) return;
-    col.appendChild(cardTemplate(r, opts));
+    if (col) col.appendChild(cardTemplate(r, opts));
   }
 
   function renderSnapshot(records){
     clearColumns();
-    const order = {"08:00":0,"12:00":1,"16:00":2,"20:00":3};
-    (records||[]).sort((a,b)=> (order[a.horario||"08:00"] - order[b.horario||"08:00"]));
-    records.forEach(r => placeRecord(r));
+    (records||[]).forEach(r => placeRecord(r));
   }
 
-  // ===== Data fetchers =====
   async function loadInitial(){
-    if (OFFLINE_MODE) return; // offline não carrega servidor
-    const resp = await fetch(`${API_BASE}/api/disparos`, {cache:"no-store"});
-    if (!resp.ok) throw new Error("GET /api/disparos falhou: " + resp.status);
-    const data = await resp.json();
-    renderSnapshot(data);
+    if (OFFLINE_MODE) return;
+    const resp = await fetch(`${API_BASE}/api/disparos`);
+    if (!resp.ok) return;
+    renderSnapshot(await resp.json());
   }
 
   function attachStream(){
-    if (OFFLINE_MODE) return; // offline não usa SSE
+    if (OFFLINE_MODE) return;
     const es = new EventSource(`${API_BASE}/api/stream`);
     es.onmessage = (evt) => {
       try{
         const payload = JSON.parse(evt.data);
         if (payload.type === "snapshot"){
-          renderSnapshot(payload.records || []);
+          renderSnapshot(payload.records);
         }
       }catch(e){ console.error(e); }
     };
-    es.onerror = (e)=> console.warn("SSE erro (verifique HTTPS e backend):", e);
   }
 
-  // ===== Form =====
-  const form = document.getElementById("formDisparo");
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("formDisparo").addEventListener("submit", async (e) => {
     e.preventDefault();
     const tipo  = document.getElementById("tipo").value.trim();
     const tempo = Number(document.getElementById("tempo").value);
     const potes = Number(document.getElementById("potes").value);
     const horario = document.getElementById("horario").value;
-
-    if(!tipo) return;
-
-    // 1) Append OTIMISTA
-    const optimisticRecord = {
-      id: uid(),
-      tipo, tempo, potes, horario,
-      status: "Em andamento"
-    };
-    placeRecord(optimisticRecord, { optimistic:true });
-
-    // 2) Se OFFLINE_MODE, encerra
-    if (OFFLINE_MODE) {
-      form.reset();
-      return;
-    }
-
-    // 3) POST no backend
+    const optimisticRecord = {id: uid(), tipo, tempo, potes, horario, status:"Em andamento"};
+    placeRecord(optimisticRecord, {optimistic:true});
     try{
-      const resp = await fetch(`${API_BASE}/api/disparos`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(optimisticRecord)
+      await fetch(`${API_BASE}/api/disparos`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(optimisticRecord)
       });
-      if (!resp.ok) throw new Error("POST /api/disparos falhou: " + resp.status);
-      form.reset();
-      // O SSE vai redesenhar com os dados oficiais (ID real).
-    }catch(e){
-      console.error("Erro ao criar disparo no servidor:", e);
-      alert("Não consegui salvar no servidor. Confira o API_BASE e o backend.");
-      // Remove o card otimista se falhou
-      const hh = horario.split(":")[0];
-      const col = document.getElementById("col-"+hh);
-      if (col && col.lastElementChild && col.lastElementChild.dataset.optimistic === "1") {
-        col.removeChild(col.lastElementChild);
-      }
-    }
+      e.target.reset();
+    }catch{}
   });
 
-  // ===== Start =====
-  (async () => {
-    try{
-      await loadInitial();
-    }catch(e){
-      console.warn("Inicialização remota falhou (UI começa vazia). Motivo:", e);
-    }
-    attachStream();
-  })();
+  (async()=>{ await loadInitial(); attachStream(); })();
   </script>
 </body>
 </html>
