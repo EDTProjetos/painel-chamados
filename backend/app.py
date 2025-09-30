@@ -2,16 +2,18 @@ import os, time, json, hashlib, requests
 from flask import Flask, jsonify, request, Response, render_template
 from flask_cors import CORS
 
+# 🔹 Configurações do Airtable
 AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_TOKEN}", "Content-Type": "application/json"}
 
-# agora ele sabe procurar o index.html dentro da pasta templates
+# 🔹 Configuração do Flask
 app = Flask(__name__, template_folder="templates")
 CORS(app)
 
+# ========== Funções utilitárias ==========
 def fetch_all():
     records, params = [], {
         "pageSize": 100,
@@ -35,26 +37,29 @@ def fetch_all():
             "tipo": f.get("Tipo", ""),
             "tempo": f.get("Tempo", ""),
             "potes": f.get("Potes", ""),
-            "horario": f.get("Horário", ""),
+            "horario": f.get("Horário", ""),   # com acento
             "status": f.get("Status", ""),
             "atualizadoEm": f.get("AtualizadoEm", ""),
         })
     return out
 
 def hash_data(data):
-    return hashlib.md5(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+    return hashlib.md5(
+        json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
 
-# 🔹 Rota raiz -> renderiza o index.html da pasta templates
+# ========== Rotas ==========
 @app.route("/")
 def serve_index():
     return render_template("index.html")
 
-# 🔹 API
+# Listar disparos
 @app.get("/api/disparos")
 def get_disparos():
     data = fetch_all()
     return jsonify(data)
 
+# Criar disparo
 @app.post("/api/disparos")
 def create_disparo():
     b = request.json or {}
@@ -62,24 +67,29 @@ def create_disparo():
         "Tipo": b.get("tipo", ""),
         "Tempo": b.get("tempo", 0),
         "Potes": b.get("potes", 0),
-        "Horario": b.get("horario", "08:00"),
+        "Horário": b.get("horario", "08:00"),  # corrigido com acento
         "Status": b.get("status", "Em andamento"),
     }
     r = requests.post(AIRTABLE_API, headers=HEADERS, json={"fields": fields}, timeout=30)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
+# Atualizar disparo
 @app.patch("/api/disparos/<rid>")
 def update_disparo(rid):
     b = request.json or {}
     fields = {}
     if "status" in b: fields["Status"] = b["status"]
-    if "horario" in b: fields["Horario"] = b["horario"]
+    if "horario" in b: fields["Horário"] = b["horario"]   # corrigido com acento
     if "tipo" in b: fields["Tipo"] = b["tipo"]
     if "tempo" in b: fields["Tempo"] = b["tempo"]
     if "potes" in b: fields["Potes"] = b["potes"]
-    r = requests.patch(f"{AIRTABLE_API}/{rid}", headers=HEADERS, json={"fields": fields}, timeout=30)
+
+    r = requests.patch(
+        f"{AIRTABLE_API}/{rid}", headers=HEADERS, json={"fields": fields}, timeout=30
+    )
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
+# Stream em tempo real (SSE)
 @app.get("/api/stream")
 def stream():
     def gen():
@@ -98,6 +108,7 @@ def stream():
                 yield "event: ping\ndata: {}\n\n"
     return Response(gen(), mimetype="text/event-stream")
 
+# ========== Main ==========
 if __name__ == "__main__":
     assert AIRTABLE_TOKEN and AIRTABLE_BASE_ID, "Configure AIRTABLE_TOKEN e AIRTABLE_BASE_ID"
     app.run(host="0.0.0.0", port=8080, debug=True)
