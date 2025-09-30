@@ -22,7 +22,8 @@ def fetch_all():
         r.raise_for_status()
         payload = r.json()
         records.extend(payload.get("records", []))
-        if "offset" not in payload: break
+        if "offset" not in payload:
+            break
         params["offset"] = payload["offset"]
 
     out = []
@@ -42,6 +43,15 @@ def fetch_all():
 def hash_data(data):
     return hashlib.md5(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
+# 🔹 Rota raiz (para evitar erro 404 no Fly.io)
+@app.get("/")
+def home():
+    return jsonify({
+        "status": "ok",
+        "msg": "Backend rodando no Fly.io!",
+        "endpoints": ["/api/disparos", "/api/stream"]
+    })
+
 @app.get("/api/disparos")
 def get_disparos():
     data = fetch_all()
@@ -51,11 +61,11 @@ def get_disparos():
 def create_disparo():
     b = request.json or {}
     fields = {
-        "Tipo": b.get("tipo",""),
+        "Tipo": b.get("tipo", ""),
         "Tempo": b.get("tempo", 0),
         "Potes": b.get("potes", 0),
-        "Horario": b.get("horario","08:00"),
-        "Status": b.get("status","Em andamento"),
+        "Horario": b.get("horario", "08:00"),
+        "Status": b.get("status", "Em andamento"),
     }
     r = requests.post(AIRTABLE_API, headers=HEADERS, json={"fields": fields}, timeout=30)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
