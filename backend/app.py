@@ -35,7 +35,7 @@ def fetch_all():
             "tipo": f.get("Tipo", ""),
             "tempo": f.get("Tempo", ""),
             "potes": f.get("Potes", ""),
-            "horario": f.get("Horario", ""),
+            "horario": f.get("Horário", ""),
             "status": f.get("Status", ""),
             "atualizadoEm": f.get("AtualizadoEm", ""),
         })
