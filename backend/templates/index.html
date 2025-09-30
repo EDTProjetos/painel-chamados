@@ -33,6 +33,7 @@
 
     .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px; width:100%; flex:1}
 
+    /* Header */
     .app-header{
       background: linear-gradient(90deg,var(--primary),var(--primary-2));
       color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
@@ -40,6 +41,19 @@
     }
     .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
+    /* Tabs */
+    .tabs{
+      display:flex; gap:10px; justify-content:center; margin:12px 0 4px;
+    }
+    .tab{
+      background:#fff; border:1px solid var(--border); color:#111827;
+      padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700;
+      transition:transform .15s ease, box-shadow .2s ease;
+    }
+    .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
+    .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
+
+    /* Legenda */
     .legenda{
       display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
       margin:16px 0 8px;
@@ -57,6 +71,7 @@
     .cor.finalizado{background:var(--finalizado)}
     .cor.insucesso{background:var(--insucesso)}
 
+    /* Formulário */
     .form-container{
       background:var(--card); border:1px solid var(--border);
       padding:20px; margin:18px 0; border-radius:14px;
@@ -76,6 +91,13 @@
       letter-spacing:.2px;
     }
 
+    /* Aviso login */
+    .badge-info{
+      display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted);
+      padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px;
+    }
+
+    /* Tabela */
     .table-card{
       background:var(--card); border:1px solid var(--border); border-radius:14px;
       box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden;
@@ -96,6 +118,7 @@
       text-align:center;
     }
 
+    /* Cards */
     .disparo{
       border-radius:12px;
       padding:12px;
@@ -104,13 +127,12 @@
       box-shadow:0 6px 16px rgba(0,0,0,.15);
       cursor:pointer;
       transition:transform .15s ease, box-shadow .2s ease;
+      animation:pop .2s ease-out both;
     }
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
-
     .status-andamento{ background:var(--andamento) }
     .status-finalizado{ background:var(--finalizado) }
     .status-insucesso{ background:var(--insucesso) }
-
     .badge{
       font-size:11px; font-weight:800;
       padding:4px 8px; border-radius:999px;
@@ -120,7 +142,19 @@
     }
     .title{font-weight:800; font-size:14px; margin-bottom:4px}
     .meta{font-size:12px; opacity:.95}
+    @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
+    /* Login card */
+    .login-card{
+      background:var(--card); border:1px solid var(--border);
+      padding:20px; margin:18px auto; border-radius:14px; max-width:420px;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
+    }
+    .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
+    .login-actions{display:flex; gap:10px; margin-top:8px}
+    .muted-tip{font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
+
+    /* Footer */
     .footer{
       width:100%;
       background:#fff;
@@ -130,6 +164,12 @@
       text-align:center;
       padding:14px 12px;
     }
+
+    /* Responsivo */
+    @media (max-width: 980px){
+      .form-grid{grid-template-columns:1fr}
+      .grid{ grid-template-columns: 130px repeat(4, minmax(160px,1fr)); overflow:auto }
+    }
   </style>
 </head>
 <body>
@@ -138,56 +178,91 @@
   </header>
 
   <div class="wrap">
-    <div class="legenda">
-      <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
-      <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
-      <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
-    </div>
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="painel">Painel</button>
+      <button class="tab" data-tab="login">Login</button>
+    </nav>
 
-    <div class="form-container">
-      <h2>Novo Disparo</h2>
-      <form id="formDisparo" class="form-grid">
-        <div>
-          <label for="tipo">Tipo de Disparo</label>
-          <input type="text" id="tipo" required />
-        </div>
-        <div>
-          <label for="tempo">Tempo Médio (minutos)</label>
-          <input type="number" id="tempo" min="0" required />
-        </div>
-        <div>
-          <label for="potes">Quantidade de Potes</label>
-          <input type="number" id="potes" min="1" required />
-        </div>
-        <div>
-          <label for="horario">Horário</label>
-          <select id="horario" required>
-            <option value="08:00">08:00</option>
-            <option value="12:00">12:00</option>
-            <option value="16:00">16:00</option>
-            <option value="20:00">20:00</option>
-          </select>
-        </div>
-        <div class="full">
-          <button type="submit">Adicionar</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="table-card">
-      <div class="grid" id="painel">
-        <div class="header">Horário</div>
-        <div class="header">08:00</div>
-        <div class="header">12:00</div>
-        <div class="header">16:00</div>
-        <div class="header">20:00</div>
-        <div class="header">Disparos</div>
-        <div id="col-08"></div>
-        <div id="col-12"></div>
-        <div id="col-16"></div>
-        <div id="col-20"></div>
+    <!-- VIEW: PAINEL -->
+    <section id="view-painel">
+      <div class="legenda">
+        <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
+        <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
+        <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
-    </div>
+
+      <!-- Form (aparece só logado) -->
+      <div id="form-wrapper" class="form-container" style="display:none;">
+        <h2>Novo Disparo</h2>
+        <form id="formDisparo" class="form-grid">
+          <div>
+            <label for="tipo">Tipo de Disparo</label>
+            <input type="text" id="tipo" required />
+          </div>
+          <div>
+            <label for="tempo">Tempo Médio (minutos)</label>
+            <input type="number" id="tempo" min="0" required />
+          </div>
+          <div>
+            <label for="potes">Quantidade de Potes</label>
+            <input type="number" id="potes" min="1" required />
+          </div>
+          <div>
+            <label for="horario">Horário</label>
+            <select id="horario" required>
+              <option value="08:00">08:00</option>
+              <option value="12:00">12:00</option>
+              <option value="16:00">16:00</option>
+              <option value="20:00">20:00</option>
+            </select>
+          </div>
+          <div class="full">
+            <button type="submit">Adicionar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Aviso quando deslogado -->
+      <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
+        Você está em <strong>modo leitura</strong>. Faça login para adicionar disparos.
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-card" style="margin-top:14px;">
+        <div class="grid" id="painel-grid">
+          <div class="header">Horário</div>
+          <div class="header">08:00</div>
+          <div class="header">12:00</div>
+          <div class="header">16:00</div>
+          <div class="header">20:00</div>
+
+          <div class="header">Disparos</div>
+          <div id="col-08"></div>
+          <div id="col-12"></div>
+          <div id="col-16"></div>
+          <div id="col-20"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: LOGIN -->
+    <section id="view-login" style="display:none;">
+      <div class="login-card">
+        <h2 class="login-title">Acessar</h2>
+        <label>Usuário</label>
+        <input type="text" id="loginUser" placeholder="usuário" />
+
+        <label style="margin-top:10px;">Senha</label>
+        <input type="password" id="loginPass" placeholder="senha" />
+
+        <div class="login-actions">
+          <button id="btnLogin">Entrar</button>
+          <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
+        </div>
+        <div class="muted-tip">Credenciais: <code>energia</code> / <code>energia1</code></div>
+      </div>
+    </section>
   </div>
 
   <footer class="footer">
@@ -195,9 +270,43 @@
   </footer>
 
   <script>
-  const API_BASE = "https://painelchamados.fly.dev/";
+  // ===== CONFIG =====
+  const API_BASE = "https://painelchamados.fly.dev"; // sem barra final
   const OFFLINE_MODE = false;
 
+  // ===== Estado de autenticação (simples, client-side) =====
+  const AUTH_USER = "energia";
+  const AUTH_PASS = "energia1";
+  const AUTH_KEY  = "painel_auth_ok";
+
+  let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
+
+  function updateAuthUI(){
+    const formWrap = document.getElementById("form-wrapper");
+    const hint = document.getElementById("readOnlyHint");
+    const logoutBtn = document.getElementById("btnLogout");
+
+    if(isAuthed){
+      formWrap.style.display = "";
+      hint.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "";
+    }else{
+      formWrap.style.display = "none";
+      hint.style.display = "";
+      if (logoutBtn) logoutBtn.style.display = "none";
+    }
+  }
+
+  // ===== Tabs =====
+  const tabs = document.querySelectorAll(".tab");
+  function switchTab(name){
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+    document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
+    document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
+  }
+  tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+  // ===== Utils =====
   function clsForStatus(status){
     switch((status||"").toLowerCase()){
       case "finalizado": return "status-finalizado";
@@ -212,6 +321,7 @@
   }
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
 
+  // ===== Render =====
   function clearColumns(){
     ["08","12","16","20"].forEach(h => {
       const el = document.getElementById("col-"+h);
@@ -233,9 +343,16 @@
       <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
 
+    // Troca de status (mantém habilitado para todos, como antes)
     div.addEventListener("click", async () => {
       const current = div.dataset.status;
       const next = nextStatus(current);
+      if (OFFLINE_MODE) {
+        div.querySelector(".badge").textContent = next;
+        div.className = `disparo ${clsForStatus(next)}`;
+        div.dataset.status = next;
+        return;
+      }
       try{
         const id = div.dataset.id;
         const res = await fetch(`${API_BASE}/api/disparos/${id}`, {
@@ -250,6 +367,7 @@
         }
       }catch(e){ console.error(e); }
     });
+
     return div;
   }
 
@@ -264,9 +382,10 @@
     (records||[]).forEach(r => placeRecord(r));
   }
 
+  // ===== Data =====
   async function loadInitial(){
     if (OFFLINE_MODE) return;
-    const resp = await fetch(`${API_BASE}/api/disparos`);
+    const resp = await fetch(`${API_BASE}/api/disparos`, {cache:"no-store"});
     if (!resp.ok) return;
     renderSnapshot(await resp.json());
   }
@@ -278,30 +397,82 @@
       try{
         const payload = JSON.parse(evt.data);
         if (payload.type === "snapshot"){
-          renderSnapshot(payload.records);
+          renderSnapshot(payload.records || []);
         }
       }catch(e){ console.error(e); }
     };
+    es.onerror = (e)=> console.warn("SSE erro:", e);
   }
 
-  document.getElementById("formDisparo").addEventListener("submit", async (e) => {
+  // ===== Form Add (somente logado) =====
+  const form = document.getElementById("formDisparo");
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if(!isAuthed){
+      alert("Faça login para adicionar disparos.");
+      return;
+    }
     const tipo  = document.getElementById("tipo").value.trim();
     const tempo = Number(document.getElementById("tempo").value);
     const potes = Number(document.getElementById("potes").value);
     const horario = document.getElementById("horario").value;
-    const optimisticRecord = {id: uid(), tipo, tempo, potes, horario, status:"Em andamento"};
-    placeRecord(optimisticRecord, {optimistic:true});
+    if(!tipo) return;
+
+    const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
+    placeRecord(optimisticRecord, { optimistic:true });
+
+    if (OFFLINE_MODE) { form.reset(); return; }
+
     try{
-      await fetch(`${API_BASE}/api/disparos`, {
+      const resp = await fetch(`${API_BASE}/api/disparos`, {
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify(optimisticRecord)
       });
-      e.target.reset();
-    }catch{}
+      if (!resp.ok) throw new Error("POST falhou: " + resp.status);
+      form.reset();
+    }catch(e){
+      console.error("Erro ao criar disparo:", e);
+      alert("Não consegui salvar no servidor. Confira o backend.");
+      // remove card otimista
+      const hh = horario.split(":")[0];
+      const col = document.getElementById("col-"+hh);
+      if (col && col.lastElementChild && col.lastElementChild.dataset.optimistic === "1") {
+        col.removeChild(col.lastElementChild);
+      }
+    }
   });
 
-  (async()=>{ await loadInitial(); attachStream(); })();
+  // ===== Login =====
+  const btnLogin  = document.getElementById("btnLogin");
+  const btnLogout = document.getElementById("btnLogout");
+
+  btnLogin.addEventListener("click", () => {
+    const u = (document.getElementById("loginUser").value || "").trim();
+    const p = (document.getElementById("loginPass").value || "").trim();
+    if (u === AUTH_USER && p === AUTH_PASS){
+      isAuthed = true;
+      localStorage.setItem(AUTH_KEY, "1");
+      updateAuthUI();
+      switchTab("painel");
+    }else{
+      alert("Usuário ou senha inválidos.");
+    }
+  });
+
+  btnLogout.addEventListener("click", () => {
+    isAuthed = false;
+    localStorage.removeItem(AUTH_KEY);
+    updateAuthUI();
+  });
+
+  // ===== Start =====
+  (async () => {
+    // aba padrão
+    switchTab("painel");
+    updateAuthUI();
+    try{ await loadInitial(); }catch(e){ console.warn("Falha ao carregar:", e); }
+    attachStream();
+  })();
   </script>
 </body>
 </html>
