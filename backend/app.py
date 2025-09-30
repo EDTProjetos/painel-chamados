@@ -1,5 +1,5 @@
 import os, time, json, hashlib, requests
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, send_from_directory
 from flask_cors import CORS
 
 AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
@@ -8,7 +8,7 @@ AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_TOKEN}", "Content-Type": "application/json"}
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 def fetch_all():
@@ -43,15 +43,12 @@ def fetch_all():
 def hash_data(data):
     return hashlib.md5(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
-# 🔹 Rota raiz (para evitar erro 404 no Fly.io)
-@app.get("/")
-def home():
-    return jsonify({
-        "status": "ok",
-        "msg": "Backend rodando no Fly.io!",
-        "endpoints": ["/api/disparos", "/api/stream"]
-    })
+# 🔹 Rota raiz -> retorna o index.html
+@app.route("/")
+def serve_index():
+    return send_from_directory(".", "index.html")
 
+# 🔹 API
 @app.get("/api/disparos")
 def get_disparos():
     data = fetch_all()
