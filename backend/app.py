@@ -1,5 +1,5 @@
 import os, time, json, hashlib, requests
-from flask import Flask, jsonify, request, Response, send_from_directory
+from flask import Flask, jsonify, request, Response, render_template
 from flask_cors import CORS
 
 AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
@@ -8,7 +8,8 @@ AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_TOKEN}", "Content-Type": "application/json"}
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+# agora ele sabe procurar o index.html dentro da pasta templates
+app = Flask(__name__, template_folder="templates")
 CORS(app)
 
 def fetch_all():
@@ -43,10 +44,10 @@ def fetch_all():
 def hash_data(data):
     return hashlib.md5(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
-# 🔹 Rota raiz -> retorna o index.html
+# 🔹 Rota raiz -> renderiza o index.html da pasta templates
 @app.route("/")
 def serve_index():
-    return send_from_directory(".", "index.html")
+    return render_template("index.html")
 
 # 🔹 API
 @app.get("/api/disparos")
