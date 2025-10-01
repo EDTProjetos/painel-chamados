@@ -124,9 +124,21 @@
       width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted);
       font-size:13px; text-align:center; padding:14px 12px;
     }
+
+    /* Splash/Spinner */
+    .splash{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:var(--bg); z-index:9999; transition:opacity .25s ease;
+    }
+    .splash.hide{ opacity:0; pointer-events:none }
+    .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2);
+      border-radius:50%; animation:spin 1s linear infinite }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
   </style>
 </head>
 <body>
+  <div id="splash" class="splash"><div class="ring" aria-label="Carregando"></div></div>
+
   <header class="app-header">
     <h1 class="app-title">Painel de Disparos</h1>
   </header>
@@ -225,12 +237,16 @@
   <script>
   // ===== CONFIG =====
   // Use MESMO HOST (string vazia) para cookies de sessão funcionarem sem CORS:
-  // Se preferir domínio, NÃO coloque barra no fim, ex.: const API_BASE = "https://painelchamados.fly.dev";
+  // Se preferir domínio, NÃO coloque barra no fim. Ex.: const API_BASE = "https://painelchamados.fly.dev";
   const API_BASE = "";
-  const OFFLINE_MODE = false;
+
+  // Detecta ambiente local (file://) ou ?offline=1
+  const IS_FILE = location.protocol === "file:";
+  const FORCE_OFFLINE = /(?:\\?|&)offline=1\\b/.test(location.search);
+  let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
 
   // Normaliza base e monta URLs
-  const BASE = (API_BASE || "").replace(/\/+$/,"");
+  const BASE = (API_BASE || "").replace(/\\/+$/,"");
   const url = (p) => `${BASE}${p}`;
 
   // ===== Auth (UI) =====
@@ -309,19 +325,22 @@
       <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
 
-    // Troca de status — exige login (backend também valida sessão)
+    // Troca de status
     div.addEventListener("click", async () => {
-      if (!isAuthed){
-        alert("Faça login para alterar o status.");
-        return;
-      }
       const current = div.dataset.status;
       const next = nextStatus(current);
 
+      // Offline: atualiza só a UI (para testes locais)
       if (OFFLINE_MODE) {
         div.querySelector(".badge").textContent = next;
         div.className = `disparo ${clsForStatus(next)}`;
         div.dataset.status = next;
+        return;
+      }
+
+      // Online: requer login
+      if (!isAuthed){
+        alert("Faça login para alterar o status.");
         return;
       }
       try{
@@ -358,12 +377,50 @@
     (records||[]).forEach(r => placeRecord(r));
   }
 
-  // ===== Data / Robustez =====
-  let lastNonEmpty = [];     // último snapshot não-vazio
-  let lastHash = "";         // hash do último snapshot aplicado
-  let sse;                   // EventSource
-  let sseFailures = 0;       // falhas consecutivas do SSE
-  let pollTimer = null;      // polling fallback
+  // ===== Data / Robustez / Desempenho =====
+  const CACHE_KEY = "painel_snapshot_v1";
+  const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
+  let lastNonEmpty = [];
+  let lastHash = "";
+  let sse = null;
+  let sseFailures = 0;
+  let pollTimer = null;
+  let gotFirstPaint = false;
+  let firstDataArrived = false;
+  let hideTimer = null;
+
+  function hideSplashSoon(){
+    const s = document.getElementById("splash");
+    if (!s) return;
+    s.classList.add("hide");
+    setTimeout(()=>{ try{s.remove();}catch{} }, 300);
+  }
+  // Garante que o spinner suma rápido mesmo sem backend
+  hideTimer = setTimeout(hideSplashSoon, 1000);
+
+  // Mostra do cache imediatamente (se recente)
+  (function paintFromCache(){
+    try{
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return;
+      const {ts, data} = JSON.parse(raw);
+      if (!data || (Date.now() - ts) > CACHE_TTL_MS) return;
+      lastNonEmpty = data;
+      lastHash = calcHash(data);
+      renderSnapshot(data);
+      clearTimeout(hideTimer);
+      hideSplashSoon();
+      gotFirstPaint = true;
+    }catch{}
+  })();
+
+  function saveCache(records){
+    try{
+      const payload = { ts: Date.now(), data: records };
+      const job = () => localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+      (window.requestIdleCallback || setTimeout)(job, 0);
+    }catch{}
+  }
 
   function safeRender(records){
     const incomingHash = calcHash(records);
@@ -374,22 +431,43 @@
     }
     renderSnapshot(records);
     lastHash = incomingHash;
-    if ((records?.length || 0) > 0) lastNonEmpty = records;
+    if ((records?.length || 0) > 0) {
+      lastNonEmpty = records;
+      saveCache(records);
+    }
+    if (!gotFirstPaint){
+      gotFirstPaint = true;
+      clearTimeout(hideTimer);
+      hideSplashSoon();
+    }
   }
 
-  async function loadInitial(){
+  // GET inicial com timeout/abort (não trava a entrada)
+  async function loadInitialWithTimeout(ms=2500){
     if (OFFLINE_MODE) return;
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>ctrl.abort("timeout"), ms);
     try{
-      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+      const resp = await fetch(url("/api/disparos"), {
+        cache:"no-store", credentials:"include", signal: ctrl.signal
+      });
+      if (firstDataArrived) return; // SSE já entregou primeiro snapshot
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
       safeRender(data);
+      firstDataArrived = true;
     }catch(e){
-      console.warn("[loadInitial] falhou:", e);
+      if (e?.name !== "AbortError") console.warn("[loadInitial]", e);
+      // Mesmo se falhar, não deixamos spinner preso
+      clearTimeout(hideTimer);
+      hideSplashSoon();
+    }finally{
+      clearTimeout(to);
     }
   }
 
   async function softRefresh(){
+    if (OFFLINE_MODE) return;
     try{
       const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
       if (!resp.ok) return;
@@ -399,6 +477,7 @@
   }
 
   function startPolling(){
+    if (OFFLINE_MODE) return;
     if (pollTimer) return;
     console.warn("[poll] iniciando fallback por polling");
     pollTimer = setInterval(async ()=>{
@@ -428,6 +507,7 @@
   }
 
   function startSSE(){
+    if (OFFLINE_MODE) { console.info("[sse] desativado (offline)"); return; }
     try{
       if (sse) sse.close();
       sseFailures = 0;
@@ -439,6 +519,7 @@
           const payload = JSON.parse(evt.data);
           if (payload.type === "snapshot"){
             safeRender(payload.records || []);
+            firstDataArrived = true;
           }
         }catch(e){ console.error("[sse] parse erro:", e); }
       };
@@ -446,21 +527,23 @@
         sseFailures++;
         console.warn("[sse] erro (contagem):", sseFailures);
         if (sseFailures >= 3){ startPolling(); }
+        // Garante esconder splash mesmo se SSE não conectar
+        clearTimeout(hideTimer);
+        hideSplashSoon();
       };
     }catch(e){
       console.warn("[sse] falha ao iniciar, ativando polling", e);
       startPolling();
+      clearTimeout(hideTimer);
+      hideSplashSoon();
     }
   }
 
-  // ===== Form Add (somente logado) =====
+  // ===== Form Add =====
   const form = document.getElementById("formDisparo");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if(!isAuthed){
-      alert("Faça login para adicionar disparos.");
-      return;
-    }
+
     const tipo  = document.getElementById("tipo").value.trim();
     const tempo = Number(document.getElementById("tempo").value);
     const potes = Number(document.getElementById("potes").value);
@@ -471,7 +554,15 @@
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
     safeRender(lastNonEmpty);
 
-    if (OFFLINE_MODE) { form.reset(); return; }
+    if (OFFLINE_MODE) { e.target.reset(); return; }
+
+    if(!isAuthed){
+      alert("Faça login para adicionar disparos.");
+      // desfaz otimista se não estiver logado
+      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+      safeRender(lastNonEmpty);
+      return;
+    }
 
     try{
       const resp = await fetch(url("/api/disparos"), {
@@ -488,8 +579,8 @@
           throw new Error("POST falhou: " + resp.status);
         }
       } else {
-        form.reset();
-        setTimeout(softRefresh, 600);
+        e.target.reset();
+        setTimeout(softRefresh, 400);
       }
     }catch(e){
       console.error("Erro ao criar disparo:", e);
@@ -508,14 +599,11 @@
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
 
-    // Autenticação local simples (credenciais pedidas)
+    // Login local simples
     if (u !== "energia" || p !== "energia1") {
       alert("Usuário ou senha inválidos.");
       return;
     }
-
-    // Se quiser autenticar no backend, troque pelo POST /api/login e remova o if acima.
-
     isAuthed = true;
     localStorage.setItem(AUTH_KEY, "1");
     updateAuthUI();
@@ -523,29 +611,22 @@
     setTimeout(softRefresh, 150);
   });
 
-  // Logout INSTANTÂNEO: atualiza UI na hora e dispara requisição em background
   btnLogout.addEventListener("click", () => {
-    // UI imediata
     isAuthed = false;
     localStorage.removeItem(AUTH_KEY);
     updateAuthUI();
     switchTab("login");
 
-    // Limpa campos e foca usuário
     const u = document.getElementById("loginUser");
     const p = document.getElementById("loginPass");
     if (p) p.value = "";
     if (u) { u.value = ""; u.focus(); }
 
-    // Fecha SSE (opcional) e para polling; recomeça logo após
     stopPolling();
     stopSSE();
-    startSSE(); // continuamos recebendo o painel em modo leitura
-
-    // Atualiza dados logo após sair
+    startSSE(); // modo leitura
     setTimeout(softRefresh, 120);
 
-    // Requisição ao backend sem aguardar (fire-and-forget)
     try { fetch(url("/api/logout"), { method:"POST", credentials:"include" }); } catch {}
   });
 
@@ -553,9 +634,17 @@
   (async () => {
     switchTab("painel");
     updateAuthUI();
-    await loadInitial();
+
+    // Se for arquivo local, já esconde splash (sem backend)
+    if (OFFLINE_MODE) {
+      clearTimeout(hideTimer);
+      hideSplashSoon();
+      return; // UI funcional em modo teste
+    }
+
+    // Online: começa SSE e fetch inicial com timeout
     startSSE();
-    stopPolling();
+    loadInitialWithTimeout(2500);
   })();
   </script>
 </body>
