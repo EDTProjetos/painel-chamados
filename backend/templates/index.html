@@ -119,7 +119,6 @@
     }
     .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
     .login-actions{display:flex; gap:10px; margin-top:8px}
-    .muted-tip{font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
 
     .footer{
       width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted);
@@ -205,13 +204,16 @@
     <section id="view-login" style="display:none;">
       <div class="login-card">
         <h2 class="login-title">Acessar</h2>
-        <label>Usuário</label>
-        <input type="text" id="loginUser" placeholder="usuário" />
-        <label style="margin-top:10px;">Senha</label>
-        <input type="password" id="loginPass" placeholder="senha" />
-        <div class="login-actions">
-          <button id="btnLogin">Entrar</button>
-          <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
+        <form id="loginForm">
+          <label for="loginUser">Usuário</label>
+          <input type="text" id="loginUser" placeholder="usuário" required />
+          <label for="loginPass" style="margin-top:10px;">Senha</label>
+          <input type="password" id="loginPass" placeholder="senha" required />
+          <div class="login-actions">
+            <button type="submit" id="btnLogin">Entrar</button>
+            <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
+          </div>
+        </form>
       </div>
     </section>
   </div>
@@ -241,13 +243,13 @@
     const logoutBtn = document.getElementById("btnLogout");
 
     if(isAuthed){
-      formWrap && (formWrap.style.display = "");
-      hint && (hint.style.display = "none");
-      logoutBtn && (logoutBtn.style.display = "");
+      if (formWrap) formWrap.style.display = "";
+      if (hint) hint.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "";
     }else{
-      formWrap && (formWrap.style.display = "none");
-      hint && (hint.style.display = "");
-      logoutBtn && (logoutBtn.style.display = "none");
+      if (formWrap) formWrap.style.display = "none";
+      if (hint) hint.style.display = "";
+      if (logoutBtn) logoutBtn.style.display = "none";
     }
   }
 
@@ -257,6 +259,9 @@
     tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
     document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
     document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
+    if (name === "login"){
+      setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
+    }
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
@@ -491,32 +496,42 @@
   });
 
   // ===== Login / Logout (sessão no backend) =====
-  const btnLogin  = document.getElementById("btnLogin");
+  const loginForm = document.getElementById("loginForm");
   const btnLogout = document.getElementById("btnLogout");
 
-  if (btnLogin) btnLogin.addEventListener("click", async () => {
+  // Login por SUBMIT (corrige problema de clique e permite Enter)
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
-    try{
-      const resp = await fetch(url("/api/login"), {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        credentials:"include", // recebe cookie HttpOnly
-        body: JSON.stringify({ username:u, password:p })
-      });
-      if (resp.ok){
-        isAuthed = true;  // <-- corrigido
-        localStorage.setItem(AUTH_KEY, "1");
-        updateAuthUI();
-        switchTab("painel");
-        setTimeout(softRefresh, 300);
-      }else{
-        alert("Usuário ou senha inválidos.");
-      }
-    }catch(e){ console.error(e); }
+
+    // Autenticação local simples (credenciais pedidas)
+    if (u !== "energia" || p !== "energia1") {
+      // Se você estiver usando o backend com /api/login, descomente o bloco mais abaixo e remova esta verificação local.
+      alert("Usuário ou senha inválidos.");
+      return;
+    }
+
+    // Autenticar via Backend%%%
+    // try{
+    //   const resp = await fetch(url("/api/login"), {
+    //     method:"POST",
+    //     headers:{"Content-Type":"application/json"},
+    //     credentials:"include",
+    //     body: JSON.stringify({ username:u, password:p })
+    //   });
+    //   if (!resp.ok) { alert("Usuário ou senha inválidos."); return; }
+    // }catch(e){ console.error(e); alert("Falha ao logar."); return; }
+
+    isAuthed = true;
+    localStorage.setItem(AUTH_KEY, "1");
+    updateAuthUI();
+    switchTab("painel");
+    setTimeout(softRefresh, 300);
   });
 
-  if (btnLogout) btnLogout.addEventListener("click", async () => {
+  btnLogout.addEventListener("click", async () => {
+    // Se houver backend, avise o servidor:
     try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
     isAuthed = false;
     localStorage.removeItem(AUTH_KEY);
@@ -532,6 +547,6 @@
     startSSE();
     stopPolling();
   })();
-</script>
+  </script>
 </body>
 </html>
