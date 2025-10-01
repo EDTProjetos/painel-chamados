@@ -361,7 +361,7 @@
   let lastNonEmpty = [];     // último snapshot não-vazio
   let lastHash = "";         // hash do último snapshot aplicado
   let sse;                   // EventSource
-  let sseFailures = 0;       # falhas consecutivas do SSE
+  let sseFailures = 0;       // falhas consecutivas do SSE
   let pollTimer = null;      // polling fallback
 
   function safeRender(records){
@@ -503,11 +503,11 @@
       const resp = await fetch(url("/api/login"), {
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        credentials:"include",
+        credentials:"include", // recebe cookie HttpOnly
         body: JSON.stringify({ username:u, password:p })
       });
       if (resp.ok){
-        isAuthed = True;
+        isAuthed = true;  // <-- corrigido
         localStorage.setItem(AUTH_KEY, "1");
         updateAuthUI();
         switchTab("painel");
@@ -534,6 +534,6 @@
     startSSE();
     stopPolling();
   })();
-  </script>
+</script>
 </body>
 </html>
