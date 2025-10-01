@@ -25,15 +25,10 @@
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      margin:0;
-      display:flex;
-      flex-direction:column;
-      min-height:100vh;
+      margin:0; display:flex; flex-direction:column; min-height:100vh;
     }
-
     .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px; width:100%; flex:1}
 
-    /* Header */
     .app-header{
       background: linear-gradient(90deg,var(--primary),var(--primary-2));
       color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
@@ -41,10 +36,7 @@
     }
     .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
-    /* Tabs */
-    .tabs{
-      display:flex; gap:10px; justify-content:center; margin:12px 0 4px;
-    }
+    .tabs{display:flex; gap:10px; justify-content:center; margin:12px 0 0}
     .tab{
       background:#fff; border:1px solid var(--border); color:#111827;
       padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700;
@@ -53,7 +45,6 @@
     .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
     .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
 
-    /* Legenda */
     .legenda{
       display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
       margin:16px 0 8px;
@@ -63,15 +54,12 @@
       background:var(--card); padding:8px 12px; border-radius:10px;
       box-shadow:0 4px 16px rgba(0,0,0,.06);
       border:1px solid var(--border);
-      transition:transform .2s ease, box-shadow .2s ease;
     }
-    .legenda-item:hover{transform:translateY(-2px); box-shadow:0 10px 22px rgba(0,0,0,.10)}
     .cor{width:16px;height:16px;border-radius:4px;display:inline-block}
     .cor.andamento{background:var(--andamento)}
     .cor.finalizado{background:var(--finalizado)}
     .cor.insucesso{background:var(--insucesso)}
 
-    /* Formulário */
     .form-container{
       background:var(--card); border:1px solid var(--border);
       padding:20px; margin:18px 0; border-radius:14px;
@@ -84,67 +72,46 @@
     input,select,button{
       width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
       background:#fff; color:var(--text); font-size:14px;
-      transition:border-color .2s ease, box-shadow .2s ease, transform .1s ease;
     }
     button{
       background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer;
       letter-spacing:.2px;
     }
 
-    /* Aviso login */
     .badge-info{
       display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted);
       padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px;
     }
 
-    /* Tabela */
     .table-card{
       background:var(--card); border:1px solid var(--border); border-radius:14px;
       box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden;
     }
     .grid{
-      display:grid;
-      grid-template-columns: 160px repeat(4, minmax(200px,1fr));
-      border-collapse: collapse;
-      width:100%;
+      display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%;
     }
     .grid > div{
-      border-right:1px solid var(--border);
-      border-bottom:1px solid var(--border);
+      border-right:1px solid var(--border); border-bottom:1px solid var(--border);
       padding:12px; min-height:72px; background:#fff;
     }
     .header{
-      background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase;
-      text-align:center;
+      background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center;
     }
 
-    /* Cards */
     .disparo{
-      border-radius:12px;
-      padding:12px;
-      margin:8px 0;
-      color:#fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.15);
-      cursor:pointer;
-      transition:transform .15s ease, box-shadow .2s ease;
-      animation:pop .2s ease-out both;
+      border-radius:12px; padding:12px; margin:8px 0; color:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer;
+      transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both;
     }
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
     .status-andamento{ background:var(--andamento) }
     .status-finalizado{ background:var(--finalizado) }
     .status-insucesso{ background:var(--insucesso) }
-    .badge{
-      font-size:11px; font-weight:800;
-      padding:4px 8px; border-radius:999px;
-      background:rgba(255,255,255,.25);
-      margin-bottom:6px;
-      display:inline-block;
-    }
+    .badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:6px; display:inline-block }
     .title{font-weight:800; font-size:14px; margin-bottom:4px}
     .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    /* Login card */
     .login-card{
       background:var(--card); border:1px solid var(--border);
       padding:20px; margin:18px auto; border-radius:14px; max-width:420px;
@@ -152,22 +119,11 @@
     }
     .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
     .login-actions{display:flex; gap:10px; margin-top:8px}
+    .muted-tip{font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
 
-    /* Footer */
     .footer{
-      width:100%;
-      background:#fff;
-      border-top:1px solid var(--border);
-      color:var(--muted);
-      font-size:13px;
-      text-align:center;
-      padding:14px 12px;
-    }
-
-    /* Responsivo */
-    @media (max-width: 980px){
-      .form-grid{grid-template-columns:1fr}
-      .grid{ grid-template-columns: 130px repeat(4, minmax(160px,1fr)); overflow:auto }
+      width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted);
+      font-size:13px; text-align:center; padding:14px 12px;
     }
   </style>
 </head>
@@ -191,7 +147,7 @@
         <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
 
-      <!-- Form (aparece só logado) -->
+      <!-- Form (só logado) -->
       <div id="form-wrapper" class="form-container" style="display:none;">
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
@@ -224,7 +180,7 @@
 
       <!-- Aviso quando deslogado -->
       <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
-        Você está em <strong>modo leitura</strong>. Faça login para adicionar disparos.
+        Você está em <strong>modo leitura</strong>. Faça login para adicionar/alterar disparos.
       </div>
 
       <!-- Tabela -->
@@ -251,13 +207,13 @@
         <h2 class="login-title">Acessar</h2>
         <label>Usuário</label>
         <input type="text" id="loginUser" placeholder="usuário" />
-
         <label style="margin-top:10px;">Senha</label>
         <input type="password" id="loginPass" placeholder="senha" />
-
         <div class="login-actions">
           <button id="btnLogin">Entrar</button>
           <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
+        </div>
+        <div class="muted-tip">Credenciais: <code>energia</code> / <code>energia1</code></div>
       </div>
     </section>
   </div>
@@ -268,14 +224,17 @@
 
   <script>
   // ===== CONFIG =====
-  const API_BASE = "https://painelchamados.fly.dev"; // sem barra final
+  // Use MESMO HOST (string vazia) para cookies de sessão funcionarem sem CORS:
+  // Se preferir domínio, NÃO coloque barra no fim, ex.: const API_BASE = "https://painelchamados.fly.dev";
+  const API_BASE = "";
   const OFFLINE_MODE = false;
 
-  // ===== Estado de autenticação (simples, client-side) =====
-  const AUTH_USER = "energia";
-  const AUTH_PASS = "energia1";
-  const AUTH_KEY  = "painel_auth_ok";
+  // Normaliza base e monta URLs
+  const BASE = (API_BASE || "").replace(/\/+$/,"");
+  const url = (p) => `${BASE}${p}`;
 
+  // ===== Auth (UI) =====
+  const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
 
   function updateAuthUI(){
@@ -284,13 +243,13 @@
     const logoutBtn = document.getElementById("btnLogout");
 
     if(isAuthed){
-      formWrap.style.display = "";
-      hint.style.display = "none";
-      if (logoutBtn) logoutBtn.style.display = "";
+      formWrap && (formWrap.style.display = "");
+      hint && (hint.style.display = "none");
+      logoutBtn && (logoutBtn.style.display = "");
     }else{
-      formWrap.style.display = "none";
-      hint.style.display = "";
-      if (logoutBtn) logoutBtn.style.display = "none";
+      formWrap && (formWrap.style.display = "none");
+      hint && (hint.style.display = "");
+      logoutBtn && (logoutBtn.style.display = "none");
     }
   }
 
@@ -307,8 +266,8 @@
   function clsForStatus(status){
     switch((status||"").toLowerCase()){
       case "finalizado": return "status-finalizado";
-      case "insucesso": return "status-insucesso";
-      default: return "status-andamento";
+      case "insucesso":  return "status-insucesso";
+      default:           return "status-andamento";
     }
   }
   function nextStatus(current){
@@ -317,6 +276,13 @@
     return order[(i+1) % order.length];
   }
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
+
+  // Hash simples p/ detectar mudanças
+  function calcHash(records){
+    try{
+      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}`).join("§");
+    }catch{ return Math.random().toString(36); }
+  }
 
   // ===== Render =====
   function clearColumns(){
@@ -340,10 +306,15 @@
       <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
 
-    // Troca de status (mantém habilitado para todos, como antes)
+    // Troca de status — exige login (backend também valida sessão)
     div.addEventListener("click", async () => {
+      if (!isAuthed){
+        alert("Faça login para alterar o status.");
+        return;
+      }
       const current = div.dataset.status;
       const next = nextStatus(current);
+
       if (OFFLINE_MODE) {
         div.querySelector(".badge").textContent = next;
         div.className = `disparo ${clsForStatus(next)}`;
@@ -352,15 +323,22 @@
       }
       try{
         const id = div.dataset.id;
-        const res = await fetch(`${API_BASE}/api/disparos/${id}`, {
+        const res = await fetch(url(`/api/disparos/${id}`), {
           method: "PATCH",
           headers: {"Content-Type":"application/json"},
+          credentials: "include", // envia cookie de sessão
           body: JSON.stringify({ status: next })
         });
         if (res.ok){
+          // otimista + confirmado
           div.querySelector(".badge").textContent = next;
           div.className = `disparo ${clsForStatus(next)}`;
           div.dataset.status = next;
+          // puxa estado do servidor logo depois
+          setTimeout(softRefresh, 600);
+        }else if(res.status === 401){
+          alert("Sessão expirada. Faça login novamente.");
+          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         }
       }catch(e){ console.error(e); }
     });
@@ -379,26 +357,91 @@
     (records||[]).forEach(r => placeRecord(r));
   }
 
-  // ===== Data =====
-  async function loadInitial(){
-    if (OFFLINE_MODE) return;
-    const resp = await fetch(`${API_BASE}/api/disparos`, {cache:"no-store"});
-    if (!resp.ok) return;
-    renderSnapshot(await resp.json());
+  // ===== Data / Robustez =====
+  let lastNonEmpty = [];     // último snapshot não-vazio
+  let lastHash = "";         // hash do último snapshot aplicado
+  let sse;                   // EventSource
+  let sseFailures = 0;       # falhas consecutivas do SSE
+  let pollTimer = null;      // polling fallback
+
+  function safeRender(records){
+    const incomingHash = calcHash(records);
+    if (incomingHash === lastHash) return;                // ignora duplicados
+    if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) {
+      console.warn("[UI] Snapshot vazio ignorado para manter estado estável.");
+      return;                                             // ignora vazios
+    }
+    renderSnapshot(records);
+    lastHash = incomingHash;
+    if ((records?.length || 0) > 0) lastNonEmpty = records;
   }
 
-  function attachStream(){
+  async function loadInitial(){
     if (OFFLINE_MODE) return;
-    const es = new EventSource(`${API_BASE}/api/stream`);
-    es.onmessage = (evt) => {
+    try{
+      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+      if (!resp.ok) throw new Error(resp.status);
+      const data = await resp.json();
+      safeRender(data);
+    }catch(e){
+      console.warn("[loadInitial] falhou:", e);
+    }
+  }
+
+  async function softRefresh(){
+    try{
+      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+      if (!resp.ok) return;
+      const data = await resp.json();
+      safeRender(data);
+    }catch{}
+  }
+
+  function startPolling(){
+    if (pollTimer) return;
+    console.warn("[poll] iniciando fallback por polling");
+    pollTimer = setInterval(async ()=>{
       try{
-        const payload = JSON.parse(evt.data);
-        if (payload.type === "snapshot"){
-          renderSnapshot(payload.records || []);
-        }
-      }catch(e){ console.error(e); }
-    };
-    es.onerror = (e)=> console.warn("SSE erro:", e);
+        const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+        if (!resp.ok) return;
+        const data = await resp.json();
+        safeRender(data);
+      }catch(e){ /* silencioso */ }
+    }, 8000);
+  }
+
+  function stopPolling(){
+    if (pollTimer){
+      clearInterval(pollTimer);
+      pollTimer = null;
+      console.warn("[poll] parado");
+    }
+  }
+
+  function startSSE(){
+    try{
+      if (sse) sse.close();
+      sseFailures = 0;
+      sse = new EventSource(url("/api/stream"));
+      console.info("[sse] conectado");
+
+      sse.onmessage = (evt) => {
+        try{
+          const payload = JSON.parse(evt.data);
+          if (payload.type === "snapshot"){
+            safeRender(payload.records || []);
+          }
+        }catch(e){ console.error("[sse] parse erro:", e); }
+      };
+      sse.onerror = () => {
+        sseFailures++;
+        console.warn("[sse] erro (contagem):", sseFailures);
+        if (sseFailures >= 3){ startPolling(); }
+      };
+    }catch(e){
+      console.warn("[sse] falha ao iniciar, ativando polling", e);
+      startPolling();
+    }
   }
 
   // ===== Form Add (somente logado) =====
@@ -415,60 +458,81 @@
     const horario = document.getElementById("horario").value;
     if(!tipo) return;
 
+    // Render otimista
     const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
-    placeRecord(optimisticRecord, { optimistic:true });
+    (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
+    safeRender(lastNonEmpty);
 
     if (OFFLINE_MODE) { form.reset(); return; }
 
     try{
-      const resp = await fetch(`${API_BASE}/api/disparos`, {
-        method:"POST", headers:{"Content-Type":"application/json"},
+      const resp = await fetch(url("/api/disparos"), {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
         body:JSON.stringify(optimisticRecord)
       });
-      if (!resp.ok) throw new Error("POST falhou: " + resp.status);
-      form.reset();
+      if (!resp.ok){
+        if (resp.status === 401){
+          alert("Sessão expirada. Faça login novamente.");
+          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+        }else{
+          throw new Error("POST falhou: " + resp.status);
+        }
+      } else {
+        form.reset();
+        setTimeout(softRefresh, 600);
+      }
     }catch(e){
       console.error("Erro ao criar disparo:", e);
-      alert("Não consegui salvar no servidor. Confira o backend.");
-      // remove card otimista
-      const hh = horario.split(":")[0];
-      const col = document.getElementById("col-"+hh);
-      if (col && col.lastElementChild && col.lastElementChild.dataset.optimistic === "1") {
-        col.removeChild(col.lastElementChild);
-      }
+      alert("Não consegui salvar no servidor.");
+      // desfaz otimista
+      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+      safeRender(lastNonEmpty);
     }
   });
 
-  // ===== Login =====
+  // ===== Login / Logout (sessão no backend) =====
   const btnLogin  = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
 
-  btnLogin.addEventListener("click", () => {
+  if (btnLogin) btnLogin.addEventListener("click", async () => {
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
-    if (u === AUTH_USER && p === AUTH_PASS){
-      isAuthed = true;
-      localStorage.setItem(AUTH_KEY, "1");
-      updateAuthUI();
-      switchTab("painel");
-    }else{
-      alert("Usuário ou senha inválidos.");
-    }
+    try{
+      const resp = await fetch(url("/api/login"), {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
+        body: JSON.stringify({ username:u, password:p })
+      });
+      if (resp.ok){
+        isAuthed = True;
+        localStorage.setItem(AUTH_KEY, "1");
+        updateAuthUI();
+        switchTab("painel");
+        setTimeout(softRefresh, 300);
+      }else{
+        alert("Usuário ou senha inválidos.");
+      }
+    }catch(e){ console.error(e); }
   });
 
-  btnLogout.addEventListener("click", () => {
+  if (btnLogout) btnLogout.addEventListener("click", async () => {
+    try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
     isAuthed = false;
     localStorage.removeItem(AUTH_KEY);
     updateAuthUI();
+    switchTab("login");
   });
 
   // ===== Start =====
   (async () => {
-    // aba padrão
     switchTab("painel");
     updateAuthUI();
-    try{ await loadInitial(); }catch(e){ console.warn("Falha ao carregar:", e); }
-    attachStream();
+    await loadInitial();
+    startSSE();
+    stopPolling();
   })();
   </script>
 </body>
