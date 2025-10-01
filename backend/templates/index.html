@@ -329,15 +329,13 @@
         const res = await fetch(url(`/api/disparos/${id}`), {
           method: "PATCH",
           headers: {"Content-Type":"application/json"},
-          credentials: "include", // envia cookie de sessão
+          credentials: "include",
           body: JSON.stringify({ status: next })
         });
         if (res.ok){
-          // otimista + confirmado
           div.querySelector(".badge").textContent = next;
           div.className = `disparo ${clsForStatus(next)}`;
           div.dataset.status = next;
-          // puxa estado do servidor logo depois
           setTimeout(softRefresh, 600);
         }else if(res.status === 401){
           alert("Sessão expirada. Faça login novamente.");
@@ -369,10 +367,10 @@
 
   function safeRender(records){
     const incomingHash = calcHash(records);
-    if (incomingHash === lastHash) return;                // ignora duplicados
+    if (incomingHash === lastHash) return;
     if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) {
       console.warn("[UI] Snapshot vazio ignorado para manter estado estável.");
-      return;                                             // ignora vazios
+      return;
     }
     renderSnapshot(records);
     lastHash = incomingHash;
@@ -421,6 +419,14 @@
     }
   }
 
+  function stopSSE(){
+    if (sse){
+      try{ sse.close(); }catch{}
+      sse = null;
+      console.warn("[sse] fechado");
+    }
+  }
+
   function startSSE(){
     try{
       if (sse) sse.close();
@@ -461,7 +467,6 @@
     const horario = document.getElementById("horario").value;
     if(!tipo) return;
 
-    // Render otimista
     const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
     safeRender(lastNonEmpty);
@@ -489,17 +494,15 @@
     }catch(e){
       console.error("Erro ao criar disparo:", e);
       alert("Não consegui salvar no servidor.");
-      // desfaz otimista
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
       safeRender(lastNonEmpty);
     }
   });
 
-  // ===== Login / Logout (sessão no backend) =====
+  // ===== Login / Logout =====
   const loginForm = document.getElementById("loginForm");
   const btnLogout = document.getElementById("btnLogout");
 
-  // Login por SUBMIT (corrige problema de clique e permite Enter)
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const u = (document.getElementById("loginUser").value || "").trim();
@@ -507,36 +510,43 @@
 
     // Autenticação local simples (credenciais pedidas)
     if (u !== "energia" || p !== "energia1") {
-      // Se você estiver usando o backend com /api/login, descomente o bloco mais abaixo e remova esta verificação local.
       alert("Usuário ou senha inválidos.");
       return;
     }
 
-    // Autenticar via Backend%%%
-    // try{
-    //   const resp = await fetch(url("/api/login"), {
-    //     method:"POST",
-    //     headers:{"Content-Type":"application/json"},
-    //     credentials:"include",
-    //     body: JSON.stringify({ username:u, password:p })
-    //   });
-    //   if (!resp.ok) { alert("Usuário ou senha inválidos."); return; }
-    // }catch(e){ console.error(e); alert("Falha ao logar."); return; }
+    // Se quiser autenticar no backend, troque pelo POST /api/login e remova o if acima.
 
     isAuthed = true;
     localStorage.setItem(AUTH_KEY, "1");
     updateAuthUI();
     switchTab("painel");
-    setTimeout(softRefresh, 300);
+    setTimeout(softRefresh, 150);
   });
 
-  btnLogout.addEventListener("click", async () => {
-    // Se houver backend, avise o servidor:
-    try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+  // Logout INSTANTÂNEO: atualiza UI na hora e dispara requisição em background
+  btnLogout.addEventListener("click", () => {
+    // UI imediata
     isAuthed = false;
     localStorage.removeItem(AUTH_KEY);
     updateAuthUI();
     switchTab("login");
+
+    // Limpa campos e foca usuário
+    const u = document.getElementById("loginUser");
+    const p = document.getElementById("loginPass");
+    if (p) p.value = "";
+    if (u) { u.value = ""; u.focus(); }
+
+    // Fecha SSE (opcional) e para polling; recomeça logo após
+    stopPolling();
+    stopSSE();
+    startSSE(); // continuamos recebendo o painel em modo leitura
+
+    // Atualiza dados logo após sair
+    setTimeout(softRefresh, 120);
+
+    // Requisição ao backend sem aguardar (fire-and-forget)
+    try { fetch(url("/api/logout"), { method:"POST", credentials:"include" }); } catch {}
   });
 
   // ===== Start =====
