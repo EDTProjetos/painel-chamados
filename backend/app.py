@@ -261,31 +261,28 @@ def update_disparo(rid):
 # ---------- SSE (stream) ----------
 @app.get("/api/stream")
 def stream():
-    """
-    Envia snapshot sempre que detectar mudança (hash).
-    Mantém ping periódico p/ conservar a conexão ativa no proxy.
-    """
-    ping_seconds = float(os.getenv("SSE_PING_SECONDS", "3.0"))
-
     def gen():
         last_hash = None
-        yield "retry: 3000\n\n"  # reconexão rápida no cliente
+        # reconexão rápida
+        yield "retry: 3000\n\n"
         while True:
-            data, _stale = get_snapshot(force=False)
+            # força leitura real do Airtable para pegar deleções externas rapidamente
+            data, stale = get_snapshot(force=True)
             h = md5(data)
             if h != last_hash:
                 last_hash = h
                 payload = json.dumps(
-                    {"type": "snapshot", "records": data}, ensure_ascii=False
+                    {"type": "snapshot", "records": data, "stale": stale},
+                    ensure_ascii=False
                 )
                 yield f"data: {payload}\n\n"
             else:
                 yield "event: ping\ndata: {}\n\n"
-            time.sleep(ping_seconds)
+            time.sleep(3)
 
     headers = {
         "Cache-Control": "no-cache, no-transform",
-        "X-Accel-Buffering": "no",   # evita buffering em proxies
+        "X-Accel-Buffering": "no",
         "Connection": "keep-alive",
     }
     return Response(gen(), mimetype="text/event-stream", headers=headers)
