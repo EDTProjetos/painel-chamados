@@ -58,7 +58,7 @@
     .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
     .login-actions{display:flex; gap:10px; margin-top:8px}
 
-    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:#6b7280; font-size:13px; text-align:center; padding:14px 12px}
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
 
     /* Splash/Spinner */
     .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
@@ -174,9 +174,9 @@
 
   <script>
   /* ========================== CONFIG ========================== */
-  // Use MESMO HOST (string vazia) para cookies/sessão e SSE funcionarem sem CORS.
-  // Se preferir domínio, NÃO coloque barra no fim. Ex.: const API_BASE = "https://paineldisparos.fly.dev";
-  const API_BASE = "";
+  // Se preferir domínio, NÃO coloque barra no fim (normalizamos abaixo).
+  // Ex.: const API_BASE = "https://paineldisparos.fly.dev";
+  const API_BASE = "https://paineldisparos.fly.dev";
 
   // Local (file://) ou ?offline=1 força modo leitura
   const IS_FILE = location.protocol === "file:";
@@ -323,8 +323,7 @@
             toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
             lastSessionWarnAt = Date.now();
           }
-          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI();
-          switchTab("login");
+          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         }else{
           toast("Não consegui alterar no servidor.", "error");
         }
@@ -384,13 +383,26 @@
     }catch{}
   }
 
-  function safeRender(records){
+  // >>>>>>> NOVA LÓGICA: aceita vazio real (não stale), ignora vazio stale
+  function safeRender(records, stale = false){
     const incomingHash = calcHash(records);
     if (incomingHash === lastHash) return;
-    if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) return;
+
+    const isEmpty = (records?.length || 0) === 0;
+    // Se vier vazio e marcado como stale (fallback), preserva a última tela boa
+    if (isEmpty && stale && (lastNonEmpty?.length || 0) > 0) return;
+
     renderSnapshot(records);
     lastHash = incomingHash;
-    if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
+
+    if (!isEmpty) {
+      lastNonEmpty = records;
+      saveCache(records);
+    } else {
+      lastNonEmpty = []; // vazio real: limpa memória
+      try { localStorage.removeItem(CACHE_KEY); } catch {}
+    }
+
     if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
   }
 
@@ -399,8 +411,9 @@
     try{
       const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
       if (!resp.ok) throw new Error(resp.status);
+      const stale = resp.headers.get("X-Data-Stale") === "1";
       const data = await resp.json();
-      safeRender(data);
+      safeRender(data, stale);
     }catch(e){
       // silencioso; cache já pode ter pintado; splash tem timeout
     }
@@ -411,8 +424,9 @@
     try{
       const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
       if (!resp.ok) return;
+      const stale = resp.headers.get("X-Data-Stale") === "1";
       const data = await resp.json();
-      safeRender(data);
+      safeRender(data, stale);
     }catch{}
   }
 
@@ -423,8 +437,9 @@
       try{
         const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
         if (resp.ok){
+          const stale = resp.headers.get("X-Data-Stale") === "1";
           const data = await resp.json();
-          safeRender(data);
+          safeRender(data, stale);
           backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
         }
       }catch{}
@@ -444,7 +459,10 @@
       sse.onmessage = (evt) => {
         try{
           const payload = JSON.parse(evt.data);
-          if (payload.type === "snapshot") safeRender(payload.records || []);
+          if (payload.type === "snapshot") {
+            // >>>>>>> usa flag 'stale' do backend se disponível
+            safeRender(payload.records || [], payload.stale === true);
+          }
         }catch{}
       };
       sse.onerror = () => { startPolling(); };
@@ -470,13 +488,13 @@
 
     const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
-    safeRender(lastNonEmpty);
+    safeRender(lastNonEmpty, false);
 
     if (OFFLINE_MODE) { e.target.reset(); return; }
     if(!isAuthed){
       toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty);
+      safeRender(lastNonEmpty, false);
       return;
     }
 
@@ -496,7 +514,7 @@
         }
         // desfaz otimista
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-        safeRender(lastNonEmpty);
+        safeRender(lastNonEmpty, false);
       } else {
         e.target.reset();
         setTimeout(softRefresh, 400);
@@ -504,7 +522,7 @@
     }catch{
       toast("Falha de rede ao salvar.", "error");
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty);
+      safeRender(lastNonEmpty, false);
     }
   });
 
@@ -518,7 +536,6 @@
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
 
-    // valida UI local imediatamente
     if (!u || !p){ return; }
     btnLogin.disabled = true;
 
@@ -530,7 +547,6 @@
 
     isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
 
-    // tenta sessão backend (não bloqueia a UI)
     try{
       const r = await fetch(url("/api/login"), {
         method:"POST",
@@ -551,20 +567,15 @@
   });
 
   btnLogout.addEventListener("click", () => {
-    // Logout instantâneo na UI
     isAuthed = false; localStorage.removeItem(AUTH_KEY);
     updateAuthUI(); switchTab("login");
 
-    // fecha streams e polling para “respiro” da página
     stopSSE(); stopPolling();
 
-    // limpa campos e foca usuário
     const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
     if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
 
-    // dispara logout no backend sem bloquear
     try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
-    // reabre SSE/poll para manter a visão painel atualizada (em modo leitura)
     setTimeout(()=>{ startSSE(); }, 300);
   });
 
