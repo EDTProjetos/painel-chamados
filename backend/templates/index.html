@@ -6,138 +6,76 @@
   <title>Painel de Disparos</title>
   <style>
     :root{
-      --bg:#f4f6f9;
-      --card:#ffffff;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --primary:#0b4a8f;
-      --primary-2:#0f6ad8;
-
-      --andamento:#ff9f1a;
-      --finalizado:#1fb36a;
-      --insucesso:#e23b3b;
+      --bg:#f4f6f9; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
+      --primary:#0b4a8f; --primary-2:#0f6ad8;
+      --andamento:#ff9f1a; --finalizado:#1fb36a; --insucesso:#e23b3b;
+      --warn:#fbbf24; --error:#ef4444; --ok:#10b981;
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{box-sizing:border-box} html,body{height:100%}
     body{
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin:0; display:flex; flex-direction:column; min-height:100vh;
+      background: var(--bg); color: var(--text); margin:0; display:flex; flex-direction:column; min-height:100vh;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px; width:100%; flex:1}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px;width:100%;flex:1}
 
-    .app-header{
-      background: linear-gradient(90deg,var(--primary),var(--primary-2));
-      color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
-      margin:0 0 12px 0;
-    }
+    .app-header{background: linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18); margin:0 0 12px 0}
     .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
     .tabs{display:flex; gap:10px; justify-content:center; margin:12px 0 0}
-    .tab{
-      background:#fff; border:1px solid var(--border); color:#111827;
-      padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700;
-      transition:transform .15s ease, box-shadow .2s ease;
-    }
+    .tab{background:#fff; border:1px solid var(--border); color:#111827; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700; transition:transform .15s ease, box-shadow .2s ease}
     .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
     .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
 
-    .legenda{
-      display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
-      margin:16px 0 8px;
-    }
-    .legenda-item{
-      display:flex; align-items:center; gap:8px; font-weight:600;
-      background:var(--card); padding:8px 12px; border-radius:10px;
-      box-shadow:0 4px 16px rgba(0,0,0,.06);
-      border:1px solid var(--border);
-    }
+    .legenda{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:16px 0 8px}
+    .legenda-item{display:flex; align-items:center; gap:8px; font-weight:600; background:var(--card); padding:8px 12px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.06); border:1px solid var(--border)}
     .cor{width:16px;height:16px;border-radius:4px;display:inline-block}
-    .cor.andamento{background:var(--andamento)}
-    .cor.finalizado{background:var(--finalizado)}
-    .cor.insucesso{background:var(--insucesso)}
+    .cor.andamento{background:var(--andamento)} .cor.finalizado{background:var(--finalizado)} .cor.insucesso{background:var(--insucesso)}
 
-    .form-container{
-      background:var(--card); border:1px solid var(--border);
-      padding:20px; margin:18px 0; border-radius:14px;
-      box-shadow:0 10px 24px rgba(0,0,0,.08);
-    }
+    .form-container{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px 0; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
     .form-container h2{margin:0 0 12px; color:var(--primary)}
     .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
     .form-grid > .full{grid-column:1 / -1}
     label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
-    input,select,button{
-      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
-      background:#fff; color:#111827; font-size:14px;
-    }
-    button{
-      background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer;
-      letter-spacing:.2px;
-    }
+    input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
+    button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .badge-info{
-      display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted);
-      padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px;
-    }
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
-    .table-card{
-      background:var(--card); border:1px solid var(--border); border-radius:14px;
-      box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden;
-    }
-    .grid{
-      display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%;
-    }
-    .grid > div{
-      border-right:1px solid var(--border); border-bottom:1px solid var(--border);
-      padding:12px; min-height:72px; background:#fff;
-    }
-    .header{
-      background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center;
-    }
+    .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
+    .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
+    .grid > div{border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:12px; min-height:72px; background:#fff}
+    .header{background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center}
 
-    .disparo{
-      border-radius:12px; padding:12px; margin:8px 0; color:#fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer;
-      transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both;
-    }
+    .disparo{border-radius:12px; padding:12px; margin:8px 0; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both}
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
-    .status-andamento{ background:var(--andamento) }
-    .status-finalizado{ background:var(--finalizado) }
-    .status-insucesso{ background:var(--insucesso) }
+    .disparo[aria-busy="true"]{ filter:grayscale(.25); opacity:.75; cursor:wait }
+    .status-andamento{ background:var(--andamento) } .status-finalizado{ background:var(--finalizado) } .status-insucesso{ background:var(--insucesso) }
     .badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:6px; display:inline-block }
-    .title{font-weight:800; font-size:14px; margin-bottom:4px}
-    .meta{font-size:12px; opacity:.95}
+    .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    .login-card{
-      background:var(--card); border:1px solid var(--border);
-      padding:20px; margin:18px auto; border-radius:14px; max-width:420px;
-      box-shadow:0 10px 24px rgba(0,0,0,.08);
-    }
+    .login-card{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px auto; border-radius:14px; max-width:420px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
     .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
     .login-actions{display:flex; gap:10px; margin-top:8px}
 
-    .footer{
-      width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted);
-      font-size:13px; text-align:center; padding:14px 12px;
-    }
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
 
     /* Splash/Spinner */
-    .splash{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:var(--bg); z-index:9999; transition:opacity .25s ease;
-    }
+    .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
     .splash.hide{ opacity:0; pointer-events:none }
-    .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2);
-      border-radius:50%; animation:spin 1s linear infinite }
+    .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
     @keyframes spin{ to{ transform:rotate(360deg) } }
+
+    /* Avisos (toast/topbar) */
+    .topbar{position:fixed; top:8px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:9999; pointer-events:none}
+    .toast{pointer-events:auto; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.08); font-size:13px; display:flex; align-items:center; gap:8px}
+    .toast.warn{ border-color:#fde68a; background:#fffbeb } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 }
+    .toast button{background:transparent; color:#111; border:none; cursor:pointer; padding:0 4px; font-weight:700}
   </style>
 </head>
 <body>
   <div id="splash" class="splash"><div class="ring" aria-label="Carregando"></div></div>
+  <div id="topbar" class="topbar" aria-live="polite" aria-atomic="true"></div>
 
   <header class="app-header">
     <h1 class="app-title">Painel de Disparos</h1>
@@ -236,49 +174,56 @@
 
   <script>
   /* ========================== CONFIG ========================== */
-  // Use MESMO HOST (string vazia) para cookies funcionarem sem CORS:
+  // Use MESMO HOST (string vazia) para cookies funcionarem sem CORS.
   // Se preferir domínio, NÃO coloque barra no fim. Ex.: const API_BASE = "https://painelchamados.fly.dev";
   const API_BASE = "";
 
-  // Detecta ambiente local (file://) ou ?offline=1 (sem regex quebrada)
+  // Local (file://) ou ?offline=1 força modo leitura
   const IS_FILE = location.protocol === "file:";
   const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
   let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
 
-  // Monta URLs para o mesmo host
   const BASE = (API_BASE || "").replace(/\/+$/,"");
   const url = (p) => `${BASE}${p}`;
 
-  /* =========================== SPLASH ========================== */
+  /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
-  const hideSplashSoon = () => {
-    if (!splash) return;
-    splash.classList.add("hide");
-    setTimeout(()=>{ try{splash.remove();}catch{} }, 300);
-  };
-  // some em 1.2s mesmo se não houver backend (evita tela travada)
-  const splashTimer = setTimeout(hideSplashSoon, 1200);
-  // em qualquer erro não previsto, garanta sumir
+  const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
+  const splashTimer = setTimeout(hideSplashSoon, 1200); // nunca fica preso
   window.addEventListener("error", hideSplashSoon);
   window.addEventListener("unhandledrejection", hideSplashSoon);
+
+  const topbar = document.getElementById("topbar");
+  const toasts = new Set();
+  function toast(msg, type="warn", ms=3500, key=null){
+    if (key && toasts.has(key)) return; // throttle por chave
+    const div = document.createElement("div");
+    div.className = `toast ${type}`;
+    div.innerHTML = `<span>${msg}</span><button aria-label="fechar">×</button>`;
+    const btn = div.querySelector("button");
+    btn.onclick = ()=> { div.remove(); if (key) toasts.delete(key); };
+    topbar.appendChild(div);
+    if (key) toasts.add(key);
+    setTimeout(()=>{ try{btn.click()}catch{} }, ms);
+  }
 
   /* ============================ AUTH =========================== */
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
+  let lastSessionWarnAt = 0;
 
   function updateAuthUI(){
     const formWrap = document.getElementById("form-wrapper");
     const hint = document.getElementById("readOnlyHint");
     const logoutBtn = document.getElementById("btnLogout");
-
     if(isAuthed){
-      if (formWrap) formWrap.style.display = "";
-      if (hint) hint.style.display = "none";
-      if (logoutBtn) logoutBtn.style.display = "";
+      formWrap && (formWrap.style.display = "");
+      hint && (hint.style.display = "none");
+      logoutBtn && (logoutBtn.style.display = "");
     }else{
-      if (formWrap) formWrap.style.display = "none";
-      if (hint) hint.style.display = "";
-      if (logoutBtn) logoutBtn.style.display = "none";
+      formWrap && (formWrap.style.display = "none");
+      hint && (hint.style.display = "");
+      logoutBtn && (logoutBtn.style.display = "none");
     }
   }
 
@@ -311,6 +256,12 @@
       return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}`).join("§");
     }catch{ return Math.random().toString(36); }
   }
+  function fetchWithTimeout(resource, options = {}, timeout = 2500) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    return fetch(resource, { ...options, signal: controller.signal })
+      .finally(() => clearTimeout(id));
+  }
 
   /* =========================== RENDER ========================== */
   function clearColumns(){
@@ -334,8 +285,9 @@
       <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
 
-    // clique -> alterna status
+    // clique -> alterna status (com trava anti duplo-clique)
     div.addEventListener("click", async () => {
+      if (div.getAttribute("aria-busy") === "true") return;
       const current = div.dataset.status;
       const next = nextStatus(current);
 
@@ -345,11 +297,16 @@
         div.dataset.status = next;
         return;
       }
-
       if (!isAuthed){
-        alert("Faça login para alterar o status.");
+        // Notifica só a cada 60s para não encher
+        if (Date.now() - lastSessionWarnAt > 60000){
+          toast("Você está em modo leitura. Faça login para alterar.", "warn", 3500, "readonly");
+          lastSessionWarnAt = Date.now();
+        }
         return;
       }
+
+      div.setAttribute("aria-busy","true");
       try{
         const id = div.dataset.id;
         const res = await fetch(url(`/api/disparos/${id}`), {
@@ -364,10 +321,19 @@
           div.dataset.status = next;
           setTimeout(softRefresh, 400);
         }else if(res.status === 401){
-          alert("Sessão expirada. Faça login novamente.");
+          if (Date.now() - lastSessionWarnAt > 30000){
+            toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
+            lastSessionWarnAt = Date.now();
+          }
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+        }else{
+          toast("Não consegui alterar no servidor.", "error");
         }
-      }catch(e){ console.error(e); }
+      }catch(e){
+        toast("Falha de rede ao atualizar.", "error");
+      }finally{
+        div.removeAttribute("aria-busy");
+      }
     });
 
     return div;
@@ -384,17 +350,17 @@
     (records||[]).forEach(r => placeRecord(r));
   }
 
-  /* ============= Data (SSE + Polling + Timeout) ============== */
+  /* ============= Data (Cache + SSE + Polling Backoff) ========= */
   const CACHE_KEY = "painel_snapshot_v1";
   const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
   let lastNonEmpty = [];
   let lastHash = "";
   let sse = null;
-  let sseFailures = 0;
   let pollTimer = null;
+  let backoffMs = 5000;
   let gotFirstPaint = false;
 
-  // pinta rapidamente a partir do cache (se houver)
+  // Pinta do cache (rápido)
   (function paintFromCache(){
     try{
       const raw = localStorage.getItem(CACHE_KEY);
@@ -429,19 +395,15 @@
     if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
   }
 
-  async function loadInitialWithTimeout(ms=2500){
+  async function loadInitial(){
     if (OFFLINE_MODE) return;
-    const ctrl = new AbortController();
-    const to = setTimeout(()=>ctrl.abort(), ms);
     try{
-      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include", signal: ctrl.signal});
+      const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 2500);
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
       safeRender(data);
     }catch(e){
-      // não deixa travar; o splash já tem timeout
-    }finally{
-      clearTimeout(to);
+      // silencioso; já pintamos do cache e o splash tem timeout
     }
   }
 
@@ -457,34 +419,38 @@
 
   function startPolling(){
     if (OFFLINE_MODE) return;
-    if (pollTimer) return;
+    if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(async ()=>{
       try{
         const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
-        if (!resp.ok) return;
-        const data = await resp.json();
-        safeRender(data);
+        if (resp.ok){
+          const data = await resp.json();
+          safeRender(data);
+          // se polling funcionou, pode reduzir backoff
+          backoffMs = Math.max(5000, Math.floor(backoffMs/2));
+        }
       }catch{}
-    }, 8000);
+    }, backoffMs);
+    // aumenta gradualmente até 30s
+    backoffMs = Math.min(backoffMs * 2, 30000);
   }
 
   function startSSE(){
     if (OFFLINE_MODE) return;
     try{
       if (sse) sse.close();
-      sseFailures = 0;
       sse = new EventSource(url("/api/stream"));
       sse.onmessage = (evt) => {
         try{
           const payload = JSON.parse(evt.data);
           if (payload.type === "snapshot") safeRender(payload.records || []);
-        }catch(e){ console.error(e); }
+        }catch{}
       };
       sse.onerror = () => {
-        sseFailures++;
-        if (sseFailures >= 3) startPolling();
+        // EventSource tenta reconectar sozinho, mas ligamos o polling
+        startPolling();
       };
-    }catch(e){
+    }catch{
       startPolling();
     }
   }
@@ -505,9 +471,8 @@
     safeRender(lastNonEmpty);
 
     if (OFFLINE_MODE) { e.target.reset(); return; }
-
     if(!isAuthed){
-      alert("Faça login para adicionar disparos.");
+      toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
       safeRender(lastNonEmpty);
       return;
@@ -522,17 +487,20 @@
       });
       if (!resp.ok){
         if (resp.status === 401){
-          alert("Sessão expirada. Faça login novamente.");
+          toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         }else{
-          throw new Error("POST falhou: " + resp.status);
+          toast("Não consegui salvar no servidor.", "error");
         }
+        // desfaz otimista
+        lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+        safeRender(lastNonEmpty);
       } else {
         e.target.reset();
         setTimeout(softRefresh, 400);
       }
-    }catch(e){
-      alert("Não consegui salvar no servidor.");
+    }catch{
+      toast("Falha de rede ao salvar.", "error");
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
       safeRender(lastNonEmpty);
     }
@@ -547,30 +515,31 @@
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
 
-    // Login simples no front (para liberar UI). Backend deve validar novamente.
     if (u !== "energia" || p !== "energia1") {
-      alert("Usuário ou senha inválidos.");
+      toast("Usuário ou senha inválidos.", "error");
       return;
     }
-    isAuthed = true;
-    localStorage.setItem(AUTH_KEY, "1");
-    updateAuthUI();
-    switchTab("painel");
+    // habilita UI imediatamente
+    isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
+
+    // pede sessão ao backend (se disponível). Se falhar, continua só com UI liberada.
+    try{
+      await fetch(url("/api/login"), {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
+        body: JSON.stringify({ username:u, password:p })
+      });
+    }catch{}
+
     setTimeout(softRefresh, 150);
   });
 
   btnLogout.addEventListener("click", () => {
-    isAuthed = false;
-    localStorage.removeItem(AUTH_KEY);
-    updateAuthUI();
-    switchTab("login");
-
-    const u = document.getElementById("loginUser");
-    const p = document.getElementById("loginPass");
-    if (p) p.value = "";
-    if (u) { u.value = ""; u.focus(); }
-
-    try { fetch(url("/api/logout"), { method:"POST", credentials:"include" }); } catch {}
+    isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+    const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
+    if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
+    try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
   });
 
   /* ========================== START =========================== */
@@ -578,14 +547,10 @@
     switchTab("painel");
     updateAuthUI();
 
-    if (OFFLINE_MODE) {
-      clearTimeout(splashTimer);
-      hideSplashSoon();
-      return; // modo leitura local
-    }
+    if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
 
-    startSSE();
-    loadInitialWithTimeout(2500);
+    startSSE();    // já entra escutando
+    loadInitial(); // mas com timeout curto para não travar
   })();
   </script>
 </body>
