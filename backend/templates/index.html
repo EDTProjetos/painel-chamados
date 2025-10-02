@@ -58,7 +58,7 @@
     .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
     .login-actions{display:flex; gap:10px; margin-top:8px}
 
-    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:#6b7280; font-size:13px; text-align:center; padding:14px 12px}
 
     /* Splash/Spinner */
     .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
@@ -78,13 +78,13 @@
   <div id="topbar" class="topbar" aria-live="polite" aria-atomic="true"></div>
 
   <header class="app-header">
-    <h1 class="app-title"> de Disparos</h1>
+    <h1 class="app-title">Painel de Disparos</h1>
   </header>
 
   <div class="wrap">
     <!-- Tabs -->
     <nav class="tabs">
-      <button class="tab active" data-tab=""></button>
+      <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
 
@@ -174,9 +174,9 @@
 
   <script>
   /* ========================== CONFIG ========================== */
-  // Use MESMO HOST (string vazia) para cookies funcionarem sem CORS.
-  // Se preferir domínio, NÃO coloque barra no fim. Ex.: const API_BASE = "https://paineldisparos.fly.dev/";
-  const API_BASE = "https://paineldisparos.fly.dev/";
+  // Use MESMO HOST (string vazia) para cookies/sessão e SSE funcionarem sem CORS.
+  // Se preferir domínio, NÃO coloque barra no fim. Ex.: const API_BASE = "https://paineldisparos.fly.dev";
+  const API_BASE = "";
 
   // Local (file://) ou ?offline=1 força modo leitura
   const IS_FILE = location.protocol === "file:";
@@ -323,7 +323,6 @@
             toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
             lastSessionWarnAt = Date.now();
           }
-          // não derruba a UI imediatamente; apenas marca como não autenticado
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI();
           switchTab("login");
         }else{
@@ -540,10 +539,8 @@
         body: JSON.stringify({ username:u, password:p })
       });
       if (!r.ok){
-        // mantém UI liberada, apenas avisa
         toast("Não consegui criar sessão segura no servidor. Tente novamente mais tarde.", "warn");
       }else{
-        // sessão criada -> força um refresh leve
         setTimeout(softRefresh, 150);
       }
     }catch{
