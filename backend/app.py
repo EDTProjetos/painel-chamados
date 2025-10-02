@@ -21,21 +21,23 @@ AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 
 if not AIRTABLE_TOKEN or not AIRTABLE_BASE_ID:
-    # Em produção o gunicorn já aborta; em dev mostramos erro claro
     log.warning("Faltam secrets AIRTABLE_TOKEN ou AIRTABLE_BASE_ID.")
 
 # Codifica nome da tabela (suporta espaço/acentos)
 TABLE_ENC = requests.utils.quote(AIRTABLE_TABLE_NAME or "Disparos", safe="")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{TABLE_ENC}"
 
-HEADERS = {
+COMMON_HEADERS = {
     "Authorization": f"Bearer {AIRTABLE_TOKEN}",
     "Content-Type": "application/json",
+    "Accept": "application/json",
+    "User-Agent": "PainelDisparos/1.0 (+fly.io)"
 }
 
 # Reaproveita conexões HTTP + headers fixos
 REQ = requests.Session()
-REQ.headers.update(HEADERS)
+REQ.headers.update(COMMON_HEADERS)
+
 DEFAULT_TIMEOUT = int(os.getenv("AIRTABLE_TIMEOUT", "12"))
 MAX_RETRIES = int(os.getenv("AIRTABLE_MAX_RETRIES", "4"))
 
@@ -50,14 +52,13 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 app.config.update(
     SECRET_KEY=os.getenv("APP_SECRET", "change-this-in-prod"),
-    SESSION_COOKIE_SECURE=(os.getenv("COOKIE_SECURE", "1") == "1"),
+    SESSION_COOKIE_SECURE=(os.getenv("COOKIE_SECURE", "1") == "1"),  # em dev: COOKIE_SECURE=0
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_HTTPONLY=True,
     PERMANENT_SESSION_LIFETIME=timedelta(days=int(os.getenv("SESSION_DAYS", "7"))),
 )
 
-# Se front e API forem mesmo host, CORS é irrelevante.
-# Deixamos ligado com credenciais (ok também se usar domínio separado).
+# Se front e API estiverem no mesmo host, CORS é irrelevante. Mantemos habilitado com credenciais.
 CORS(app, supports_credentials=True)
 
 # ===================== HELPERS =======================
@@ -71,9 +72,18 @@ def require_auth(fn):
     return wrapper
 
 def md5(obj) -> str:
-    return hashlib.md5(
-        json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")
-    ).hexdigest()
+    return hashlib.md5(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+def _to_int(v, default=0):
+    try:
+        if v is None or v == "":
+            return default
+        return int(v)
+    except Exception:
+        try:
+            return int(float(v))
+        except Exception:
+            return default
 
 def _airtable_request(method: str, url: str, **kwargs) -> requests.Response:
     """
@@ -85,59 +95,66 @@ def _airtable_request(method: str, url: str, **kwargs) -> requests.Response:
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             resp = REQ.request(method, url, timeout=timeout, **kwargs)
+            # Throttling
             if resp.status_code == 429:
                 ra = resp.headers.get("Retry-After")
                 try:
                     wait = float(ra) if ra else backoff
                 except Exception:
                     wait = backoff
-                log.warning("Airtable 429; aguardando %.2fs", wait)
+                log.warning("Airtable 429; aguardando %.2fs (tentativa %s/%s)", wait, attempt, MAX_RETRIES)
                 time.sleep(wait)
                 backoff = min(backoff * 2, 6)
                 continue
+            # 5xx: tenta novamente
             if 500 <= resp.status_code < 600:
-                log.warning("Airtable %s; retry em %.2fs", resp.status_code, backoff)
+                log.warning("Airtable %s; retry em %.2fs (tentativa %s/%s)", resp.status_code, backoff, attempt, MAX_RETRIES)
                 time.sleep(backoff)
                 backoff = min(backoff * 2, 6)
                 continue
             return resp
         except requests.RequestException as e:
-            log.warning("Erro de rede para Airtable (%s). Retry em %.2fs", e, backoff)
+            log.warning("Erro de rede para Airtable (%s). Retry em %.2fs (tentativa %s/%s)", e, backoff, attempt, MAX_RETRIES)
             time.sleep(backoff)
             backoff = min(backoff * 2, 6)
-    # Última tentativa (deixa erro estourar p/ caller tratar)
+    # Última tentativa
     return REQ.request(method, url, timeout=timeout, **kwargs)
 
 def _normalize_records(records):
-    # Converte payload do Airtable para o modelo esperado no front
+    """
+    Converte payload do Airtable para o modelo esperado no front.
+    OBS: garante tipos numéricos nos campos adequados.
+    """
     out = []
     for rec in records:
         f = rec.get("fields", {}) or {}
         out.append(
             {
                 "id": rec.get("id"),
-                "tipo": f.get("Tipo", ""),
-                "tempo": f.get("Tempo", ""),
-                "potes": f.get("Potes", ""),
-                "horario": f.get("Horário", ""),  # campo com acento no Airtable
-                "status": f.get("Status", ""),
-                "atualizadoEm": f.get("AtualizadoEm", ""),
+                "tipo": f.get("Tipo", "") or "",
+                "tempo": _to_int(f.get("Tempo", 0), 0),
+                "potes": _to_int(f.get("Potes", 0), 0),
+                "horario": f.get("Horário", "") or "",  # campo com acento no Airtable
+                "status": f.get("Status", "") or "",
+                "atualizadoEm": f.get("AtualizadoEm", "") or "",
+                # Novos campos:
+                "volume": _to_int(f.get("Volume", 0), 0),
+                "template": f.get("Template", "") or "",
             }
         )
     return out
 
 def _fetch_all_from_airtable():
-    """Lê tudo do Airtable (paginado) com robustez / ordenado por 'AtualizadoEm'."""
+    """Lê tudo do Airtable (paginado), ordenado por 'AtualizadoEm' (ideal: Last modified time)."""
     records = []
     params = {
         "pageSize": 100,
-        "sort[0][field]": "AtualizadoEm",  # ideal: Last modified time ou campo de data
+        "sort[0][field]": "AtualizadoEm",
         "sort[0][direction]": "desc",
     }
     while True:
         r = _airtable_request("GET", AIRTABLE_API, params=params)
         if not r.ok:
-            # deixa o caller decidir o fallback (cache)
             r.raise_for_status()
         payload = r.json()
         records.extend(payload.get("records", []))
@@ -175,7 +192,7 @@ def get_snapshot(force: bool = False):
 
 @app.after_request
 def add_common_headers(resp):
-    # Evita cache cliente/proxy para rotas da API
+    # Evita cache em rotas de API
     if request.path.startswith("/api/"):
         resp.headers.setdefault("Cache-Control", "no-store")
     return resp
@@ -186,7 +203,6 @@ def serve_index():
 
 @app.get("/healthz")
 def health():
-    # Útil p/ checagens do Fly
     return jsonify({"ok": True})
 
 # ---------- Auth ----------
@@ -218,16 +234,20 @@ def get_disparos():
 @require_auth
 def create_disparo():
     b = request.json or {}
+    # Mapeia somente campos esperados pelo Airtable
     fields = {
-        "Tipo": b.get("tipo", ""),
-        "Tempo": b.get("tempo", 0),
-        "Potes": b.get("potes", 0),
-        "Horário": b.get("horario", "08:00"),  # campo com acento
-        "Status": b.get("status", "Em andamento"),
+        "Tipo": b.get("tipo", "") or "",
+        "Tempo": _to_int(b.get("tempo", 0), 0),
+        "Potes": _to_int(b.get("potes", 0), 0),
+        "Horário": b.get("horario", "08:00") or "08:00",   # campo com acento
+        "Status": b.get("status", "Em andamento") or "Em andamento",
+        # Novos:
+        "Volume": _to_int(b.get("volume", 0), 0),
+        "Template": b.get("template", "") or "",
     }
     r = _airtable_request("POST", AIRTABLE_API, json={"fields": fields})
+    # Se deu certo, atualiza cache (best-effort)
     if r.ok:
-        # Atualiza cache (best effort)
         try:
             get_snapshot(force=True)
         except Exception:
@@ -239,16 +259,16 @@ def create_disparo():
 def update_disparo(rid):
     b = request.json or {}
     fields = {}
-    if "status" in b:
-        fields["Status"] = b["status"]
-    if "horario" in b:
-        fields["Horário"] = b["horario"]  # campo com acento
-    if "tipo" in b:
-        fields["Tipo"] = b["tipo"]
-    if "tempo" in b:
-        fields["Tempo"] = b["tempo"]
-    if "potes" in b:
-        fields["Potes"] = b["potes"]
+    if "status"   in b: fields["Status"]   = b["status"]
+    if "horario"  in b: fields["Horário"]  = b["horario"]   # campo com acento
+    if "tipo"     in b: fields["Tipo"]     = b["tipo"]
+    if "tempo"    in b: fields["Tempo"]    = _to_int(b["tempo"], 0)
+    if "potes"    in b: fields["Potes"]    = _to_int(b["potes"], 0)
+    if "volume"   in b: fields["Volume"]   = _to_int(b["volume"], 0)
+    if "template" in b: fields["Template"] = b["template"]
+
+    if not fields:
+        return jsonify({"error": "no_fields_to_update"}), 400
 
     r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields})
     if r.ok:
@@ -266,7 +286,7 @@ def stream():
         # reconexão rápida
         yield "retry: 3000\n\n"
         while True:
-            # força leitura real do Airtable para pegar deleções externas rapidamente
+            # força leitura real do Airtable para capturar deleções/alterações rapidamente
             data, stale = get_snapshot(force=True)
             h = md5(data)
             if h != last_hash:
@@ -290,5 +310,5 @@ def stream():
 # ===================== MAIN =========================
 if __name__ == "__main__":
     assert AIRTABLE_TOKEN and AIRTABLE_BASE_ID, "Configure AIRTABLE_TOKEN e AIRTABLE_BASE_ID"
-    # Em produção rode com GUNICORN (ver Dockerfile/README).
+    # Em produção rode com GUNICORN.
     app.run(host="0.0.0.0", port=8080, debug=True)
