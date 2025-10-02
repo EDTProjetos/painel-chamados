@@ -1,5 +1,6 @@
 import os, time, json, hashlib, requests
 from functools import wraps
+from datetime import timedelta
 from flask import Flask, jsonify, request, Response, render_template, session
 from flask_cors import CORS
 
@@ -10,20 +11,26 @@ AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
 HEADERS = {"Authorization": f"Bearer {AIRTABLE_TOKEN}", "Content-Type": "application/json"}
 
+# Reaproveita conexões HTTP (menos latência / menos overhead de TLS)
+REQ = requests.Session()
+REQ.headers.update(HEADERS)
+DEFAULT_TIMEOUT = 12  # mais baixo que 30s para não travar UI
+
 # ===== App / Auth =====
 APP_USER = os.getenv("APP_USER", "energia")
 APP_PASS = os.getenv("APP_PASS", "energia1")
 
 app = Flask(__name__, template_folder="templates")
-# Em produção (Fly) use HTTPS → cookie seguro por padrão
 app.config.update(
     SECRET_KEY=os.getenv("APP_SECRET", "change-this-in-prod"),
+    # Em dev (http://localhost) USE COOKIE_SECURE=0.
+    # Em produção no Fly (https) deixe =1 (padrão).
     SESSION_COOKIE_SECURE=(os.getenv("COOKIE_SECURE", "1") == "1"),
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_HTTPONLY=True,
+    PERMANENT_SESSION_LIFETIME=timedelta(days=int(os.getenv("SESSION_DAYS", "7"))),
 )
-# Se site e API estiverem no MESMO host (recomendado), CORS é irrelevante;
-# deixamos habilitado com suporte a credenciais por segurança.
+# Se site e API estiverem no MESMO host, CORS não é necessário; deixamos ligado por segurança.
 CORS(app, supports_credentials=True)
 
 # ===== Helpers =====
@@ -36,13 +43,14 @@ def require_auth(fn):
     return wrapper
 
 def fetch_all():
+    """Lê todas as linhas do Airtable (ordenadas por AtualizadoEm desc) e normaliza campos."""
     records, params = [], {
         "pageSize": 100,
         "sort[0][field]": "AtualizadoEm",
         "sort[0][direction]": "desc",
     }
     while True:
-        r = requests.get(AIRTABLE_API, headers=HEADERS, params=params, timeout=30)
+        r = REQ.get(AIRTABLE_API, params=params, timeout=DEFAULT_TIMEOUT)
         r.raise_for_status()
         payload = r.json()
         records.extend(payload.get("records", []))
@@ -54,11 +62,11 @@ def fetch_all():
     for rec in records:
         f = rec.get("fields", {})
         out.append({
-            "id": rec["id"],
+            "id": rec.get("id"),
             "tipo": f.get("Tipo", ""),
             "tempo": f.get("Tempo", ""),
             "potes": f.get("Potes", ""),
-            "horario": f.get("Horário", ""),   # <-- com acento
+            "horario": f.get("Horário", ""),   # <-- campo com acento no Airtable
             "status": f.get("Status", ""),
             "atualizadoEm": f.get("AtualizadoEm", ""),
         })
@@ -86,6 +94,7 @@ def api_login():
     p = (b.get("password") or "").strip()
     if u == APP_USER and p == APP_PASS:
         session["auth_ok"] = True
+        session.permanent = True  # <- mantém cookie por PERMANENT_SESSION_LIFETIME
         return jsonify({"ok": True})
     return jsonify({"ok": False, "error": "invalid_credentials"}), 401
 
@@ -115,7 +124,7 @@ def create_disparo():
         "Status": b.get("status", "Em andamento"),
         "AtualizadoEm": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    r = requests.post(AIRTABLE_API, headers=HEADERS, json={"fields": fields}, timeout=30)
+    r = REQ.post(AIRTABLE_API, json={"fields": fields}, timeout=DEFAULT_TIMEOUT)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
 @app.patch("/api/disparos/<rid>")
@@ -130,7 +139,7 @@ def update_disparo(rid):
     if "potes"   in b: fields["Potes"]    = b["potes"]
     if fields:          fields["AtualizadoEm"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
-    r = requests.patch(f"{AIRTABLE_API}/{rid}", headers=HEADERS, json={"fields": fields}, timeout=30)
+    r = REQ.patch(f"{AIRTABLE_API}/{rid}", json={"fields": fields}, timeout=DEFAULT_TIMEOUT)
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
 # ----- SSE robusto -----
@@ -138,8 +147,7 @@ def update_disparo(rid):
 def stream():
     def gen():
         last_hash = None
-        # reconexão rápida (2s)
-        yield "retry: 2000\n\n"
+        yield "retry: 2000\n\n"  # reconexão rápida
         while True:
             try:
                 data = fetch_all()
@@ -150,13 +158,13 @@ def stream():
                 else:
                     yield "event: ping\ndata: {}\n\n"
             except Exception:
-                # Em erro (Airtable flutuando), não manda snapshot vazio
+                # Em erro no Airtable, não manda snapshot vazio (mantém UI estável)
                 yield "event: ping\ndata: {}\n\n"
             time.sleep(5)
 
     headers = {
         "Cache-Control": "no-cache",
-        "X-Accel-Buffering": "no",  # desativa buffering em alguns proxies
+        "X-Accel-Buffering": "no",
         "Connection": "keep-alive",
     }
     return Response(gen(), mimetype="text/event-stream", headers=headers)
