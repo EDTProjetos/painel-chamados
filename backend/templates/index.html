@@ -9,28 +9,44 @@
       --bg:#f4f6f9; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
       --primary:#0b4a8f; --primary-2:#0f6ad8;
       --andamento:#ff9f1a; --finalizado:#1fb36a; --insucesso:#e23b3b;
-      --warn:#fbbf24; --error:#ef4444; --ok:#10b981;
     }
-    *{box-sizing:border-box} html,body{height:100%}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg); color: var(--text); margin:0; display:flex; flex-direction:column; min-height:100vh;
+      background: var(--bg);
+      color: var(--text);
+      margin:0; display:flex; flex-direction:column; min-height:100vh;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px;width:100%;flex:1}
 
-    .app-header{background: linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18); margin:0 0 12px 0}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px 16px 40px;width:100%;flex:1}
+
+    /* Header */
+    .app-header{
+      background: linear-gradient(90deg,var(--primary),var(--primary-2));
+      color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
+      margin:0 0 12px 0;
+    }
     .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
+    /* Tabs */
     .tabs{display:flex; gap:10px; justify-content:center; margin:12px 0 0}
-    .tab{background:#fff; border:1px solid var(--border); color:#111827; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700; transition:transform .15s ease, box-shadow .2s ease}
+    .tab{
+      background:#fff; border:1px solid var(--border); color:#111827;
+      padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700;
+      transition:transform .15s ease, box-shadow .2s ease;
+    }
     .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
     .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
 
+    /* Legenda */
     .legenda{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:16px 0 8px}
     .legenda-item{display:flex; align-items:center; gap:8px; font-weight:600; background:var(--card); padding:8px 12px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.06); border:1px solid var(--border)}
     .cor{width:16px;height:16px;border-radius:4px;display:inline-block}
     .cor.andamento{background:var(--andamento)} .cor.finalizado{background:var(--finalizado)} .cor.insucesso{background:var(--insucesso)}
 
+    /* Form */
     .form-container{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px 0; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
     .form-container h2{margin:0 0 12px; color:var(--primary)}
     .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
@@ -41,42 +57,42 @@
 
     .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
+    /* Tabela (grid) */
     .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
     .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
     .grid > div{border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:12px; min-height:72px; background:#fff}
     .header{background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center}
 
+    /* Cards */
     .disparo{border-radius:12px; padding:12px; margin:8px 0; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both}
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
-    .disparo[aria-busy="true"]{ filter:grayscale(.25); opacity:.75; cursor:wait }
     .status-andamento{ background:var(--andamento) } .status-finalizado{ background:var(--finalizado) } .status-insucesso{ background:var(--insucesso) }
     .badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:6px; display:inline-block }
     .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    .login-card{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px auto; border-radius:14px; max-width:420px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
-    .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
-    .login-actions{display:flex; gap:10px; margin-top:8px}
+    /* Modal (card details + template) */
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:1000}
+    .modal-inner{background:#fff; border-radius:14px; width:min(680px,92vw); padding:18px 18px 16px; box-shadow:0 20px 48px rgba(0,0,0,.28); position:relative}
+    .modal-close{position:absolute; top:10px; right:12px; font-size:22px; line-height:20px; cursor:pointer; border:none; background:transparent}
+    .modal h3{margin:0 0 6px; color:var(--primary)}
+    .kv{display:grid; grid-template-columns:140px 1fr; gap:8px; margin:10px 0 14px}
+    .kv div span{display:block; font-size:13px; color:#374151}
+    .template-box{background:#f9fafb; border:1px solid var(--border); border-radius:10px; padding:12px; white-space:pre-wrap; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size:14px}
+    .pill{display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700; color:#fff}
+    .pill.and{background:var(--andamento)} .pill.fin{background:var(--finalizado)} .pill.ins{background:var(--insucesso)}
 
+    /* Footer */
     .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
 
-    /* Splash/Spinner */
-    .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
-    .splash.hide{ opacity:0; pointer-events:none }
-    .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
-    @keyframes spin{ to{ transform:rotate(360deg) } }
-
-    /* Avisos (toast/topbar) */
-    .topbar{position:fixed; top:8px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:9999; pointer-events:none}
-    .toast{pointer-events:auto; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.08); font-size:13px; display:flex; align-items:center; gap:8px}
-    .toast.warn{ border-color:#fde68a; background:#fffbeb } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 }
-    .toast button{background:transparent; color:#111; border:none; cursor:pointer; padding:0 4px; font-weight:700}
+    @media (max-width: 980px){
+      .form-grid{grid-template-columns:1fr}
+      .grid{ grid-template-columns: 130px repeat(4, minmax(180px,1fr)); overflow:auto }
+      .kv{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <div id="splash" class="splash"><div class="ring" aria-label="Carregando"></div></div>
-  <div id="topbar" class="topbar" aria-live="polite" aria-atomic="true"></div>
-
   <header class="app-header">
     <h1 class="app-title">Painel de Disparos</h1>
   </header>
@@ -90,27 +106,43 @@
 
     <!-- VIEW: PAINEL -->
     <section id="view-painel">
+      <!-- Legenda -->
       <div class="legenda">
         <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
         <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
         <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
 
-      <!-- Form (só logado) -->
+      <!-- Form (só aparece logado) -->
       <div id="form-wrapper" class="form-container" style="display:none;">
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
           <div>
-            <label for="tipo">Tipo de Disparo</label>
-            <input type="text" id="tipo" required />
+            <label for="tipo">Nome do Disparo</label>
+            <input type="text" id="tipo" placeholder="ex.: Preventivo D0" required />
           </div>
           <div>
-            <label for="tempo">Tempo Médio (minutos)</label>
+            <label for="templateKey">Template (opcional)</label>
+            <select id="templateKey">
+              <option value="">— Nenhum —</option>
+              <option value="Preventivo D0">Preventivo D0</option>
+              <option value="Preventivo D3 e D10">Preventivo D3 e D10</option>
+              <option value="Vencidos 1">Vencidos 1</option>
+              <option value="Vencidos 2">Vencidos 2</option>
+              <option value="Vencidos 5">Vencidos 5</option>
+            </select>
+          </div>
+          <div>
+            <label for="tempo">Tempo Médio (min)</label>
             <input type="number" id="tempo" min="0" required />
           </div>
           <div>
             <label for="potes">Quantidade de Potes</label>
-            <input type="number" id="potes" min="1" required />
+            <input type="number" id="potes" min="0" required />
+          </div>
+          <div>
+            <label for="volume">Volume de Disparos</label>
+            <input type="number" id="volume" min="0" placeholder="ex.: 250" />
           </div>
           <div>
             <label for="horario">Horário</label>
@@ -129,7 +161,7 @@
 
       <!-- Aviso quando deslogado -->
       <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
-        Você está em <strong>modo leitura</strong>. Faça login para adicionar/alterar disparos.
+        Você está em <strong>modo leitura</strong>. Faça login para adicionar disparos.
       </div>
 
       <!-- Tabela -->
@@ -152,14 +184,18 @@
 
     <!-- VIEW: LOGIN -->
     <section id="view-login" style="display:none;">
-      <div class="login-card">
-        <h2 class="login-title">Acessar</h2>
-        <form id="loginForm">
-          <label for="loginUser">Usuário</label>
-          <input type="text" id="loginUser" placeholder="usuário" required />
-          <label for="loginPass" style="margin-top:10px;">Senha</label>
-          <input type="password" id="loginPass" placeholder="senha" required />
-          <div class="login-actions">
+      <div class="form-container" style="max-width:420px;margin-inline:auto;">
+        <h2 style="margin:0 0 10px;color:var(--primary);text-align:center;">Acessar</h2>
+        <form id="loginForm" class="form-grid">
+          <div class="full">
+            <label for="loginUser">Usuário</label>
+            <input type="text" id="loginUser" placeholder="usuário" required />
+          </div>
+          <div class="full">
+            <label for="loginPass">Senha</label>
+            <input type="password" id="loginPass" placeholder="senha" required />
+          </div>
+          <div class="full" style="display:flex;gap:10px">
             <button type="submit" id="btnLogin">Entrar</button>
             <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
           </div>
@@ -168,427 +204,324 @@
     </section>
   </div>
 
-  <footer class="footer">
-    Desenvolvido por Leahpar Code &copy; 2025
-  </footer>
+  <!-- Modal Card -->
+  <div class="modal" id="cardModal" aria-hidden="true">
+    <div class="modal-inner">
+      <button class="modal-close" id="modalClose" aria-label="Fechar">×</button>
+      <h3 id="modalTitle"></h3>
+      <div class="kv">
+        <div><span><strong>Status</strong></span></div><div><span id="modalStatus"></span></div>
+        <div><span><strong>Horário</strong></span></div><div><span id="modalHorario"></span></div>
+        <div><span><strong>Tempo Médio</strong></span></div><div><span id="modalTempo"></span> min</div>
+        <div><span><strong>Potes</strong></span></div><div><span id="modalPotes"></span></div>
+        <div><span><strong>Volume</strong></span></div><div><span id="modalVolume"></span></div>
+      </div>
+      <h4 style="margin:10px 0 8px">Template</h4>
+      <div class="template-box" id="modalTemplate">—</div>
+    </div>
+  </div>
+
+  <footer class="footer">Desenvolvido por Leahpar Code &copy; 2025</footer>
 
   <script>
-  /* ========================== CONFIG ========================== */
-  // Se preferir domínio, NÃO coloque barra no fim (normalizamos abaixo).
-  // Ex.: const API_BASE = "https://paineldisparos.fly.dev";
-  const API_BASE = "https://paineldisparos.fly.dev";
+    /* ===================== CONFIG ===================== */
+    const API_BASE = ""; // mesmo host
+    const url = (p) => `${API_BASE}${p}`;
 
-  // Local (file://) ou ?offline=1 força modo leitura
-  const IS_FILE = location.protocol === "file:";
-  const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
-  let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
+    /* ===================== TEMPLATES =================== */
+    const TEMPLATES = {
+      "Preventivo D0": `Olá $[nome]!😊
 
-  const BASE = (API_BASE || "").replace(/\/+$/,"");
-  const url = (p) => `${BASE}${p}`;
+Seu boleto vence Hoje! Para facilitar vamos encaminhar ele novamente por aqui.
+Clique no documento para ver seu consumo de energia e o código de barras.(Caso já tenha pago é só desconsiderar)
 
-  /* ====================== SPLASH & TOASTS ===================== */
-  const splash = document.getElementById("splash");
-  const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
-  const splashTimer = setTimeout(hideSplashSoon, 1200); // segurança anti “travar”
-  window.addEventListener("error", hideSplashSoon);
-  window.addEventListener("unhandledrejection", hideSplashSoon);
+*Valor* R$: $[valor]
+*Vencimento* : $[data_vencimento]
 
-  const topbar = document.getElementById("topbar");
-  const toasts = new Set();
-  function toast(msg, type="warn", ms=3500, key=null){
-    if (key && toasts.has(key)) return; // throttle por chave
-    const div = document.createElement("div");
-    div.className = `toast ${type}`;
-    div.innerHTML = `<span>${msg}</span><button aria-label="fechar">×</button>`;
-    const btn = div.querySelector("button");
-    btn.onclick = ()=> { div.remove(); if (key) toasts.delete(key); };
-    topbar.appendChild(div);
-    if (key) toasts.add(key);
-    setTimeout(()=>{ try{btn.click()}catch{} }, ms);
-  }
+📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
-  /* ============================ AUTH =========================== */
-  const AUTH_KEY = "painel_auth_ok";
-  let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
-  let lastSessionWarnAt = 0;
+Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`,
 
-  function updateAuthUI(){
-    const formWrap = document.getElementById("form-wrapper");
-    const hint = document.getElementById("readOnlyHint");
-    const logoutBtn = document.getElementById("btnLogout");
-    if(isAuthed){
-      formWrap && (formWrap.style.display = "");
-      hint && (hint.style.display = "none");
-      logoutBtn && (logoutBtn.style.display = "");
-    }else{
-      formWrap && (formWrap.style.display = "none");
-      hint && (hint.style.display = "");
-      logoutBtn && (logoutBtn.style.display = "none");
-    }
-  }
+      "Preventivo D3 e D10": `Olá $[nome]!😊
 
-  /* ============================ TABS =========================== */
-  const tabs = document.querySelectorAll(".tab");
-  function switchTab(name){
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
-    document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
-    document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
-    if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
-  }
-  tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+Seu boleto vence em $[data_vencimento]! Para facilitar vamos encaminhar ele novamente por aqui.
+Clique no documento para ver seu consumo de energia e o código de barras (Caso já tenha pago é só desconsiderar).
 
-  /* ============================ UTILS ========================== */
-  function clsForStatus(status){
-    switch((status||"").toLowerCase()){
-      case "finalizado": return "status-finalizado";
-      case "insucesso":  return "status-insucesso";
-      default:           return "status-andamento";
-    }
-  }
-  function nextStatus(current){
-    const order = ["Em andamento","Finalizado","Insucesso"];
-    const i = order.indexOf(current);
-    return order[(i+1) % order.length];
-  }
-  function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
-  function calcHash(records){
-    try{
-      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}`).join("§");
-    }catch{ return Math.random().toString(36); }
-  }
-  function fetchWithTimeout(resource, options = {}, timeout = 3000) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
-  }
+*Valor* R$ : $[valor]
 
-  /* =========================== RENDER ========================== */
-  function clearColumns(){
-    ["08","12","16","20"].forEach(h => {
-      const el = document.getElementById("col-"+h);
-      if (el) el.innerHTML = "";
-    });
-  }
+📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
-  function cardTemplate(r, {optimistic=false} = {}){
-    const div = document.createElement("div");
-    div.className = `disparo ${clsForStatus(r.status)}`;
-    div.dataset.id = r.id || uid();
-    div.dataset.status = r.status || "Em andamento";
-    div.dataset.horario = r["horario"] || "08:00";
-    if (optimistic) div.dataset.optimistic = "1";
+Energia de TODOS: A Energia que Retorna!🌎`,
 
-    div.innerHTML = `
-      <span class="badge">${r.status || "Em andamento"}</span>
-      <div class="title">${r.tipo || ""}</div>
-      <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
-    `;
+      "Vencidos 1": `Olá $[nome]!😊
 
-    // clique -> alterna status (com trava anti duplo-clique)
-    div.addEventListener("click", async () => {
-      if (div.getAttribute("aria-busy") === "true") return;
-      const current = div.dataset.status;
-      const next = nextStatus(current);
+*ATENÇÃO! Sua conta de energia venceu há $[dias_vencidos] dias atrás e não identificamos seu pagamento*
 
-      if (OFFLINE_MODE) {
-        div.querySelector(".badge").textContent = next;
-        div.className = `disparo ${clsForStatus(next)}`;
-        div.dataset.status = next;
-        return;
+*Valor* R$ :$[valor]
+*Vencimento* : $[data_vencimento]
+
+*Atenção*: não deixe de pagar em dia suas faturas para evitar juros e continuar economizando! (Favor desconsiderar essa mensagem, caso já tenha pago).
+
+👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
+
+Clique no documento para ver seu consumo de energia e o código de barras.
+
+❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
+
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
+
+      "Vencidos 2": `Olá $[nome]!😊
+
+*ATENÇÃO! Sua conta de energia venceu há  $[dias_vencidos]  dias atrás e não identificamos seu pagamento*
+
+Por conta disso poderá haver a suspensão de energia solar. A boa notícia é que ainda há chances de regularizar antes que isso aconteça.  (Favor desconsiderar essa mensagem, caso já tenha pago).
+
+*Valor* R$ :  $[valor]
+*Vencimento* : $[data_vencimento]
+
+👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
+
+Clique no documento para ver seu consumo de energia e o código de barras.
+
+❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
+
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
+
+      "Vencidos 5": `Olá $[nome]!😊
+
+⚠ Até o momento não identificamos o pagamento do seu débito com a Energia de TODOS. Após várias tentativas de contato e de negociação sem sucesso, encaminhamos o seu cadastro ao Serviço de Proteção ao Crédito - SPC.
+
+👉 Quantidade de boletos sem pagamento:  $[quantidade_boletos]
+👉 Valor pendente: R$  $[valor]
+
+Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelamento, fale abaixo com nossos atendentes.
+
+📞 Este é nosso número oficial de atendimento via WhatsApp. Se tiver alguma dúvida é só entrar em contato por aqui, combinado? 👍
+
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`
+    };
+
+    const AUTH_KEY = "painel_auth_ok";
+    let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
+
+    function updateAuthUI(){
+      const formWrap = document.getElementById("form-wrapper");
+      const hint = document.getElementById("readOnlyHint");
+      const logoutBtn = document.getElementById("btnLogout");
+
+      if(isAuthed){
+        formWrap && (formWrap.style.display = "");
+        hint && (hint.style.display = "none");
+        logoutBtn && (logoutBtn.style.display = "");
+      }else{
+        formWrap && (formWrap.style.display = "none");
+        hint && (hint.style.display = "");
+        logoutBtn && (logoutBtn.style.display = "none");
       }
-      if (!isAuthed){
-        if (Date.now() - lastSessionWarnAt > 60000){
-          toast("Você está em modo leitura. Faça login para alterar.", "warn", 3500, "readonly");
-          lastSessionWarnAt = Date.now();
-        }
-        return;
-      }
-
-      div.setAttribute("aria-busy","true");
-      try{
-        const id = div.dataset.id;
-        const res = await fetch(url(`/api/disparos/${id}`), {
-          method: "PATCH",
-          headers: {"Content-Type":"application/json"},
-          credentials: "include",
-          body: JSON.stringify({ status: next })
-        });
-        if (res.ok){
-          div.querySelector(".badge").textContent = next;
-          div.className = `disparo ${clsForStatus(next)}`;
-          div.dataset.status = next;
-          setTimeout(softRefresh, 400);
-        }else if(res.status === 401){
-          if (Date.now() - lastSessionWarnAt > 30000){
-            toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
-            lastSessionWarnAt = Date.now();
-          }
-          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-        }else{
-          toast("Não consegui alterar no servidor.", "error");
-        }
-      }catch(e){
-        toast("Falha de rede ao atualizar.", "error");
-      }finally{
-        div.removeAttribute("aria-busy");
-      }
-    });
-
-    return div;
-  }
-
-  function placeRecord(r, opts){
-    const hh = (r["horario"] || "08:00").split(":")[0];
-    const col = document.getElementById("col-"+hh);
-    if (col) col.appendChild(cardTemplate(r, opts));
-  }
-
-  function renderSnapshot(records){
-    clearColumns();
-    (records||[]).forEach(r => placeRecord(r));
-  }
-
-  /* ============= Data (Cache + SSE + Polling Backoff) ========= */
-  const CACHE_KEY = "painel_snapshot_v1";
-  const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
-  let lastNonEmpty = [];
-  let lastHash = "";
-  let sse = null;
-  let pollTimer = null;
-  let backoffMs = 5000;
-  let gotFirstPaint = false;
-
-  // Pinta do cache (rápido)
-  (function paintFromCache(){
-    try{
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return;
-      const {ts, data} = JSON.parse(raw);
-      if (!data || (Date.now() - ts) > CACHE_TTL_MS) return;
-      lastNonEmpty = data;
-      lastHash = calcHash(data);
-      renderSnapshot(data);
-      clearTimeout(splashTimer);
-      hideSplashSoon();
-      gotFirstPaint = true;
-    }catch{}
-  })();
-
-  function saveCache(records){
-    try{
-      const payload = { ts: Date.now(), data: records };
-      (window.requestIdleCallback || setTimeout)(() =>
-        localStorage.setItem(CACHE_KEY, JSON.stringify(payload)), 0
-      );
-    }catch{}
-  }
-
-  // >>>>>>> NOVA LÓGICA: aceita vazio real (não stale), ignora vazio stale
-  function safeRender(records, stale = false){
-    const incomingHash = calcHash(records);
-    if (incomingHash === lastHash) return;
-
-    const isEmpty = (records?.length || 0) === 0;
-    // Se vier vazio e marcado como stale (fallback), preserva a última tela boa
-    if (isEmpty && stale && (lastNonEmpty?.length || 0) > 0) return;
-
-    renderSnapshot(records);
-    lastHash = incomingHash;
-
-    if (!isEmpty) {
-      lastNonEmpty = records;
-      saveCache(records);
-    } else {
-      lastNonEmpty = []; // vazio real: limpa memória
-      try { localStorage.removeItem(CACHE_KEY); } catch {}
     }
 
-    if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
-  }
-
-  async function loadInitial(){
-    if (OFFLINE_MODE) return;
-    try{
-      const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
-      if (!resp.ok) throw new Error(resp.status);
-      const stale = resp.headers.get("X-Data-Stale") === "1";
-      const data = await resp.json();
-      safeRender(data, stale);
-    }catch(e){
-      // silencioso; cache já pode ter pintado; splash tem timeout
+    /* ===================== TABS ======================== */
+    const tabs = document.querySelectorAll(".tab");
+    function switchTab(name){
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+      document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
+      document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
+      if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
     }
-  }
+    tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
-  async function softRefresh(){
-    if (OFFLINE_MODE) return;
-    try{
-      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
-      if (!resp.ok) return;
-      const stale = resp.headers.get("X-Data-Stale") === "1";
-      const data = await resp.json();
-      safeRender(data, stale);
-    }catch{}
-  }
+    /* ===================== UTILS ======================= */
+    function clsForStatus(status){
+      const s = (status||"").toLowerCase();
+      if (s.includes("final")) return "status-finalizado";
+      if (s.includes("insu")) return "status-insucesso";
+      return "status-andamento";
+    }
+    function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
+    const matchTemplateKey = (name) => (name && TEMPLATES[name]) ? name : "";
 
-  function startPolling(){
-    if (OFFLINE_MODE) return;
-    if (pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(async ()=>{
+    /* ===================== RENDER ====================== */
+    function clearColumns(){
+      ["08","12","16","20"].forEach(h => {
+        const el = document.getElementById("col-"+h);
+        if (el) el.innerHTML = "";
+      });
+    }
+
+    function cardTemplate(r){
+      const div = document.createElement("div");
+      div.className = `disparo ${clsForStatus(r.status)}`;
+      div.dataset.id = r.id || uid();
+      div.dataset.status = r.status || "Em andamento";
+      div.dataset.horario = r.horario || "08:00";
+      div.dataset.volume = r.volume ?? "";
+      div.dataset.tipo = r.tipo || "";
+      // preferir templateKey salvo; se não houver, tenta pelo nome
+      div.dataset.templateKey = r.templateKey || matchTemplateKey(r.tipo) || "";
+
+      div.innerHTML = `
+        <span class="badge">${r.status || "Em andamento"}</span>
+        <div class="title">${r.tipo || ""}</div>
+        <div class="meta">Tempo: <strong>${r.tempo ?? ""}m</strong> · Potes: <strong>${r.potes ?? ""}</strong>${r.volume ? ` · Vol: <strong>${r.volume}</strong>` : ""}</div>
+      `;
+
+      // Clique no card -> abre modal com detalhes + template
+      div.addEventListener("click", () => openModal({
+        ...r,
+        templateKey: div.dataset.templateKey
+      }));
+
+      return div;
+    }
+
+    function placeRecord(r){
+      const hh = (r.horario || "08:00").split(":")[0];
+      const col = document.getElementById("col-"+hh);
+      if (col) col.appendChild(cardTemplate(r));
+    }
+
+    function renderSnapshot(records){
+      clearColumns();
+      const order = {"08:00":0,"12:00":1,"16:00":2,"20:00":3};
+      (records||[])
+        .slice()
+        .sort((a,b)=>(order[a.horario||"08:00"] - order[b.horario||"08:00"]))
+        .forEach(placeRecord);
+    }
+
+    /* ===================== DATA ======================== */
+    async function loadInitial(){
       try{
         const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
-        if (resp.ok){
-          const stale = resp.headers.get("X-Data-Stale") === "1";
-          const data = await resp.json();
-          safeRender(data, stale);
-          backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
-        }
+        if(!resp.ok) return;
+        const data = await resp.json();
+        renderSnapshot(data);
       }catch{}
-    }, backoffMs);
-    backoffMs = Math.min(backoffMs * 2, 30000); // cresce até 30s
-  }
-
-  function stopPolling(){
-    if (pollTimer){ clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  function startSSE(){
-    if (OFFLINE_MODE) return;
-    try{
-      if (sse) sse.close();
-      sse = new EventSource(url("/api/stream"));
-      sse.onmessage = (evt) => {
-        try{
-          const payload = JSON.parse(evt.data);
-          if (payload.type === "snapshot") {
-            // >>>>>>> usa flag 'stale' do backend se disponível
-            safeRender(payload.records || [], payload.stale === true);
-          }
-        }catch{}
-      };
-      sse.onerror = () => { startPolling(); };
-    }catch{
-      startPolling();
-    }
-  }
-
-  function stopSSE(){
-    if (sse){ try{sse.close();}catch{} sse = null; }
-  }
-
-  /* ======================== FORM ADD ========================== */
-  const form = document.getElementById("formDisparo");
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const tipo  = document.getElementById("tipo").value.trim();
-    const tempo = Number(document.getElementById("tempo").value);
-    const potes = Number(document.getElementById("potes").value);
-    const horario = document.getElementById("horario").value;
-    if(!tipo) return;
-
-    const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
-    (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
-    safeRender(lastNonEmpty, false);
-
-    if (OFFLINE_MODE) { e.target.reset(); return; }
-    if(!isAuthed){
-      toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
-      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty, false);
-      return;
     }
 
-    try{
-      const resp = await fetch(url("/api/disparos"), {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        credentials:"include",
-        body:JSON.stringify(optimisticRecord)
-      });
-      if (!resp.ok){
-        if (resp.status === 401){
-          toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
-          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-        }else{
-          toast("Não consegui salvar no servidor.", "error");
-        }
-        // desfaz otimista
-        lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-        safeRender(lastNonEmpty, false);
-      } else {
-        e.target.reset();
-        setTimeout(softRefresh, 400);
+    let pollTimer = null;
+    function startSSE(){
+      try{
+        const es = new EventSource(url("/api/stream"));
+        es.onmessage = (evt) => {
+          try{
+            const payload = JSON.parse(evt.data);
+            if (payload.type === "snapshot"){
+              renderSnapshot(payload.records || []);
+            }
+          }catch{}
+        };
+        es.onerror = () => {
+          if (!pollTimer) pollTimer = setInterval(loadInitial, 8000);
+        };
+      }catch{
+        if (!pollTimer) pollTimer = setInterval(loadInitial, 8000);
       }
-    }catch{
-      toast("Falha de rede ao salvar.", "error");
-      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty, false);
-    }
-  });
-
-  /* ====================== LOGIN / LOGOUT ====================== */
-  const loginForm = document.getElementById("loginForm");
-  const btnLogin  = document.getElementById("btnLogin");
-  const btnLogout = document.getElementById("btnLogout");
-
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const u = (document.getElementById("loginUser").value || "").trim();
-    const p = (document.getElementById("loginPass").value || "").trim();
-
-    if (!u || !p){ return; }
-    btnLogin.disabled = true;
-
-    if (u !== "energia" || p !== "energia1") {
-      toast("Usuário ou senha inválidos.", "error");
-      btnLogin.disabled = false;
-      return;
     }
 
-    isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
+    /* ===================== FORM ADD ==================== */
+    const form = document.getElementById("formDisparo");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if(!isAuthed){ alert("Faça login para adicionar."); return; }
 
-    try{
-      const r = await fetch(url("/api/login"), {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        credentials:"include",
-        body: JSON.stringify({ username:u, password:p })
-      });
-      if (!r.ok){
-        toast("Não consegui criar sessão segura no servidor. Tente novamente mais tarde.", "warn");
-      }else{
-        setTimeout(softRefresh, 150);
+      const tipo  = document.getElementById("tipo").value.trim();
+      const tempo = Number(document.getElementById("tempo").value);
+      const potes = Number(document.getElementById("potes").value);
+      const volume = document.getElementById("volume").value ? Number(document.getElementById("volume").value) : null;
+      const horario = document.getElementById("horario").value;
+      const templateKey = document.getElementById("templateKey").value || "";
+
+      if (!tipo){ alert("Informe o nome do disparo."); return; }
+
+      // Otimista: guardamos templateKey só no cliente (Airtable não tem esse campo)
+      const optimistic = { id: uid(), tipo, tempo, potes, volume, horario, status:"Em andamento", templateKey };
+      placeRecord(optimistic);
+
+      try{
+        const payload = { ...optimistic };
+        delete payload.templateKey; // não existe no Airtable
+        const resp = await fetch(url("/api/disparos"), {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          credentials:"include",
+          body:JSON.stringify(payload)
+        });
+        if(!resp.ok) throw new Error("POST falhou");
+        form.reset();
+      }catch{
+        alert("Falha ao salvar no servidor.");
+        // força recarregar snapshot oficial
+        loadInitial();
       }
-    }catch{
-      toast("Rede instável ao criar sessão. Continuando em modo UI.", "warn");
-    }finally{
-      btnLogin.disabled = false;
+    });
+
+    /* ===================== LOGIN/LOGOUT ================= */
+    const loginForm = document.getElementById("loginForm");
+    const btnLogout = document.getElementById("btnLogout");
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const u = (document.getElementById("loginUser").value || "").trim();
+      const p = (document.getElementById("loginPass").value || "").trim();
+
+      if (u !== "energia" || p !== "energia1") {
+        alert("Usuário ou senha inválidos.");
+        return;
+      }
+      // libera UI imediatamente
+      isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
+      try{
+        await fetch(url("/api/login"), {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          credentials:"include",
+          body: JSON.stringify({ username:u, password:p })
+        });
+      }catch{}
+      loadInitial();
+    });
+
+    btnLogout.addEventListener("click", async () => {
+      isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+      try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+    });
+
+    /* ===================== MODAL ======================= */
+    const modal = document.getElementById("cardModal");
+    const modalClose = document.getElementById("modalClose");
+    modalClose.onclick = () => modal.style.display = "none";
+    window.addEventListener("click", (e)=>{ if (e.target === modal) modal.style.display="none"; });
+
+    function statusPill(status){
+      const s = (status||"").toLowerCase();
+      if (s.includes("final")) return `<span class="pill fin">Finalizado</span>`;
+      if (s.includes("insu")) return `<span class="pill ins">Insucesso</span>`;
+      return `<span class="pill and">Em andamento</span>`;
     }
-  });
 
-  btnLogout.addEventListener("click", () => {
-    isAuthed = false; localStorage.removeItem(AUTH_KEY);
-    updateAuthUI(); switchTab("login");
+    function openModal(r){
+      const key = r.templateKey || matchTemplateKey(r.tipo) || "";
+      const tpl = key ? TEMPLATES[key] : (TEMPLATES[r.tipo] || "Sem template cadastrado.");
 
-    stopSSE(); stopPolling();
+      document.getElementById("modalTitle").textContent = r.tipo || "—";
+      document.getElementById("modalStatus").innerHTML   = statusPill(r.status);
+      document.getElementById("modalHorario").textContent= r.horario || "—";
+      document.getElementById("modalTempo").textContent  = r.tempo ?? "—";
+      document.getElementById("modalPotes").textContent  = r.potes ?? "—";
+      document.getElementById("modalVolume").textContent = (r.volume ?? "—");
+      document.getElementById("modalTemplate").textContent = tpl;
 
-    const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
-    if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
+      modal.style.display = "flex";
+    }
 
-    try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
-    setTimeout(()=>{ startSSE(); }, 300);
-  });
-
-  /* ========================== START =========================== */
-  (async () => {
-    switchTab("painel");
-    updateAuthUI();
-
-    if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
-
-    startSSE();    // começa ouvindo atualizações
-    loadInitial(); // busca inicial rápida (timeout curto)
-  })();
+    /* ===================== START ======================= */
+    (async () => {
+      switchTab("painel");
+      updateAuthUI();
+      await loadInitial();
+      startSSE();
+    })();
   </script>
 </body>
 </html>
