@@ -189,7 +189,7 @@
   /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
   const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
-  const splashTimer = setTimeout(hideSplashSoon, 1200); // nunca fica preso
+  const splashTimer = setTimeout(hideSplashSoon, 1200); // segurança anti “travar”
   window.addEventListener("error", hideSplashSoon);
   window.addEventListener("unhandledrejection", hideSplashSoon);
 
@@ -256,11 +256,10 @@
       return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}`).join("§");
     }catch{ return Math.random().toString(36); }
   }
-  function fetchWithTimeout(resource, options = {}, timeout = 2500) {
+  function fetchWithTimeout(resource, options = {}, timeout = 3000) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
-    return fetch(resource, { ...options, signal: controller.signal })
-      .finally(() => clearTimeout(id));
+    return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
   }
 
   /* =========================== RENDER ========================== */
@@ -298,7 +297,6 @@
         return;
       }
       if (!isAuthed){
-        // Notifica só a cada 60s para não encher
         if (Date.now() - lastSessionWarnAt > 60000){
           toast("Você está em modo leitura. Faça login para alterar.", "warn", 3500, "readonly");
           lastSessionWarnAt = Date.now();
@@ -325,7 +323,9 @@
             toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
             lastSessionWarnAt = Date.now();
           }
-          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+          // não derruba a UI imediatamente; apenas marca como não autenticado
+          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI();
+          switchTab("login");
         }else{
           toast("Não consegui alterar no servidor.", "error");
         }
@@ -398,12 +398,12 @@
   async function loadInitial(){
     if (OFFLINE_MODE) return;
     try{
-      const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 2500);
+      const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
       safeRender(data);
     }catch(e){
-      // silencioso; já pintamos do cache e o splash tem timeout
+      // silencioso; cache já pode ter pintado; splash tem timeout
     }
   }
 
@@ -426,13 +426,15 @@
         if (resp.ok){
           const data = await resp.json();
           safeRender(data);
-          // se polling funcionou, pode reduzir backoff
-          backoffMs = Math.max(5000, Math.floor(backoffMs/2));
+          backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
         }
       }catch{}
     }, backoffMs);
-    // aumenta gradualmente até 30s
-    backoffMs = Math.min(backoffMs * 2, 30000);
+    backoffMs = Math.min(backoffMs * 2, 30000); // cresce até 30s
+  }
+
+  function stopPolling(){
+    if (pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   }
 
   function startSSE(){
@@ -446,13 +448,14 @@
           if (payload.type === "snapshot") safeRender(payload.records || []);
         }catch{}
       };
-      sse.onerror = () => {
-        // EventSource tenta reconectar sozinho, mas ligamos o polling
-        startPolling();
-      };
+      sse.onerror = () => { startPolling(); };
     }catch{
       startPolling();
     }
+  }
+
+  function stopSSE(){
+    if (sse){ try{sse.close();}catch{} sse = null; }
   }
 
   /* ======================== FORM ADD ========================== */
@@ -508,6 +511,7 @@
 
   /* ====================== LOGIN / LOGOUT ====================== */
   const loginForm = document.getElementById("loginForm");
+  const btnLogin  = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
 
   loginForm.addEventListener("submit", async (e) => {
@@ -515,31 +519,56 @@
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
 
+    // valida UI local imediatamente
+    if (!u || !p){ return; }
+    btnLogin.disabled = true;
+
     if (u !== "energia" || p !== "energia1") {
       toast("Usuário ou senha inválidos.", "error");
+      btnLogin.disabled = false;
       return;
     }
-    // habilita UI imediatamente
+
     isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
 
-    // pede sessão ao backend (se disponível). Se falhar, continua só com UI liberada.
+    // tenta sessão backend (não bloqueia a UI)
     try{
-      await fetch(url("/api/login"), {
+      const r = await fetch(url("/api/login"), {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         credentials:"include",
         body: JSON.stringify({ username:u, password:p })
       });
-    }catch{}
-
-    setTimeout(softRefresh, 150);
+      if (!r.ok){
+        // mantém UI liberada, apenas avisa
+        toast("Não consegui criar sessão segura no servidor. Tente novamente mais tarde.", "warn");
+      }else{
+        // sessão criada -> força um refresh leve
+        setTimeout(softRefresh, 150);
+      }
+    }catch{
+      toast("Rede instável ao criar sessão. Continuando em modo UI.", "warn");
+    }finally{
+      btnLogin.disabled = false;
+    }
   });
 
   btnLogout.addEventListener("click", () => {
-    isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+    // Logout instantâneo na UI
+    isAuthed = false; localStorage.removeItem(AUTH_KEY);
+    updateAuthUI(); switchTab("login");
+
+    // fecha streams e polling para “respiro” da página
+    stopSSE(); stopPolling();
+
+    // limpa campos e foca usuário
     const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
     if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
+
+    // dispara logout no backend sem bloquear
     try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+    // reabre SSE/poll para manter a visão painel atualizada (em modo leitura)
+    setTimeout(()=>{ startSSE(); }, 300);
   });
 
   /* ========================== START =========================== */
@@ -549,8 +578,8 @@
 
     if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
 
-    startSSE();    // já entra escutando
-    loadInitial(); // mas com timeout curto para não travar
+    startSSE();    // começa ouvindo atualizações
+    loadInitial(); // busca inicial rápida (timeout curto)
   })();
   </script>
 </body>
