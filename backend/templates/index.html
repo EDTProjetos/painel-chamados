@@ -225,7 +225,8 @@
 
   <script>
     /* ===================== CONFIG ===================== */
-    const API_BASE = ""; // mesmo host
+    // Mesmo host (caminhos relativos). Se preferir: const API_BASE = window.location.origin;
+    const API_BASE = "";
     const url = (p) => `${API_BASE}${p}`;
 
     /* ===================== TEMPLATES =================== */
@@ -241,7 +242,6 @@ Clique no documento para ver seu consumo de energia e o código de barras.(Caso 
 📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
 Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`,
-
       "Preventivo D3 e D10": `Olá $[nome]!😊
 
 Seu boleto vence em $[data_vencimento]! Para facilitar vamos encaminhar ele novamente por aqui.
@@ -252,7 +252,6 @@ Clique no documento para ver seu consumo de energia e o código de barras (Caso 
 📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
 Energia de TODOS: A Energia que Retorna!🌎`,
-
       "Vencidos 1": `Olá $[nome]!😊
 
 *ATENÇÃO! Sua conta de energia venceu há $[dias_vencidos] dias atrás e não identificamos seu pagamento*
@@ -269,7 +268,6 @@ Clique no documento para ver seu consumo de energia e o código de barras.
 ❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
 
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-
       "Vencidos 2": `Olá $[nome]!😊
 
 *ATENÇÃO! Sua conta de energia venceu há  $[dias_vencidos]  dias atrás e não identificamos seu pagamento*
@@ -286,7 +284,6 @@ Clique no documento para ver seu consumo de energia e o código de barras.
 ❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
 
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-
       "Vencidos 5": `Olá $[nome]!😊
 
 ⚠ Até o momento não identificamos o pagamento do seu débito com a Energia de TODOS. Após várias tentativas de contato e de negociação sem sucesso, encaminhamos o seu cadastro ao Serviço de Proteção ao Crédito - SPC.
@@ -356,7 +353,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       div.dataset.horario = r.horario || "08:00";
       div.dataset.volume = r.volume ?? "";
       div.dataset.tipo = r.tipo || "";
-      // preferir templateKey salvo; se não houver, tenta pelo nome
       div.dataset.templateKey = r.templateKey || matchTemplateKey(r.tipo) || "";
 
       div.innerHTML = `
@@ -365,12 +361,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         <div class="meta">Tempo: <strong>${r.tempo ?? ""}m</strong> · Potes: <strong>${r.potes ?? ""}</strong>${r.volume ? ` · Vol: <strong>${r.volume}</strong>` : ""}</div>
       `;
 
-      // Clique no card -> abre modal com detalhes + template
-      div.addEventListener("click", () => openModal({
-        ...r,
-        templateKey: div.dataset.templateKey
-      }));
-
+      div.addEventListener("click", () => openModal({ ...r, templateKey: div.dataset.templateKey }));
       return div;
     }
 
@@ -392,7 +383,11 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     /* ===================== DATA ======================== */
     async function loadInitial(){
       try{
-        const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+        const resp = await fetch(url("/api/disparos"), {
+          cache:"no-store",
+          credentials:"include",
+          headers: { "Accept":"application/json" }
+        });
         if(!resp.ok) return;
         const data = await resp.json();
         renderSnapshot(data);
@@ -434,24 +429,35 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
       if (!tipo){ alert("Informe o nome do disparo."); return; }
 
-      // Otimista: guardamos templateKey só no cliente (Airtable não tem esse campo)
+      // Render otimista (mantido)
       const optimistic = { id: uid(), tipo, tempo, potes, volume, horario, status:"Em andamento", templateKey };
       placeRecord(optimistic);
 
       try{
         const payload = { ...optimistic };
-        delete payload.templateKey; // não existe no Airtable
+        delete payload.templateKey; // campo apenas no cliente
+
         const resp = await fetch(url("/api/disparos"), {
           method:"POST",
-          headers:{"Content-Type":"application/json"},
+          headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          },
           credentials:"include",
           body:JSON.stringify(payload)
         });
-        if(!resp.ok) throw new Error("POST falhou");
+
+        if(!resp.ok){
+          const err = await resp.json().catch(()=>({}));
+          throw new Error(err?.message || err?.error || "Falha no POST");
+        }
+
         form.reset();
-      }catch{
+        // Garante sincronizar com o snapshot “oficial”
+        await loadInitial();
+      }catch(err){
         alert("Falha ao salvar no servidor.");
-        // força recarregar snapshot oficial
+        // Recarrega estado do servidor
         loadInitial();
       }
     });
@@ -469,12 +475,11 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         alert("Usuário ou senha inválidos.");
         return;
       }
-      // libera UI imediatamente
       isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
       try{
         await fetch(url("/api/login"), {
           method:"POST",
-          headers:{"Content-Type":"application/json"},
+          headers:{ "Content-Type":"application/json", "Accept":"application/json" },
           credentials:"include",
           body: JSON.stringify({ username:u, password:p })
         });
@@ -484,7 +489,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
     btnLogout.addEventListener("click", async () => {
       isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-      try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+      try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include", headers:{ "Accept":"application/json" } }); }catch{}
     });
 
     /* ===================== MODAL ======================= */
