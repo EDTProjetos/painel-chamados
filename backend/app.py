@@ -23,19 +23,18 @@ AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Disparos")
 if not AIRTABLE_TOKEN or not AIRTABLE_BASE_ID:
     log.warning("Faltam secrets AIRTABLE_TOKEN ou AIRTABLE_BASE_ID.")
 
+# Codifica nome da tabela (suporta espaço/acentos)
 TABLE_ENC = requests.utils.quote(AIRTABLE_TABLE_NAME or "Disparos", safe="")
 AIRTABLE_API = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{TABLE_ENC}"
 
-COMMON_HEADERS = {
+HEADERS = {
     "Authorization": f"Bearer {AIRTABLE_TOKEN}",
     "Content-Type": "application/json",
-    "Accept": "application/json",
-    "User-Agent": "PainelDisparos/1.0 (+fly.io)"
 }
 
+# Reaproveita conexões HTTP + headers fixos
 REQ = requests.Session()
-REQ.headers.update(COMMON_HEADERS)
-
+REQ.headers.update(HEADERS)
 DEFAULT_TIMEOUT = int(os.getenv("AIRTABLE_TIMEOUT", "12"))
 MAX_RETRIES = int(os.getenv("AIRTABLE_MAX_RETRIES", "4"))
 
@@ -44,6 +43,8 @@ APP_USER = os.getenv("APP_USER", "energia")
 APP_PASS = os.getenv("APP_PASS", "energia1")
 
 app = Flask(__name__, template_folder="templates")
+
+# Corrige scheme/host/port atrás do proxy (Fly)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 app.config.update(
@@ -54,6 +55,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=int(os.getenv("SESSION_DAYS", "7"))),
 )
 
+# Se front e API forem mesmo host, CORS é irrelevante.
 CORS(app, supports_credentials=True)
 
 # ===================== HELPERS =======================
@@ -62,29 +64,23 @@ def require_auth(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if not session.get("auth_ok"):
-            return jsonify({"ok": False, "error": "unauthorized"}), 401
+            return jsonify({"error": "unauthorized"}), 401
         return fn(*args, **kwargs)
     return wrapper
 
 def md5(obj) -> str:
-    return hashlib.md5(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
-
-def _to_int(v, default=0):
-    try:
-        if v is None or v == "":
-            return default
-        return int(v)
-    except Exception:
-        try:
-            return int(float(v))
-        except Exception:
-            return default
+    return hashlib.md5(
+        json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
 
 def _airtable_request(method: str, url: str, **kwargs) -> requests.Response:
-    """Chama o Airtable com retry/backoff para 429/5xx/timeouts, respeitando Retry-After."""
+    """
+    Chama o Airtable com retry/backoff para 429/5xx/timeouts,
+    respeitando 'Retry-After' quando presente.
+    """
     timeout = kwargs.pop("timeout", DEFAULT_TIMEOUT)
     backoff = 0.6
-    for attempt in range(1, MAX_RETRIES + 1):
+    for _ in range(1, MAX_RETRIES + 1):
         try:
             resp = REQ.request(method, url, timeout=timeout, **kwargs)
             if resp.status_code == 429:
@@ -93,59 +89,83 @@ def _airtable_request(method: str, url: str, **kwargs) -> requests.Response:
                     wait = float(ra) if ra else backoff
                 except Exception:
                     wait = backoff
-                log.warning("Airtable 429; aguardando %.2fs (tentativa %s/%s)", wait, attempt, MAX_RETRIES)
-                time.sleep(wait); backoff = min(backoff * 2, 6); continue
+                log.warning("Airtable 429; aguardando %.2fs", wait)
+                time.sleep(wait)
+                backoff = min(backoff * 2, 6)
+                continue
             if 500 <= resp.status_code < 600:
-                log.warning("Airtable %s; retry em %.2fs (tentativa %s/%s)", resp.status_code, backoff, attempt, MAX_RETRIES)
-                time.sleep(backoff); backoff = min(backoff * 2, 6); continue
+                log.warning("Airtable %s; retry em %.2fs", resp.status_code, backoff)
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 6)
+                continue
             return resp
         except requests.RequestException as e:
-            log.warning("Erro de rede para Airtable (%s). Retry em %.2fs (tentativa %s/%s)", e, backoff, attempt, MAX_RETRIES)
-            time.sleep(backoff); backoff = min(backoff * 2, 6)
+            log.warning("Erro de rede para Airtable (%s). Retry em %.2fs", e, backoff)
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 6)
+    # Última tentativa (deixa erro estourar p/ caller tratar)
     return REQ.request(method, url, timeout=timeout, **kwargs)
 
 def _normalize_records(records):
+    """Converte payload do Airtable para o modelo esperado no front."""
     out = []
     for rec in records:
         f = rec.get("fields", {}) or {}
-        out.append({
-            "id": rec.get("id"),
-            "tipo": f.get("Tipo", "") or "",
-            "tempo": _to_int(f.get("Tempo", 0), 0),
-            "potes": _to_int(f.get("Potes", 0), 0),
-            "horario": f.get("Horário", "") or "",
-            "status": f.get("Status", "") or "",
-            "atualizadoEm": f.get("AtualizadoEm", "") or "",
-            "volume": _to_int(f.get("Volume", 0), 0),
-            "template": f.get("Template", "") or "",
-        })
+        out.append(
+            {
+                "id": rec.get("id"),
+                "tipo": f.get("Tipo", ""),
+                "tempo": f.get("Tempo", ""),
+                "potes": f.get("Potes", ""),
+                "horario": f.get("Horário", ""),  # campo com acento no Airtable
+                "status": f.get("Status", ""),
+                "atualizadoEm": f.get("AtualizadoEm", ""),
+                # Novos campos (opcionais)
+                "volume": f.get("Volume", 0),
+                "template": f.get("Template", ""),
+            }
+        )
     return out
 
 def _fetch_all_from_airtable():
+    """Lê tudo do Airtable (paginado) com robustez / ordenado por 'AtualizadoEm'."""
     records = []
-    params = {"pageSize": 100, "sort[0][field]": "AtualizadoEm", "sort[0][direction]": "desc"}
+    params = {
+        "pageSize": 100,
+        "sort[0][field]": "AtualizadoEm",  # ideal: Last modified time ou campo de data
+        "sort[0][direction]": "desc",
+    }
     while True:
         r = _airtable_request("GET", AIRTABLE_API, params=params)
-        if not r.ok: r.raise_for_status()
+        if not r.ok:
+            r.raise_for_status()
         payload = r.json()
         records.extend(payload.get("records", []))
-        if "offset" not in payload: break
+        if "offset" not in payload:
+            break
         params["offset"] = payload["offset"]
     return _normalize_records(records)
 
+# ---- Snapshot em memória (evita quebrar front se Airtable oscilar) ----
 _LAST_SNAPSHOT = []
 _LAST_HASH = ""
 _LAST_FETCH_TS = 0.0
-_SNAPSHOT_TTL = float(os.getenv("SNAPSHOT_TTL", "8.0"))
+_SNAPSHOT_TTL = float(os.getenv("SNAPSHOT_TTL", "8.0"))  # segundos
 
 def get_snapshot(force: bool = False):
+    """
+    Retorna (data, is_stale). Atualiza do Airtable se TTL expirou.
+    Em erro, devolve último snapshot bom (stale=True).
+    """
     global _LAST_SNAPSHOT, _LAST_HASH, _LAST_FETCH_TS
     now = time.time()
     if not force and (now - _LAST_FETCH_TS) < _SNAPSHOT_TTL and _LAST_SNAPSHOT:
         return _LAST_SNAPSHOT, False
     try:
         data = _fetch_all_from_airtable()
-        _LAST_SNAPSHOT = data; _LAST_HASH = md5(data); _LAST_FETCH_TS = time.time()
+        _LAST_SNAPSHOT = data
+        _LAST_HASH = md5(data)
+        _LAST_FETCH_TS = time.time()
         return data, False
     except Exception as e:
         log.warning("Falha ao atualizar snapshot do Airtable: %s", e)
@@ -155,10 +175,15 @@ def get_snapshot(force: bool = False):
 
 @app.after_request
 def add_common_headers(resp):
+    # Evita cache cliente/proxy para rotas da API
     if request.path.startswith("/api/"):
         resp.headers.setdefault("Cache-Control", "no-store")
         resp.headers.setdefault("Content-Type", "application/json; charset=utf-8")
     return resp
+
+@app.errorhandler(406)
+def not_acceptable(e):
+    return jsonify({"ok": False, "error": "not_acceptable"}), 406
 
 @app.route("/")
 def serve_index():
@@ -171,11 +196,12 @@ def health():
 # ---------- Auth ----------
 @app.post("/api/login")
 def api_login():
-    b = request.json or {}
+    b = request.get_json(silent=True) or {}
     u = (b.get("username") or "").strip()
     p = (b.get("password") or "").strip()
     if u == APP_USER and p == APP_PASS:
-        session["auth_ok"] = True; session.permanent = True
+        session["auth_ok"] = True
+        session.permanent = True
         return jsonify({"ok": True})
     return jsonify({"ok": False, "error": "invalid_credentials"}), 401
 
@@ -188,108 +214,119 @@ def api_logout():
 @app.get("/api/disparos")
 def get_disparos():
     data, stale = get_snapshot(force=False)
-    resp = jsonify(data); resp.headers["X-Data-Stale"] = "1" if stale else "0"
+    resp = jsonify(data)
+    resp.headers["X-Data-Stale"] = "1" if stale else "0"
     return resp
-
-def _post_airtable(fields: dict):
-    """POST com typecast; retorna Response."""
-    return _airtable_request("POST", AIRTABLE_API, json={"fields": fields, "typecast": True})
-
-def _patch_airtable(rid: str, fields: dict):
-    return _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields, "typecast": True})
 
 @app.post("/api/disparos")
 @require_auth
 def create_disparo():
-    b = request.json or {}
+    b = request.get_json(silent=True) or {}
 
-    # campos mínimos
-    fields_min = {
-        "Tipo": b.get("tipo", "") or "",
-        "Tempo": _to_int(b.get("tempo", 0), 0),
-        "Potes": _to_int(b.get("potes", 0), 0),
-        "Horário": b.get("horario", "08:00") or "08:00",
-        "Status": b.get("status", "Em andamento") or "Em andamento",
+    # saneia e normaliza
+    tipo    = (b.get("tipo") or "").strip()
+    tempo   = int(b.get("tempo") or 0)
+    potes   = int(b.get("potes") or 0)
+    horario = (b.get("horario") or "08:00").strip()
+    status  = (b.get("status")  or "Em andamento").strip()
+    volume  = b.get("volume")
+    tmpl    = (b.get("template") or "").strip()
+
+    if not tipo:
+        return jsonify({"ok": False, "error": "missing_tipo"}), 400
+
+    fields = {
+        "Tipo": tipo,
+        "Tempo": tempo,
+        "Potes": potes,
+        "Horário": horario,           # campo com acento no Airtable
+        "Status": status,
     }
+    # Envia campos opcionais, se existirem no Airtable
+    if volume is not None:
+        try: fields["Volume"] = int(volume)
+        except: pass
+    if tmpl:
+        fields["Template"] = tmpl
 
-    # inclui extras se vierem
-    fields_all = dict(fields_min)
-    if b.get("volume") not in (None, "", []):
-        fields_all["Volume"] = _to_int(b.get("volume", 0), 0)
-    tpl = (b.get("template") or "").strip()
-    if tpl:
-        fields_all["Template"] = tpl
+    r = _airtable_request("POST", AIRTABLE_API, json={"fields": fields})
 
-    # 1) tenta all
-    r = _post_airtable(fields_all)
-    first_error = None
-    if not r.ok and 400 <= r.status_code < 500:
-        try: first_error = r.json()
-        except Exception: first_error = {"raw": r.text}
-        # 2) tenta mínimos
-        r = _post_airtable(fields_min)
-
-        if not r.ok and 400 <= r.status_code < 500:
-            # 3) remove Status (às vezes opções diferem)
-            fields_min_no_status = dict(fields_min); fields_min_no_status.pop("Status", None)
-            r = _post_airtable(fields_min_no_status)
+    # Resposta sempre em JSON
+    try:
+        payload = r.json()
+    except Exception:
+        payload = {"ok": r.ok, "airtable_raw": r.text}
 
     if r.ok:
-        try: get_snapshot(force=True)
-        except Exception as e: log.warning("Falha ao atualizar snapshot pós-criação: %s", e)
-        return jsonify({"ok": True, "record": r.json()}), 201
+        try:
+            get_snapshot(force=True)
+        except Exception:
+            pass
+        return jsonify(payload), 200
 
-    try: details = r.json()
-    except Exception: details = {"raw": r.text}
-    merged = {"first_attempt": first_error, "final_attempt": details}
-    log.error("Erro do Airtable ao criar disparo: %s %s", r.status_code, merged)
-    status = 400 if 400 <= r.status_code < 500 else 502
-    return jsonify({"ok": False, "status": r.status_code, "error": "airtable_error", "details": merged}), status
+    code = r.status_code or 500
+    return jsonify({"ok": False, "status": code, "error": payload}), code
 
 @app.patch("/api/disparos/<rid>")
 @require_auth
 def update_disparo(rid):
-    b = request.json or {}
+    b = request.get_json(silent=True) or {}
     fields = {}
-    if "status" in b:   fields["Status"]   = b["status"]
-    if "horario" in b:  fields["Horário"]  = b["horario"]
-    if "tipo"    in b:  fields["Tipo"]     = b["tipo"]
-    if "tempo"   in b:  fields["Tempo"]    = _to_int(b["tempo"], 0)
-    if "potes"   in b:  fields["Potes"]    = _to_int(b["potes"], 0)
-    if "volume"  in b:  fields["Volume"]   = _to_int(b["volume"], 0)
+    if "status"  in b: fields["Status"]   = b["status"]
+    if "horario" in b: fields["Horário"]  = b["horario"]   # com acento
+    if "tipo"    in b: fields["Tipo"]     = b["tipo"]
+    if "tempo"   in b: fields["Tempo"]    = b["tempo"]
+    if "potes"   in b: fields["Potes"]    = b["potes"]
+    if "volume"  in b:
+        try: fields["Volume"] = int(b["volume"])
+        except: pass
     if "template" in b and b["template"]:
-        fields["Template"] = b["template"]
+        fields["Template"] = (b["template"] or "").strip()
 
-    if not fields:
-        return jsonify({"ok": False, "error": "no_fields_to_update"}), 400
+    r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields})
 
-    r = _patch_airtable(rid, fields)
+    try:
+        payload = r.json()
+    except Exception:
+        payload = {"ok": r.ok, "airtable_raw": r.text}
+
     if r.ok:
-        try: get_snapshot(force=True)
-        except Exception as e: log.warning("Falha ao atualizar snapshot pós-update: %s", e)
-        return jsonify({"ok": True, "record": r.json()})
-    try: details = r.json()
-    except Exception: details = {"raw": r.text}
-    status = 400 if 400 <= r.status_code < 500 else 502
-    return jsonify({"ok": False, "status": r.status_code, "error": "airtable_error", "details": details}), status
+        try:
+            get_snapshot(force=True)
+        except Exception:
+            pass
+        return jsonify(payload), 200
 
-# ---------- SSE ----------
+    code = r.status_code or 500
+    return jsonify({"ok": False, "status": code, "error": payload}), code
+
+# ---------- SSE (stream) ----------
 @app.get("/api/stream")
 def stream():
     def gen():
         last_hash = None
+        # reconexão rápida
         yield "retry: 3000\n\n"
         while True:
+            # força leitura real do Airtable para pegar deleções externas rapidamente
             data, stale = get_snapshot(force=True)
             h = md5(data)
             if h != last_hash:
                 last_hash = h
-                payload = json.dumps({"type": "snapshot", "records": data, "stale": stale}, ensure_ascii=False)
+                payload = json.dumps(
+                    {"type": "snapshot", "records": data, "stale": stale},
+                    ensure_ascii=False
+                )
                 yield f"data: {payload}\n\n"
             else:
                 yield "event: ping\ndata: {}\n\n"
             time.sleep(3)
-    headers = {"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no", "Connection": "keep-alive"}
+
+    headers = {
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+        "Connection": "keep-alive",
+    }
     return Response(gen(), mimetype="text/event-stream", headers=headers)
 
 # ===================== MAIN =========================
