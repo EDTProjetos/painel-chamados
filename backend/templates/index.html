@@ -39,7 +39,7 @@
     input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
     button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:#muted; padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
     .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
     .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
@@ -53,7 +53,6 @@
     .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    /* Detalhes expansíveis dentro do card */
     .details{
       position:absolute; inset:0; background:rgba(0,0,0,.25);
       display:none; align-items:flex-end; padding:0; backdrop-filter: blur(2px);
@@ -78,14 +77,11 @@
     .login-actions{display:flex; gap:10px; margin-top:8px}
 
     .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
-
-    /* Splash/Spinner */
     .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
     .splash.hide{ opacity:0; pointer-events:none }
     .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
     @keyframes spin{ to{ transform:rotate(360deg) } }
 
-    /* Avisos (toast/topbar) */
     .topbar{position:fixed; top:8px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:9999; pointer-events:none}
     .toast{pointer-events:auto; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.08); font-size:13px; display:flex; align-items:center; gap:8px}
     .toast.warn{ border-color:#fde68a; background:#fffbeb } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 }
@@ -101,13 +97,11 @@
   </header>
 
   <div class="wrap">
-    <!-- Tabs -->
     <nav class="tabs">
       <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
 
-    <!-- VIEW: PAINEL -->
     <section id="view-painel">
       <div class="legenda">
         <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
@@ -115,7 +109,6 @@
         <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
 
-      <!-- Form (só logado) -->
       <div id="form-wrapper" class="form-container" style="display:none;">
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
@@ -134,7 +127,6 @@
               <option value="vencidos_5">Vencidos 5</option>
             </select>
           </div>
-
           <div>
             <label for="tempo">Tempo Médio (min)</label>
             <input type="number" id="tempo" min="0" value="1" required />
@@ -143,7 +135,6 @@
             <label for="potes">Quantidade de Potes</label>
             <input type="number" id="potes" min="1" value="1" required />
           </div>
-
           <div>
             <label for="volume">Volume de Disparos</label>
             <input type="number" id="volume" min="0" value="0" />
@@ -157,19 +148,16 @@
               <option value="20:00">20:00</option>
             </select>
           </div>
-
           <div class="full">
             <button type="submit">Adicionar</button>
           </div>
         </form>
       </div>
 
-      <!-- Aviso quando deslogado -->
       <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
         Você está em <strong>modo leitura</strong>. Faça login para adicionar disparos.
       </div>
 
-      <!-- Tabela -->
       <div class="table-card" style="margin-top:14px;">
         <div class="grid" id="painel-grid">
           <div class="header">Horário</div>
@@ -187,7 +175,6 @@
       </div>
     </section>
 
-    <!-- VIEW: LOGIN -->
     <section id="view-login" style="display:none;">
       <div class="login-card">
         <h2 class="login-title">Acessar</h2>
@@ -210,11 +197,7 @@
   </footer>
 
   <script>
-  /* ========================== CONFIG ========================== */
-  // IMPORTANTÍSSIMO: usar MESMO HOST (string vazia) para cookies funcionarem sem CORS.
-  const API_BASE = ""; // <- não coloque barra no fim
-
-  // Local (file://) ou ?offline=1 força modo leitura
+  const API_BASE = "";
   const IS_FILE = location.protocol === "file:";
   const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
   let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
@@ -222,17 +205,16 @@
   const BASE = (API_BASE || "").replace(/\/+$/,"");
   const url = (p) => `${BASE}${p}`;
 
-  /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
   const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
-  const splashTimer = setTimeout(hideSplashSoon, 1200); // segurança anti “travar”
+  const splashTimer = setTimeout(hideSplashSoon, 1200);
   window.addEventListener("error", hideSplashSoon);
   window.addEventListener("unhandledrejection", hideSplashSoon);
 
   const topbar = document.getElementById("topbar");
   const toasts = new Set();
   function toast(msg, type="warn", ms=3500, key=null){
-    if (key && toasts.has(key)) return; // throttle por chave
+    if (key && toasts.has(key)) return;
     const div = document.createElement("div");
     div.className = `toast ${type}`;
     div.innerHTML = `<span>${msg}</span><button aria-label="fechar">×</button>`;
@@ -243,7 +225,6 @@
     setTimeout(()=>{ try{btn.click()}catch{} }, ms);
   }
 
-  /* ============================ AUTH =========================== */
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
 
@@ -262,7 +243,6 @@
     }
   }
 
-  /* ============================ TABS =========================== */
   const tabs = document.querySelectorAll(".tab");
   function switchTab(name){
     tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
@@ -272,7 +252,6 @@
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
-  /* ============================ UTILS ========================== */
   const TEMPLATE_MAP = {
     preventivo_d0:
 `Olá $[nome]!😊
@@ -366,7 +345,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
   }
 
-  /* =========================== RENDER ========================== */
   function clearColumns(){
     ["08","12","16","20"].forEach(h => {
       const el = document.getElementById("col-"+h);
@@ -420,15 +398,15 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       </div>
     `;
 
-    // Clique: abre/fecha somente os detalhes (sem mudar status!)
     div.addEventListener("click", (ev) => {
-      // Não propagamos cliques no botão fechar
-      if ((ev.target as HTMLElement).classList?.contains("close")) return;
+      const t = ev.target;
+      if (t && t.classList && t.classList.contains("close")) return; // <-- JS puro
       const details = div.querySelector(".details");
-      const visible = details?.style.display === "flex";
+      const visible = details && details.style.display === "flex";
       closeAllDetails();
       if (!visible && details){ details.style.display = "flex"; }
     });
+
     const closeBtn = div.querySelector(".close");
     if (closeBtn){
       closeBtn.addEventListener("click", (e)=>{
@@ -451,9 +429,8 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     (records||[]).forEach(r => placeRecord(r));
   }
 
-  /* ============= Data (Cache + SSE + Polling Backoff) ========= */
   const CACHE_KEY = "painel_snapshot_v2";
-  const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
+  const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
   let lastNonEmpty = [];
   let lastHash = "";
   let sse = null;
@@ -502,9 +479,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
       safeRender(data);
-    }catch(e){
-      // silencioso; cache já pode ter pintado; splash tem timeout
-    }
+    }catch(e){}
   }
 
   async function softRefresh(){
@@ -526,11 +501,11 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         if (resp.ok){
           const data = await resp.json();
           safeRender(data);
-          backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
+          backoffMs = Math.max(5000, Math.floor(backoffMs/2));
         }
       }catch{}
     }, backoffMs);
-    backoffMs = Math.min(backoffMs * 2, 30000); // cresce até 30s
+    backoffMs = Math.min(backoffMs * 2, 30000);
   }
 
   function stopPolling(){
@@ -558,7 +533,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     if (sse){ try{sse.close();}catch{} sse = null; }
   }
 
-  /* ======================== FORM ADD ========================== */
   const form = document.getElementById("formDisparo");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -572,7 +546,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
     if(!tipo) return;
 
-    // Render otimista local (para UI), mas NÃO mandamos o id no body do POST
     const optimisticRecord = {
       id: uid(), tipo, tempo, potes, volume, horario, template,
       status:"Em andamento"
@@ -593,7 +566,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         method:"POST",
         headers:{
           "Content-Type":"application/json",
-          "Accept":"application/json"       // <- evita 406 em alguns proxies
+          "Accept":"application/json"
         },
         credentials:"include",
         body:JSON.stringify({
@@ -608,7 +581,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         }else{
           toast("Não consegui salvar no servidor.", "error");
         }
-        // desfaz otimista
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
         safeRender(lastNonEmpty);
       } else {
@@ -622,7 +594,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }
   });
 
-  /* ====================== LOGIN / LOGOUT ====================== */
   const loginForm = document.getElementById("loginForm");
   const btnLogin  = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
@@ -672,7 +643,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     setTimeout(()=>{ startSSE(); }, 300);
   });
 
-  /* ========================== START =========================== */
   (async () => {
     switchTab("painel");
     updateAuthUI();
