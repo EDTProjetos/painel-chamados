@@ -55,7 +55,7 @@
     input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
     button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:#muted; padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
     /* Tabela (grid) */
     .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
@@ -71,7 +71,7 @@
     .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    /* Modal (card details + template) */
+    /* Modal */
     .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:1000}
     .modal-inner{background:#fff; border-radius:14px; width:min(680px,92vw); padding:18px 18px 16px; box-shadow:0 20px 48px rgba(0,0,0,.28); position:relative}
     .modal-close{position:absolute; top:10px; right:12px; font-size:22px; line-height:20px; cursor:pointer; border:none; background:transparent}
@@ -83,7 +83,7 @@
     .pill.and{background:var(--andamento)} .pill.fin{background:var(--finalizado)} .pill.ins{background:var(--insucesso)}
 
     /* Footer */
-    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:#muted; font-size:13px; text-align:center; padding:14px 12px}
 
     @media (max-width: 980px){
       .form-grid{grid-template-columns:1fr}
@@ -98,22 +98,18 @@
   </header>
 
   <div class="wrap">
-    <!-- Tabs -->
     <nav class="tabs">
       <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
 
-    <!-- VIEW: PAINEL -->
     <section id="view-painel">
-      <!-- Legenda -->
       <div class="legenda">
         <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
         <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
         <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
 
-      <!-- Form (só aparece logado) -->
       <div id="form-wrapper" class="form-container" style="display:none;">
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
@@ -159,12 +155,10 @@
         </form>
       </div>
 
-      <!-- Aviso quando deslogado -->
       <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
         Você está em <strong>modo leitura</strong>. Faça login para adicionar disparos.
       </div>
 
-      <!-- Tabela -->
       <div class="table-card" style="margin-top:14px;">
         <div class="grid" id="painel-grid">
           <div class="header">Horário</div>
@@ -182,7 +176,6 @@
       </div>
     </section>
 
-    <!-- VIEW: LOGIN -->
     <section id="view-login" style="display:none;">
       <div class="form-container" style="max-width:420px;margin-inline:auto;">
         <h2 style="margin:0 0 10px;color:var(--primary);text-align:center;">Acessar</h2>
@@ -204,7 +197,7 @@
     </section>
   </div>
 
-  <!-- Modal Card -->
+  <!-- Modal -->
   <div class="modal" id="cardModal" aria-hidden="true">
     <div class="modal-inner">
       <button class="modal-close" id="modalClose" aria-label="Fechar">×</button>
@@ -225,7 +218,6 @@
 
   <script>
     /* ===================== CONFIG ===================== */
-    // Mesmo host (caminhos relativos). Se preferir: const API_BASE = window.location.origin;
     const API_BASE = "";
     const url = (p) => `${API_BASE}${p}`;
 
@@ -429,13 +421,13 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
       if (!tipo){ alert("Informe o nome do disparo."); return; }
 
-      // Render otimista (mantido)
+      // render otimista
       const optimistic = { id: uid(), tipo, tempo, potes, volume, horario, status:"Em andamento", templateKey };
       placeRecord(optimistic);
 
       try{
         const payload = { ...optimistic };
-        delete payload.templateKey; // campo apenas no cliente
+        delete payload.templateKey; // só cliente
 
         const resp = await fetch(url("/api/disparos"), {
           method:"POST",
@@ -448,16 +440,22 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         });
 
         if(!resp.ok){
-          const err = await resp.json().catch(()=>({}));
-          throw new Error(err?.message || err?.error || "Falha no POST");
+          let msg = "Falha no POST";
+          try{
+            const err = await resp.json();
+            msg = err?.details?.error?.message || err?.message || err?.error || msg;
+            console.error("Erro detalhado do servidor:", err);
+          }catch{}
+          alert("Falha ao salvar no servidor.\n" + msg);
+          await loadInitial();
+          return;
         }
 
         form.reset();
-        // Garante sincronizar com o snapshot “oficial”
-        await loadInitial();
+        await loadInitial(); // sincroniza com snapshot
       }catch(err){
+        console.error(err);
         alert("Falha ao salvar no servidor.");
-        // Recarrega estado do servidor
         loadInitial();
       }
     });
@@ -520,7 +518,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       modal.style.display = "flex";
     }
 
-    /* ===================== START ======================= */
     (async () => {
       switchTab("painel");
       updateAuthUI();
