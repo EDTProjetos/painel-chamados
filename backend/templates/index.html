@@ -39,53 +39,43 @@
     input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
     button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:#muted; padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:#6b7280; padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
     .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
     .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
     .grid > div{border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:12px; min-height:72px; background:#fff}
     .header{background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center}
 
-    .disparo{border-radius:12px; padding:12px; margin:8px 0; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both; position:relative; overflow:hidden}
+    .disparo{border-radius:12px; padding:12px; margin:8px 0; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both}
     .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
     .status-andamento{ background:var(--andamento) } .status-finalizado{ background:var(--finalizado) } .status-insucesso{ background:var(--insucesso) }
     .badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:6px; display:inline-block }
     .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    .details{
-      position:absolute; inset:0; background:rgba(0,0,0,.25);
-      display:none; align-items:flex-end; padding:0; backdrop-filter: blur(2px);
+    /* MODAL */
+    .modal-mask{
+      position:fixed; inset:0; background:rgba(0,0,0,.45);
+      display:none; align-items:center; justify-content:center; z-index:9999;
     }
-    .details .sheet{
-      width:100%; background:rgba(255,255,255,.95); color:#111;
-      border-top-left-radius:14px; border-top-right-radius:14px;
-      padding:12px; max-height:75%; overflow:auto;
-      box-shadow:0 -8px 20px rgba(0,0,0,.25);
+    .modal{
+      width:min(760px, 94vw); max-height:85vh; overflow:auto;
+      background:#fff; color:#111; border-radius:16px; box-shadow:0 25px 60px rgba(0,0,0,.35);
+      border:1px solid var(--border);
     }
-    .details .row{ display:flex; gap:10px; flex-wrap:wrap; font-size:12px; color:#374151; margin-bottom:6px }
-    .details .row strong{ color:#111 }
-    .details .template{
-      white-space:pre-wrap; background:#f9fafb; border:1px dashed #e5e7eb; padding:10px; border-radius:10px; color:#111
+    .modal-head{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; border-bottom:1px solid var(--border);
     }
-    .details .close{
-      position:absolute; top:6px; right:8px; background:#111827; color:#fff; border:none; border-radius:8px; padding:2px 8px; cursor:pointer
-    }
-
-    .login-card{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px auto; border-radius:14px; max-width:420px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
-    .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
-    .login-actions{display:flex; gap:10px; margin-top:8px}
-
-    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
-    .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
-    .splash.hide{ opacity:0; pointer-events:none }
-    .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
-    @keyframes spin{ to{ transform:rotate(360deg) } }
-
-    .topbar{position:fixed; top:8px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:9999; pointer-events:none}
-    .toast{pointer-events:auto; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.08); font-size:13px; display:flex; align-items:center; gap:8px}
-    .toast.warn{ border-color:#fde68a; background:#fffbeb } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 }
-    .toast button{background:transparent; color:#111; border:none; cursor:pointer; padding:0 4px; font-weight:700}
+    .modal-body{ padding:14px 16px; display:grid; gap:12px }
+    .kvs{ display:flex; flex-wrap:wrap; gap:8px; font-size:13px; color:#374151 }
+    .kv{ background:#f3f4f6; border:1px solid #e5e7eb; border-radius:10px; padding:6px 10px }
+    .tpl-name{ font-weight:700; color:#111 }
+    .tpl-text{ white-space:pre-wrap; background:#f9fafb; border:1px dashed #e5e7eb; padding:10px; border-radius:10px; color:#111 }
+    .modal-actions{ display:flex; gap:10px; justify-content:flex-end; padding:0 16px 14px }
+    .btn{ border:none; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:700 }
+    .btn.copy{ background:#0ea5e9; color:#fff }
+    .btn.close{ background:#111827; color:#fff }
   </style>
 </head>
 <body>
@@ -192,6 +182,25 @@
     </section>
   </div>
 
+  <!-- MODAL -->
+  <div id="modalMask" class="modal-mask" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <strong id="modalTitle">Resumo do disparo</strong>
+        <button class="btn close" id="btnCloseModal">Fechar</button>
+      </div>
+      <div class="modal-body">
+        <div class="kvs" id="modalKVs"></div>
+        <div><span class="tpl-name" id="modalTplName">Template</span></div>
+        <div class="tpl-text" id="modalTplText">—</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn copy" id="btnCopyTpl">Copiar template</button>
+        <button class="btn copy" id="btnCopyResumo">Copiar resumo</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     Desenvolvido por Leahpar Code &copy; 2025
   </footer>
@@ -227,7 +236,6 @@
 
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
-
   function updateAuthUI(){
     const formWrap = document.getElementById("form-wrapper");
     const hint = document.getElementById("readOnlyHint");
@@ -325,6 +333,13 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`
   };
   const templateText = (key) => TEMPLATE_MAP[key] || "";
+  const templateName = (key) => ({
+    preventivo_d0:"Preventivo D0",
+    preventivo_d3d10:"Preventivo D3 e D10",
+    vencidos_1:"Vencidos 1",
+    vencidos_2:"Vencidos 2",
+    vencidos_5:"Vencidos 5"
+  }[key] || "—");
 
   function clsForStatus(status){
     switch((status||"").toLowerCase()){
@@ -336,7 +351,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
   function calcHash(records){
     try{
-      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.volume||0}|${r.template||""}`).join("§");
+      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.volume||0}|${r.template||""}|${r.atualizadoEm||""}`).join("§");
     }catch{ return Math.random().toString(36); }
   }
   function fetchWithTimeout(resource, options = {}, timeout = 3000) {
@@ -345,90 +360,106 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
   }
 
+  // ===== MODAL =====
+  const modalMask = document.getElementById("modalMask");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalKVs = document.getElementById("modalKVs");
+  const modalTplName = document.getElementById("modalTplName");
+  const modalTplText = document.getElementById("modalTplText");
+  const btnCloseModal = document.getElementById("btnCloseModal");
+  const btnCopyTpl = document.getElementById("btnCopyTpl");
+  const btnCopyResumo = document.getElementById("btnCopyResumo");
+  let lastModalData = null;
+
+  function minutesRemaining(r){
+    try{
+      const tempo = Number(r.tempo||0);
+      if (!tempo) return 0;
+      if ((r.status||"").toLowerCase() === "finalizado") return 0;
+      const upd = r.atualizadoEm ? new Date(r.atualizadoEm) : null;
+      if (!upd || isNaN(+upd)) return tempo; // sem base → mostra tempo total
+      const elapsedMin = Math.floor((Date.now() - +upd)/60000);
+      return Math.max(tempo - elapsedMin, 0);
+    }catch{ return Number(r.tempo||0) || 0; }
+  }
+
+  function openModal(record){
+    lastModalData = record;
+    modalTitle.textContent = record.tipo || "Disparo";
+    const kvHtml = `
+      <span class="kv"><strong>Status:</strong> ${record.status||"Em andamento"}</span>
+      <span class="kv"><strong>Horário:</strong> ${record.horario||"08:00"}</span>
+      <span class="kv"><strong>Potes:</strong> ${record.potes??"-"}</span>
+      <span class="kv"><strong>Volume:</strong> ${record.volume??0}</span>
+      <span class="kv"><strong>Tempo médio:</strong> ${record.tempo??"-"} min</span>
+      <span class="kv"><strong>Tempo restante:</strong> ${minutesRemaining(record)} min</span>
+    `;
+    modalKVs.innerHTML = kvHtml;
+    modalTplName.textContent = `Template: ${templateName(record.template||"")}`;
+    const text = templateText(record.template||"");
+    modalTplText.textContent = text ? text : "—";
+    modalMask.style.display = "flex";
+    modalMask.setAttribute("aria-hidden", "false");
+  }
+  function closeModal(){
+    modalMask.style.display = "none";
+    modalMask.setAttribute("aria-hidden", "true");
+  }
+  btnCloseModal.addEventListener("click", closeModal);
+  modalMask.addEventListener("click", (e)=>{ if (e.target === modalMask) closeModal(); });
+  document.addEventListener("keydown", (e)=>{ if (e.key === "Escape" && modalMask.style.display === "flex") closeModal(); });
+
+  btnCopyTpl.addEventListener("click", async ()=>{
+    const txt = modalTplText.textContent || "";
+    try{
+      await navigator.clipboard.writeText(txt);
+      toast("Template copiado!", "ok");
+    }catch{ toast("Não consegui copiar.", "error"); }
+  });
+  btnCopyResumo.addEventListener("click", async ()=>{
+    if (!lastModalData) return;
+    const r = lastModalData;
+    const resumo =
+`Disparo: ${r.tipo||"-"}
+Status: ${r.status||"Em andamento"}
+Horário: ${r.horario||"-"}
+Potes: ${r.potes??"-"}
+Volume: ${r.volume??0}
+Tempo médio: ${r.tempo??"-"} min
+Tempo restante: ${minutesRemaining(r)} min
+Template: ${templateName(r.template||"")}
+---
+${templateText(r.template||"")}`;
+    try{
+      await navigator.clipboard.writeText(resumo);
+      toast("Resumo copiado!", "ok");
+    }catch{ toast("Não consegui copiar.", "error"); }
+  });
+
+  // ===== RENDER =====
   function clearColumns(){
     ["08","12","16","20"].forEach(h => {
       const el = document.getElementById("col-"+h);
       if (el) el.innerHTML = "";
     });
   }
-
-  function closeAllDetails(){
-    document.querySelectorAll(".disparo .details").forEach(d => d.style.display = "none");
-  }
-
   function cardTemplate(r){
     const div = document.createElement("div");
     div.className = `disparo ${clsForStatus(r.status)}`;
     div.dataset.id = r.id || uid();
-    div.dataset.status = r.status || "Em andamento";
     div.dataset.horario = r["horario"] || "08:00";
-    div.dataset.volume = (r.volume ?? 0);
-    div.dataset.template = (r.template || "");
-
-    const volumeLabel = (r.volume ?? 0);
-    const tmplKey = (r.template || "");
-    const tmplText = templateText(tmplKey);
-    const tmplName = {
-      preventivo_d0: "Preventivo D0",
-      preventivo_d3d10: "Preventivo D3 e D10",
-      vencidos_1: "Vencidos 1",
-      vencidos_2: "Vencidos 2",
-      vencidos_5: "Vencidos 5"
-    }[tmplKey] || "—";
-
     div.innerHTML = `
       <span class="badge">${r.status || "Em andamento"}</span>
       <div class="title">${r.tipo || ""}</div>
-      <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong> • Vol: <strong>${volumeLabel}</strong></div>
-
-      <div class="details" role="dialog" aria-label="Detalhes do disparo">
-        <button class="close" title="Fechar">Fechar</button>
-        <div class="sheet">
-          <div class="row"><strong>Status:</strong> ${r.status || "Em andamento"}</div>
-          <div class="row"><strong>Tipo:</strong> ${r.tipo || ""}</div>
-          <div class="row">
-            <span><strong>Tempo:</strong> ${r.tempo ?? ""}min</span>
-            <span><strong>Potes:</strong> ${r.potes ?? ""}</span>
-            <span><strong>Volume:</strong> ${volumeLabel}</span>
-            <span><strong>Horário:</strong> ${(r.horario || "08:00")}</span>
-          </div>
-          <div class="row"><strong>Template:</strong> ${tmplName}</div>
-          ${tmplText ? `<div class="template">${tmplText.replace(/</g,"&lt;")}</div>` : `<div class="template" style="opacity:.75">Sem template vinculado.</div>`}
-        </div>
-      </div>
+      <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong> • Vol: <strong>${r.volume??0}</strong></div>
     `;
-
-    div.addEventListener("click", (ev) => {
-      const t = ev.target;
-      if (t && t.classList && t.classList.contains("close")) return; // <-- JS puro
-      const details = div.querySelector(".details");
-      const visible = details && details.style.display === "flex";
-      closeAllDetails();
-      if (!visible && details){ details.style.display = "flex"; }
-    });
-
-    const closeBtn = div.querySelector(".close");
-    if (closeBtn){
-      closeBtn.addEventListener("click", (e)=>{
-        e.stopPropagation();
-        const details = div.querySelector(".details");
-        if (details) details.style.display = "none";
-      });
-    }
+    div.addEventListener("click", ()=> openModal(r));
     return div;
   }
+  function placeRecord(r){ const hh=(r.horario||"08:00").split(":")[0]; const col=document.getElementById("col-"+hh); if(col) col.appendChild(cardTemplate(r)); }
+  function renderSnapshot(records){ clearColumns(); (records||[]).forEach(placeRecord); }
 
-  function placeRecord(r){
-    const hh = (r["horario"] || "08:00").split(":")[0];
-    const col = document.getElementById("col-"+hh);
-    if (col) col.appendChild(cardTemplate(r));
-  }
-
-  function renderSnapshot(records){
-    clearColumns();
-    (records||[]).forEach(r => placeRecord(r));
-  }
-
+  // ===== DATA / SSE =====
   const CACHE_KEY = "painel_snapshot_v2";
   const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
   let lastNonEmpty = [];
@@ -444,34 +475,26 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       if (!raw) return;
       const {ts, data} = JSON.parse(raw);
       if (!data || (Date.now() - ts) > CACHE_TTL_MS) return;
-      lastNonEmpty = data;
-      lastHash = calcHash(data);
+      lastNonEmpty = data; lastHash = calcHash(data);
       renderSnapshot(data);
-      clearTimeout(splashTimer);
-      hideSplashSoon();
-      gotFirstPaint = true;
+      clearTimeout(splashTimer); hideSplashSoon(); gotFirstPaint = true;
     }catch{}
   })();
 
   function saveCache(records){
     try{
       const payload = { ts: Date.now(), data: records };
-      (window.requestIdleCallback || setTimeout)(() =>
-        localStorage.setItem(CACHE_KEY, JSON.stringify(payload)), 0
-      );
+      (window.requestIdleCallback || setTimeout)(()=>localStorage.setItem(CACHE_KEY, JSON.stringify(payload)),0);
     }catch{}
   }
-
   function safeRender(records){
     const incomingHash = calcHash(records);
     if (incomingHash === lastHash) return;
-    if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) return;
-    renderSnapshot(records);
-    lastHash = incomingHash;
-    if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
-    if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
+    if ((records?.length||0)===0 && (lastNonEmpty?.length||0)>0) return;
+    renderSnapshot(records); lastHash = incomingHash;
+    if ((records?.length||0)>0){ lastNonEmpty = records; saveCache(records); }
+    if (!gotFirstPaint){ gotFirstPaint=true; clearTimeout(splashTimer); hideSplashSoon(); }
   }
-
   async function loadInitial(){
     if (OFFLINE_MODE) return;
     try{
@@ -479,9 +502,8 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
       safeRender(data);
-    }catch(e){}
+    }catch{}
   }
-
   async function softRefresh(){
     if (OFFLINE_MODE) return;
     try{
@@ -491,7 +513,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       safeRender(data);
     }catch{}
   }
-
   function startPolling(){
     if (OFFLINE_MODE) return;
     if (pollTimer) clearInterval(pollTimer);
@@ -505,51 +526,36 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         }
       }catch{}
     }, backoffMs);
-    backoffMs = Math.min(backoffMs * 2, 30000);
+    backoffMs = Math.min(backoffMs*2, 30000);
   }
-
-  function stopPolling(){
-    if (pollTimer){ clearInterval(pollTimer); pollTimer = null; }
-  }
-
   function startSSE(){
     if (OFFLINE_MODE) return;
     try{
       if (sse) sse.close();
       sse = new EventSource(url("/api/stream"));
-      sse.onmessage = (evt) => {
+      sse.onmessage = (evt)=>{
         try{
           const payload = JSON.parse(evt.data);
-          if (payload.type === "snapshot") safeRender(payload.records || []);
+          if (payload.type === "snapshot") safeRender(payload.records||[]);
         }catch{}
       };
-      sse.onerror = () => { startPolling(); };
-    }catch{
-      startPolling();
-    }
+      sse.onerror = ()=>{ startPolling(); };
+    }catch{ startPolling(); }
   }
 
-  function stopSSE(){
-    if (sse){ try{sse.close();}catch{} sse = null; }
-  }
-
+  // ===== FORM / LOGIN (iguais) =====
   const form = document.getElementById("formDisparo");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     const tipo    = document.getElementById("tipo").value.trim();
     const tempo   = Number(document.getElementById("tempo").value);
     const potes   = Number(document.getElementById("potes").value);
     const volume  = Number(document.getElementById("volume").value);
     const horario = document.getElementById("horario").value;
     const template = document.getElementById("templateSel").value || "";
-
     if(!tipo) return;
 
-    const optimisticRecord = {
-      id: uid(), tipo, tempo, potes, volume, horario, template,
-      status:"Em andamento"
-    };
+    const optimisticRecord = { id: uid(), tipo, tempo, potes, volume, horario, template, status:"Em andamento", atualizadoEm: new Date().toISOString() };
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
     safeRender(lastNonEmpty);
 
@@ -557,35 +563,24 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     if(!isAuthed){
       toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty);
-      return;
+      safeRender(lastNonEmpty); return;
     }
-
     try{
       const resp = await fetch(url("/api/disparos"), {
         method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Accept":"application/json"
-        },
+        headers:{ "Content-Type":"application/json", "Accept":"application/json" },
         credentials:"include",
-        body:JSON.stringify({
-          tipo, tempo, potes, volume, horario, template, status:"Em andamento"
-        })
+        body:JSON.stringify({ tipo, tempo, potes, volume, horario, template, status:"Em andamento" })
       });
-
       if (!resp.ok){
         if (resp.status === 401){
           toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
-          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-        }else{
-          toast("Não consegui salvar no servidor.", "error");
-        }
+          isAuthed = false; localStorage.removeItem("painel_auth_ok"); updateAuthUI(); switchTab("login");
+        }else{ toast("Não consegui salvar no servidor.", "error"); }
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
         safeRender(lastNonEmpty);
       } else {
-        e.target.reset();
-        setTimeout(softRefresh, 400);
+        e.target.reset(); setTimeout(softRefresh, 400);
       }
     }catch{
       toast("Falha de rede ao salvar.", "error");
@@ -597,23 +592,18 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   const loginForm = document.getElementById("loginForm");
   const btnLogin  = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
-
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
-
     if (!u || !p){ return; }
     btnLogin.disabled = true;
 
     if (u !== "energia" || p !== "energia1") {
       toast("Usuário ou senha inválidos.", "error");
-      btnLogin.disabled = false;
-      return;
+      btnLogin.disabled = false; return;
     }
-
     isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
-
     try{
       const r = await fetch(url("/api/login"), {
         method:"POST",
@@ -621,26 +611,15 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         credentials:"include",
         body: JSON.stringify({ username:u, password:p })
       });
-      if (!r.ok){
-        toast("Não consegui criar sessão segura no servidor. Tente novamente mais tarde.", "warn");
-      }else{
-        setTimeout(softRefresh, 150);
-      }
-    }catch{
-      toast("Rede instável ao criar sessão. Continuando em modo UI.", "warn");
-    }finally{
-      btnLogin.disabled = false;
-    }
+      if (!r.ok){ toast("Não consegui criar sessão no servidor.", "warn"); }
+      else { setTimeout(softRefresh, 150); }
+    }catch{ toast("Rede instável ao criar sessão. Continuando em modo UI.", "warn"); }
+    finally{ btnLogin.disabled = false; }
   });
-
   btnLogout.addEventListener("click", () => {
     isAuthed = false; localStorage.removeItem(AUTH_KEY);
     updateAuthUI(); switchTab("login");
-    stopSSE(); stopPolling();
-    const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
-    if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
     try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
-    setTimeout(()=>{ startSSE(); }, 300);
   });
 
   (async () => {
