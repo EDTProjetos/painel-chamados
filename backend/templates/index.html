@@ -10,7 +10,6 @@
       --primary:#0b4a8f; --primary-2:#0f6ad8;
       --andamento:#ff9f1a; --finalizado:#1fb36a; --insucesso:#e23b3b;
       --warn:#fbbf24; --error:#ef4444; --ok:#10b981;
-      --chip:#eef2f7;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
@@ -27,24 +26,22 @@
     .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
     .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
 
-    .legend{display:flex; gap:12px; justify-content:center; margin:16px 0}
-    .legend .item{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px}
+    .legenda{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:16px 0 8px}
+    .legenda-item{display:flex; align-items:center; gap:8px; font-weight:600; background:var(--card); padding:8px 12px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,.06); border:1px solid var(--border)}
+    .cor{width:16px;height:16px;border-radius:4px;display:inline-block}
+    .cor.andamento{background:var(--andamento)} .cor.finalizado{background:var(--finalizado)} .cor.insucesso{background:var(--insucesso)}
 
-    .dot{width:12px;height:12px;border-radius:3px}
-    .dot.and{background:var(--andamento)}
-    .dot.fin{background:var(--finalizado)}
-    .dot.ins{background:var(--insucesso)}
-
-    .form-card{background:#fff; border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
-    .form-title{margin:0 0 12px; font-weight:800; color:var(--primary)}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .grid2 .full{grid-column:1/-1}
+    .form-container{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px 0; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
+    .form-container h2{margin:0 0 12px; color:var(--primary)}
+    .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+    .form-grid > .full{grid-column:1 / -1}
     label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
     input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
-    button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer}
-    button:disabled{opacity:.7; cursor:not-allowed}
+    button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .table-card{background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden; margin-top:14px}
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
+
+    .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
     .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
     .grid > div{border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:12px; min-height:72px; background:#fff}
     .header{background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center}
@@ -56,36 +53,43 @@
     .title{font-weight:800; font-size:14px; margin-bottom:4px} .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    .login-card{background:#fff; border:1px solid var(--border); padding:20px; margin:18px auto; border-radius:14px; max-width:520px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
-    .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
-    .login-actions{display:flex; gap:10px; margin-top:8px}
+    .login-card{background:var(--card); border:1px solid var(--border); padding:20px; margin:18px auto; border-radius:14px; max-width:540px; box-shadow:0 10px 24px rgba(0,0,0,.08)}
+    .login-title{margin:0 0 12px; color:var(--primary); text-align:left; font-size:22px}
+    .login-actions{display:flex; gap:10px; margin-top:12px}
     .btn-danger{background:#ef4444}
 
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
+
+    /* Splash/Spinner */
     .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
     .splash.hide{ opacity:0; pointer-events:none }
     .ring{ width:48px; height:48px; border:4px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
     @keyframes spin{ to{ transform:rotate(360deg) } }
 
-    .topbar{position:fixed; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:9999; pointer-events:none}
-    .toast{pointer-events:auto; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.08); font-size:14px; display:flex; align-items:center; gap:10px; min-width:240px; justify-content:center}
-    .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.warn{ border-color:#fde68a; background:#fffbeb }
-    .toast .x{margin-left:6px; cursor:pointer; font-weight:800}
+    /* Toast center */
+    .topbar{position:fixed; top:18px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:10000; pointer-events:none}
+    .toast{pointer-events:auto; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:#fff; box-shadow:0 14px 32px rgba(0,0,0,.12); font-size:14px; display:flex; align-items:center; gap:10px; min-width:280px}
+    .toast.warn{ border-color:#fde68a; background:#fffbeb } .toast.error{ border-color:#fecaca; background:#fff1f2 } .toast.ok{ border-color:#bbf7d0; background:#f0fdf4 }
+    .toast button{background:transparent; color:#111; border:none; cursor:pointer; padding:0 4px; font-weight:700}
 
-    /* MODAL */
-    .modal{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:flex-start; justify-content:center; padding:28px; z-index:9990}
-    .modal.show{display:flex}
-    .modal-card{width:min(920px, 96vw); background:#fff; border:1px solid var(--border); border-radius:18px; box-shadow:0 18px 44px rgba(0,0,0,.22); overflow:hidden}
-    .modal-header{position:relative; background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; padding:12px 48px 12px 16px; font-weight:900; display:flex; align-items:center; gap:12px}
-    .modal-close{position:absolute; right:10px; top:8px; width:28px; height:28px; border-radius:999px; background:#0d4ea3; color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:900}
-    .modal-body{padding:14px 14px 18px}
-    .chips{display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 14px}
-    .chip{background:var(--chip); border:1px solid var(--border); padding:6px 10px; border-radius:999px; font-size:13px}
-    .status-chip{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:13px; border:1px solid var(--border)}
-    .status-col-andamento{ background:#fff5e6; color:#7a4b00 }
-    .status-col-finalizado{ background:#e8fff2; color:#0f6a44 }
-    .status-col-insucesso{ background:#ffecec; color:#8b1e1e }
-    .template-box{border:1px dashed var(--border); border-radius:12px; padding:12px; background:#fff}
-    .modal-actions{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
+    /* Modal bonito */
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.36); display:none; align-items:flex-start; justify-content:center; padding:32px 12px; z-index:9998}
+    .modal-backdrop.show{display:flex}
+    .modal-card{width:min(980px, 96%); background:#fff; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.25); border:1px solid var(--border); overflow:hidden}
+    .modal-head{position:relative; background:linear-gradient(90deg,var(--primary),var(--primary-2)); padding:10px 16px 16px 16px; color:#fff; display:flex; align-items:center; gap:12px}
+    .modal-title{font-weight:800; font-size:18px; flex:1}
+    .close-btn{position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:999px; border:none; background:rgba(255,255,255,.2); color:#fff; cursor:pointer; font-weight:900}
+    .close-btn:hover{background:rgba(255,255,255,.35)}
+    .chips{display:flex; flex-wrap:wrap; gap:10px; padding:12px 16px}
+    .chip{background:#eef2ff; border:1px solid #e5e7eb; color:#0f172a; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700}
+    .chip.status.andamento{ background: #fff7ed; border-color:#ffedd5; color:#92400e}
+    .chip.status.finalizado{ background: #ecfdf5; border-color:#d1fae5; color:#065f46}
+    .chip.status.insucesso{ background: #fef2f2; border-color:#fee2e2; color:#991b1b}
+
+    .modal-body{padding:0 16px 16px}
+    .tpl-box{border:1px solid var(--border); border-radius:12px; padding:14px; min-height:140px; background:#fff; white-space:pre-wrap; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height:1.45}
+    .modal-actions{display:flex; gap:12px; margin-top:12px}
+    .btn-outline{background:#fff; color:#0f172a; border:1px solid var(--border)}
   </style>
 </head>
 <body>
@@ -97,70 +101,80 @@
   </header>
 
   <div class="wrap">
+    <!-- Tabs -->
     <nav class="tabs">
       <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
 
-    <div class="legend">
-      <div class="item"><span class="dot and"></span> Em andamento</div>
-      <div class="item"><span class="dot fin"></span> Finalizado</div>
-      <div class="item"><span class="dot ins"></span> Insucesso</div>
-    </div>
-
-    <!-- PAINEL -->
+    <!-- VIEW: PAINEL -->
     <section id="view-painel">
-      <div class="form-card" id="form-wrapper" style="display:none;">
-        <h2 class="form-title">Novo Disparo</h2>
-        <form id="formDisparo" class="grid2">
+      <div class="legenda">
+        <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
+        <div class="legenda-item"><span class="cor finalizado"></span> Finalizado</div>
+        <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
+      </div>
+
+      <!-- Form (só logado) -->
+      <div id="form-wrapper" class="form-container" style="display:none;">
+        <h2>Novo Disparo</h2>
+        <form id="formDisparo" class="form-grid">
           <div>
-            <label>Nome do Disparo</label>
+            <label for="tipo">Nome do Disparo</label>
             <input type="text" id="tipo" placeholder="Ex.: Disparo D0" required />
           </div>
+
           <div>
-            <label>Template (opcional)</label>
-            <select id="templateSelect">
-              <option value="">— Sem template —</option>
-              <option value="Preventivo D0">Preventivo D0</option>
-              <option value="Preventivo D3 e D10">Preventivo D3 e D10</option>
-              <option value="Vencidos 1">Vencidos 1</option>
-              <option value="Vencidos 2">Vencidos 2</option>
-              <option value="Vencidos 5">Vencidos 5</option>
+            <label for="template">Template (opcional)</label>
+            <select id="template">
+              <option value="">(sem template)</option>
+              <option value="preventivo_d0">Preventivo D0</option>
+              <option value="preventivo_d3_d10">Preventivo D3 e D10</option>
+              <option value="vencidos_1">Vencidos 1</option>
+              <option value="vencidos_2">Vencidos 2</option>
+              <option value="vencidos_5">Vencidos 5</option>
             </select>
           </div>
 
           <div>
-            <label>Tempo Médio (min)</label>
-            <input type="number" id="tempo" min="0" value="12" />
-          </div>
-          <div>
-            <label>Quantidade de Potes</label>
-            <input type="number" id="potes" min="1" value="1" />
+            <label for="tempo">Tempo Médio (min)</label>
+            <input type="number" id="tempo" min="0" required />
           </div>
 
           <div>
-            <label>Volume de Disparos</label>
+            <label for="potes">Quantidade de Potes</label>
+            <input type="number" id="potes" min="1" required />
+          </div>
+
+          <div>
+            <label for="volume">Volume de Disparos</label>
             <input type="number" id="volume" min="0" value="0" />
           </div>
+
           <div>
-            <label>Horário</label>
-            <select id="horario">
-              <option>08:00</option><option>12:00</option><option>16:00</option><option>20:00</option>
+            <label for="horario">Horário</label>
+            <select id="horario" required>
+              <option value="08:00">08:00</option>
+              <option value="12:00">12:00</option>
+              <option value="16:00">16:00</option>
+              <option value="20:00">20:00</option>
             </select>
           </div>
 
           <div class="full">
-            <button type="submit" id="btnAdd">Adicionar</button>
+            <button type="submit">Adicionar</button>
           </div>
         </form>
       </div>
 
-      <div id="readOnlyHint" class="form-card" style="display:none;">
-        <strong>Modo leitura:</strong> faça login para adicionar/alterar.
+      <!-- Aviso quando deslogado -->
+      <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
+        Você está em <strong>modo leitura</strong>. Faça login para adicionar/alterar disparos.
       </div>
 
-      <div class="table-card">
-        <div class="grid">
+      <!-- Tabela -->
+      <div class="table-card" style="margin-top:14px;">
+        <div class="grid" id="painel-grid">
           <div class="header">Horário</div>
           <div class="header">08:00</div>
           <div class="header">12:00</div>
@@ -176,403 +190,536 @@
       </div>
     </section>
 
-    <!-- LOGIN -->
+    <!-- VIEW: LOGIN -->
     <section id="view-login" style="display:none;">
       <div class="login-card">
         <h2 class="login-title">Acessar</h2>
         <form id="loginForm">
-          <label>Usuário</label>
-          <input type="text" id="loginUser" value="energia" required />
-          <label style="margin-top:10px;">Senha</label>
-          <input type="password" id="loginPass" value="energia1" required />
+          <label for="loginUser">Usuário</label>
+          <input type="text" id="loginUser" placeholder="usuário" required value="energia" />
+          <label for="loginPass" style="margin-top:10px;">Senha</label>
+          <input type="password" id="loginPass" placeholder="senha" required value="energia1" />
           <div class="login-actions">
             <button type="submit" id="btnLogin">Entrar</button>
-            <button type="button" class="btn-danger" id="btnLogout" style="display:none;">Sair</button>
+            <button type="button" id="btnLogout" class="btn-danger">Sair</button>
           </div>
         </form>
       </div>
     </section>
   </div>
 
-  <footer class="footer" style="text-align:center;color:#6b7280;padding:14px 12px;border-top:1px solid var(--border);background:#fff;">
+  <footer class="footer">
     Desenvolvido por Leahpar Code &copy; 2025
   </footer>
 
   <!-- MODAL -->
-  <div id="modal" class="modal" aria-hidden="true">
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-card">
-      <div class="modal-header">
-        <div id="m-title" style="font-size:18px; font-weight:900;">Detalhes</div>
-        <button class="modal-close" id="m-close" title="Fechar">×</button>
+      <div class="modal-head">
+        <div class="modal-title" id="m-title">Detalhes</div>
+        <button class="close-btn" id="m-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="chips">
+        <span class="chip status" id="m-status">Status</span>
+        <span class="chip">Horário: <b id="m-horario">--:--</b></span>
+        <span class="chip">Potes: <b id="m-potes">0</b></span>
+        <span class="chip">Volume: <b id="m-volume">0</b></span>
+        <span class="chip">Tempo médio: <b id="m-tempo">0</b> min</span>
+        <span class="chip">Tempo restante: <b id="m-restante">0</b> min</span>
       </div>
       <div class="modal-body">
-        <div class="chips" id="m-chips"></div>
-        <div style="font-weight:800; margin:8px 0 8px;">Template: <span id="m-tpl-name">—</span></div>
-        <div class="template-box">
-          <pre id="m-tpl" style="white-space:pre-wrap; font-family:inherit; margin:0;"></pre>
-        </div>
+        <div style="font-weight:800; margin:6px 0 8px">Template: <span id="m-tpl-name">—</span></div>
+        <div id="m-tpl-body" class="tpl-box">(Sem template associado a este disparo)</div>
+
         <div class="modal-actions">
-          <button id="btnCopyTpl">Copiar template</button>
-          <button id="btnCopyResumo">Copiar resumo</button>
+          <button id="copyTpl" class="btn-outline">Copiar template</button>
+          <button id="copyResumo" class="btn-outline">Copiar resumo</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-  /* ===================== CONFIG ===================== */
-  const API_BASE = ""; // mesmo host
-  const IS_FILE = location.protocol === "file:";
-  const url = (p) => `${(API_BASE||"").replace(/\/+$/,"")}${p}`;
+<script>
+/* ========================== CONFIG ========================== */
+// Mesmo host → deixe vazio (""). Se usar domínio, sem barra no final.
+const API_BASE = "";
+const IS_FILE = location.protocol === "file:";
+const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
+let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
 
-  /* ===================== SPLASH + TOAST ===================== */
-  const splash = document.getElementById("splash");
-  const hideSplash = () => { splash?.classList.add("hide"); setTimeout(()=>splash?.remove(),300); };
-  setTimeout(hideSplash, 1200);
+const BASE = (API_BASE || "").replace(/\/+$/,"");
+const url = (p) => `${BASE}${p}`;
 
-  const topbar = document.getElementById("topbar");
-  function toast(msg, type="ok", ms=2600){
-    const div = document.createElement("div");
-    div.className = `toast ${type}`;
-    div.innerHTML = `<span>${msg}</span>`;
-    topbar.appendChild(div);
-    setTimeout(()=>div.remove(), ms);
+/* ====================== SPLASH & TOASTS ===================== */
+const splash = document.getElementById("splash");
+const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
+const splashTimer = setTimeout(hideSplashSoon, 1200); // segurança anti “travar”
+addEventListener("error", hideSplashSoon);
+addEventListener("unhandledrejection", hideSplashSoon);
+
+const topbar = document.getElementById("topbar");
+const toasts = new Set();
+function toast(msg, type="warn", ms=3200, key=null){
+  if (key && toasts.has(key)) return;
+  const div = document.createElement("div");
+  div.className = `toast ${type}`;
+  div.innerHTML = `<span>${msg}</span><button aria-label="fechar">×</button>`;
+  const btn = div.querySelector("button");
+  btn.onclick = ()=> { div.remove(); if (key) toasts.delete(key); };
+  topbar.appendChild(div);
+  if (key) toasts.add(key);
+  setTimeout(()=>{ try{btn.click()}catch{} }, ms);
+}
+
+/* ============================ AUTH =========================== */
+const AUTH_KEY = "painel_auth_ok";
+let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
+
+function updateAuthUI(){
+  const formWrap = document.getElementById("form-wrapper");
+  const hint = document.getElementById("readOnlyHint");
+  if(isAuthed){
+    formWrap.style.display = "";
+    hint.style.display = "none";
+  }else{
+    formWrap.style.display = "none";
+    hint.style.display = "";
   }
+}
 
-  /* ===================== AUTH ===================== */
-  const AUTH_KEY = "painel_auth_ok";
-  let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
+/* ============================ TABS =========================== */
+const tabs = document.querySelectorAll(".tab");
+function switchTab(name){
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
+  document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
+  if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
+}
+tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
-  function updateAuthUI(){
-    const formWrap = document.getElementById("form-wrapper");
-    const hint = document.getElementById("readOnlyHint");
-    const btnLogout = document.getElementById("btnLogout");
-    if(isAuthed){
-      formWrap.style.display = "";
-      hint.style.display = "none";
-      btnLogout.style.display = "";
-    }else{
-      formWrap.style.display = "none";
-      hint.style.display = "";
-      btnLogout.style.display = "none";
-    }
-  }
+/* ===================== Templates (keys = Airtable) ===================== */
+const TEMPLATES = {
+  preventivo_d0: {
+    label: "Preventivo D0",
+    body: `Olá $[nome]!😊
 
-  /* ===================== TABS ===================== */
-  const tabs = document.querySelectorAll(".tab");
-  function switchTab(name){
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab===name));
-    document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
-    document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
-  }
-  tabs.forEach(b => b.addEventListener("click", ()=> switchTab(b.dataset.tab)));
-
-  /* ===================== TEMPLATE LIB ===================== */
-  const TEMPLATE_LIB = {
-    "Preventivo D0": ({nome,valor,data_vencimento}) => 
-`Olá ${nome}!😊
-
-Seu boleto vence Hoje! Para facilitar vamos encaminhar ele novamente por aqui.
+Seu boleto vence Hoje! Para facilitar vamos encaminhar ele novamente por aqui. 
 Clique no documento para ver seu consumo de energia e o código de barras.(Caso já tenha pago é só desconsiderar)
 
-*Valor* R$: ${valor}
-*Vencimento* : ${data_vencimento}
+*Valor* R$: $[valor]
+*Vencimento* : $[data_vencimento]
 
-📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
+📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍 
 
-Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`,
+Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`
+  },
+  preventivo_d3_d10: {
+    label: "Preventivo D3 e D10",
+    body: `Olá $[nome]!😊 
 
-    "Preventivo D3 e D10": ({nome,valor,data_vencimento}) =>
-`Olá ${nome}!😊
+Seu boleto vence em $[data_vencimento]! Para facilitar vamos encaminhar ele novamente por aqui. 
+Clique no documento para ver seu consumo de energia e o código de barras (Caso já tenha pago é só desconsiderar). 
 
-Seu boleto vence em ${data_vencimento}! Para facilitar vamos encaminhar ele novamente por aqui.
-Clique no documento para ver seu consumo de energia e o código de barras (Caso já tenha pago é só desconsiderar).
+*Valor* R$ : $[valor]
 
-*Valor* R$ : ${valor}
+📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍 
 
-📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
+Energia de TODOS: A Energia que Retorna!🌎`
+  },
+  vencidos_1: {
+    label: "Vencidos 1",
+    body: `Olá $[nome]!😊 
 
-Energia de TODOS: A Energia que Retorna!🌎`,
+*ATENÇÃO! Sua conta de energia venceu há $[dias_vencidos] dias atrás e não identificamos seu pagamento* 
 
-    "Vencidos 1": ({nome,valor,data_vencimento,dias_vencidos}) =>
-`Olá ${nome}!😊
+*Valor* R$ :$[valor]
+*Vencimento* : $[data_vencimento]
 
-*ATENÇÃO! Sua conta de energia venceu há ${dias_vencidos} dias atrás e não identificamos seu pagamento*
+*Atenção*: não deixe de pagar em dia suas faturas para evitar juros e continuar economizando! (Favor desconsiderar essa mensagem, caso já tenha pago). 
 
-*Valor* R$ :${valor}
-*Vencimento* : ${data_vencimento}
+👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo! 
 
-*Atenção*: não deixe de pagar em dia suas faturas para evitar juros e continuar economizando! (Favor desconsiderar essa mensagem, caso já tenha pago).
-
-👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
-
-Clique no documento para ver seu consumo de energia e o código de barras.
-
-❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
-
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-
-    "Vencidos 2": ({nome,valor,data_vencimento,dias_vencidos}) =>
-`Olá ${nome}!😊
-
-*ATENÇÃO! Sua conta de energia venceu há  ${dias_vencidos}  dias atrás e não identificamos seu pagamento*
-
-Por conta disso poderá haver a suspensão de energia solar. A boa notícia é que ainda há chances de regularizar antes que isso aconteça.  (Favor desconsiderar essa mensagem, caso já tenha pago).
-
-*Valor* R$ :  ${valor}
-*Vencimento* : ${data_vencimento}
-
-👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
-
-Clique no documento para ver seu consumo de energia e o código de barras.
+Clique no documento para ver seu consumo de energia e o código de barras. 
 
 ❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
 
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`
+  },
+  vencidos_2: {
+    label: "Vencidos 2",
+    body: `Olá $[nome]!😊 
 
-    "Vencidos 5": ({quantidade_boletos,valor}) =>
-`Olá ${"${nome}"}!😊
+*ATENÇÃO! Sua conta de energia venceu há  $[dias_vencidos]  dias atrás e não identificamos seu pagamento* 
+
+Por conta disso poderá haver a suspensão de energia solar. A boa notícia é que ainda há chances de regularizar antes que isso aconteça.  (Favor desconsiderar essa mensagem, caso já tenha pago). 
+
+*Valor* R$ :  $[valor]
+*Vencimento* : $[data_vencimento]
+
+👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo! 
+
+Clique no documento para ver seu consumo de energia e o código de barras. 
+
+❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
+
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`
+  },
+  vencidos_5: {
+    label: "Vencidos 5",
+    body: `Olá $[nome]!😊
 
 ⚠ Até o momento não identificamos o pagamento do seu débito com a Energia de TODOS. Após várias tentativas de contato e de negociação sem sucesso, encaminhamos o seu cadastro ao Serviço de Proteção ao Crédito - SPC.
 
-👉 Quantidade de boletos sem pagamento:  ${quantidade_boletos}
-👉 Valor pendente: R$  ${valor}
+👉 Quantidade de boletos sem pagamento:  $[quantidade_boletos]
+👉 Valor pendente: R$  $[valor]
 
 Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelamento, fale abaixo com nossos atendentes.
 
 📞 Este é nosso número oficial de atendimento via WhatsApp. Se tiver alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-  };
-
-  /* ===================== RENDER ===================== */
-  const COLS = { "08:00":"col-08", "12:00":"col-12", "16:00":"col-16", "20:00":"col-20" };
-  function statusClass(s){ s=(s||"").toLowerCase(); if(s==="finalizado")return "status-finalizado"; if(s==="insucesso")return "status-insucesso"; return "status-andamento";}
-
-  function clearCols(){ Object.values(COLS).forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=""; }); }
-
-  function cardTemplate(r){
-    const div = document.createElement("div");
-    div.className = `disparo ${statusClass(r.status)}`;
-    div.dataset.id = r.id;
-    div.innerHTML = `
-      <span class="badge">${r.status||"Em andamento"}</span>
-      <div class="title">${r.tipo||""}</div>
-      <div class="meta">Tempo médio: <strong>${r.tempo??""} min</strong> • Potes: <strong>${r.potes??""}</strong> • Vol.: <strong>${r.volume??0}</strong></div>
-    `;
-    div.addEventListener("click", ()=> openModal(r));
-    return div;
+*Mais Sol, Energia e Economia para TODOS* 🌎💚`
   }
+};
+const tplLabel = key => (TEMPLATES[key]?.label || "—");
+const tplBody  = key => (TEMPLATES[key]?.body  || "(Sem template associado a este disparo)");
 
-  function place(r){
-    const hh = (r.horario||"08:00").slice(0,2);
-    const col = document.getElementById(`col-${hh}`);
-    if(col) col.appendChild(cardTemplate(r));
-  }
+/* ============================ UTILS ========================== */
+function clsForStatus(status){
+  const s = (status||"").toLowerCase();
+  if (s.includes("final")) return "status-finalizado";
+  if (s.includes("insu")) return "status-insucesso";
+  return "status-andamento";
+}
+function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
+function calcHash(records){
+  try{
+    return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.volume||0}|${r.template||""}`).join("§");
+  }catch{ return Math.random().toString(36); }
+}
+function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+}
 
-  function render(records){ clearCols(); (records||[]).forEach(place); }
-
-  /* ===================== DATA + SSE ===================== */
-  let lastHash = "";
-  let lastSnapshot = [];
-  let sse;
-
-  function calcHash(records){
-    try{
-      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.volume}|${r.template||""}`).join("§");
-    }catch{ return Math.random().toString(36); }
-  }
-
-  function applySnapshot(records, stale=false){
-    const h = calcHash(records);
-    if (h === lastHash) return;
-    // se vier vazio E for stale, ignoramos (evita flicker). Se vazio e NÃO stale => aplicar (ex.: deletou tudo)
-    if ((records?.length||0)===0 && stale) return;
-    render(records);
-    lastHash = h;
-    lastSnapshot = records;
-  }
-
-  async function loadInitial(){
-    try{
-      const resp = await fetch(url("/api/disparos"), {credentials:"include", cache:"no-store"});
-      const stale = resp.headers.get("X-Data-Stale")==="1";
-      const data = await resp.json();
-      applySnapshot(data, stale);
-    }catch{}
-    hideSplash();
-  }
-
-  function startSSE(){
-    try{
-      if (sse) sse.close();
-      sse = new EventSource(url("/api/stream"));
-      sse.onmessage = (evt)=>{
-        try{
-          const payload = JSON.parse(evt.data||"{}");
-          if (payload.type==="snapshot") applySnapshot(payload.records||[], !!payload.stale);
-        }catch{}
-      };
-      sse.onerror = ()=>{}; // polling não necessário aqui pois stream força leitura real
-    }catch{}
-  }
-
-  /* ===================== FORM ===================== */
-  document.getElementById("formDisparo").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    if(!isAuthed){ toast("Faça login para adicionar.", "warn"); return; }
-
-    const tipo = document.getElementById("tipo").value.trim();
-    const tempo = Number(document.getElementById("tempo").value||0);
-    const potes = Number(document.getElementById("potes").value||0);
-    const volume = Number(document.getElementById("volume").value||0);
-    const horario = document.getElementById("horario").value;
-    const template = document.getElementById("templateSelect").value || "";
-
-    if (!tipo) return;
-
-    try{
-      const resp = await fetch(url("/api/disparos"), {
-        method:"POST",
-        credentials:"include",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-          tipo, tempo, potes, volume, horario, template,
-          status:"Em andamento"
-        })
-      });
-      if(!resp.ok){
-        if(resp.status===401){ isAuthed=false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login"); toast("Sessão expirada.","warn"); }
-        else{
-          const txt = await resp.text();
-          console.warn("POST falhou:", txt);
-          toast("Não consegui salvar no servidor.","error");
-        }
-        return;
-      }
-      (e.target).reset();
-      document.getElementById("tempo").value = 12;
-      document.getElementById("potes").value = 1;
-      document.getElementById("volume").value = 0;
-      toast("Disparo adicionado!","ok");
-      setTimeout(loadInitial, 250);
-    }catch{
-      toast("Falha de rede ao salvar.","error");
-    }
+/* =========================== RENDER ========================== */
+function clearColumns(){
+  ["08","12","16","20"].forEach(h => {
+    const el = document.getElementById("col-"+h);
+    if (el) el.innerHTML = "";
   });
+}
 
-  /* ===================== LOGIN ===================== */
-  document.getElementById("loginForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const u = document.getElementById("loginUser").value.trim();
-    const p = document.getElementById("loginPass").value.trim();
-    if(!u || !p) return;
-
-    try{
-      const r = await fetch(url("/api/login"), {
-        method:"POST", credentials:"include",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({username:u, password:p})
-      });
-      if(r.ok){ isAuthed=true; localStorage.setItem(AUTH_KEY,"1"); updateAuthUI(); switchTab("painel"); toast("Login ok!","ok"); setTimeout(loadInitial, 120); }
-      else{ toast("Usuário ou senha inválidos.","error"); }
-    }catch{ toast("Rede instável.","warn"); }
-  });
-
-  document.getElementById("btnLogout").addEventListener("click", async ()=>{
-    try{ await fetch(url("/api/logout"), {method:"POST", credentials:"include"}); }catch{}
-    isAuthed=false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login"); toast("Sessão encerrada.","ok");
-  });
-
-  /* ===================== MODAL ===================== */
+function openModalFor(rec){
   const modal = document.getElementById("modal");
-  document.getElementById("m-close").onclick = () => modal.classList.remove("show");
-  modal.addEventListener("click", (e)=>{ if(e.target===modal) modal.classList.remove("show"); });
+  document.getElementById("m-title").textContent = rec.tipo || "Detalhes";
+  const st = (rec.status || "Em andamento").toLowerCase();
+  const stChip = document.getElementById("m-status");
+  stChip.textContent = rec.status || "Em andamento";
+  stChip.className = `chip status ${st.includes("final")?'finalizado':st.includes('insu')?'insucesso':'andamento'}`;
 
-  function statusChip(status){
-    const s = (status||"Em andamento").toLowerCase();
-    let cls = "status-col-andamento", txt="Em andamento";
-    if(s==="finalizado"){ cls="status-col-finalizado"; txt="Finalizado"; }
-    else if(s==="insucesso"){ cls="status-col-insucesso"; txt="Insucesso"; }
-    const div = document.createElement("div");
-    div.className = `status-chip ${cls}`;
-    div.innerHTML = `<strong>Status:</strong>&nbsp;${txt}`;
-    return div;
-  }
+  document.getElementById("m-horario").textContent = rec.horario || "--:--";
+  document.getElementById("m-potes").textContent   = rec.potes ?? 0;
+  document.getElementById("m-volume").textContent  = rec.volume ?? 0;
+  document.getElementById("m-tempo").textContent   = rec.tempo ?? 0;
+  // “restante” é uma aproximação simples (potes * tempo)
+  const restante = ((Number(rec.potes)||0) * (Number(rec.tempo)||0));
+  document.getElementById("m-restante").textContent = restante;
 
-  let currentRec = null;
+  document.getElementById("m-tpl-name").textContent = tplLabel(rec.template);
+  document.getElementById("m-tpl-body").textContent = tplBody(rec.template);
 
-  function openModal(r){
-    currentRec = r;
-    document.getElementById("m-title").textContent = r.tipo || "Detalhes";
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden","false");
+}
+document.getElementById("m-close").addEventListener("click", ()=> {
+  const modal = document.getElementById("modal");
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden","true");
+});
+document.getElementById("modal").addEventListener("click", (e)=>{
+  if (e.target.id === "modal") document.getElementById("m-close").click();
+});
 
-    const chips = document.getElementById("m-chips");
-    chips.innerHTML = "";
-    chips.append(
-      statusChip(r.status),
-      chip("Horário:", r.horario||""),
-      chip("Potes:", r.potes??0),
-      chip("Volume:", r.volume??0),
-      chip("Tempo médio:", (r.tempo??0)+" min"),
-      chip("Tempo restante:", calcRestante(r)+" min")
+function cardTemplate(r){
+  const div = document.createElement("div");
+  div.className = `disparo ${clsForStatus(r.status)}`;
+  div.dataset.id = r.id || uid();
+  div.dataset.status = r.status || "Em andamento";
+  div.dataset.horario = r["horario"] || "08:00";
+  div.dataset.template = r.template || "";
+
+  div.innerHTML = `
+    <span class="badge">${r.status || "Em andamento"}</span>
+    <div class="title">${r.tipo || ""}</div>
+    <div class="meta">Tempo médio: <strong>${r.tempo ?? 0} min</strong> • Potes: <strong>${r.potes ?? 0}</strong> • Vol: <strong>${r.volume ?? 0}</strong></div>
+  `;
+
+  // Clique abre modal (somente leitura)
+  div.addEventListener("click", () => openModalFor(r));
+  return div;
+}
+
+function placeRecord(r){
+  const hh = (r["horario"] || "08:00").split(":")[0];
+  const col = document.getElementById("col-"+hh);
+  if (col) col.appendChild(cardTemplate(r));
+}
+
+function renderSnapshot(records){
+  clearColumns();
+  (records||[]).forEach(r => placeRecord(r));
+}
+
+/* ============= Data (Cache + SSE + Polling Backoff) ========= */
+const CACHE_KEY = "painel_snapshot_v2";
+const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
+let lastNonEmpty = [];
+let lastHash = "";
+let sse = null;
+let pollTimer = null;
+let backoffMs = 5000;
+let gotFirstPaint = false;
+
+// Pinta do cache (rápido)
+(function paintFromCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return;
+    const {ts, data} = JSON.parse(raw);
+    if (!data || (Date.now() - ts) > CACHE_TTL_MS) return;
+    lastNonEmpty = data;
+    lastHash = calcHash(data);
+    renderSnapshot(data);
+    clearTimeout(splashTimer);
+    hideSplashSoon();
+    gotFirstPaint = true;
+  }catch{}
+})();
+
+function saveCache(records){
+  try{
+    const payload = { ts: Date.now(), data: records };
+    (window.requestIdleCallback || setTimeout)(() =>
+      localStorage.setItem(CACHE_KEY, JSON.stringify(payload)), 0
     );
+  }catch{}
+}
 
-    const tplName = r.template || "—";
-    document.getElementById("m-tpl-name").textContent = tplName;
+function safeRender(records){
+  const incomingHash = calcHash(records);
+  if (incomingHash === lastHash) return;
+  // se vier vazio e já temos dados, ignore (evita "apagar" em falha temporária)
+  if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) return;
+  renderSnapshot(records);
+  lastHash = incomingHash;
+  if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
+  if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
+}
 
-    const tplGen = TEMPLATE_LIB[tplName];
-    const preview = tplGen ? tplGen({
-      nome:"${nome}", valor:"${valor}", data_vencimento:"${data_vencimento}",
-      dias_vencidos:"${dias_vencidos}", quantidade_boletos:"${quantidade_boletos}"
-    }) : "(Sem template associado a este disparo)";
-    document.getElementById("m-tpl").textContent = preview;
+async function loadInitial(){
+  if (OFFLINE_MODE) return;
+  try{
+    const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
+    if (!resp.ok) throw new Error(resp.status);
+    const data = await resp.json();
+    safeRender(data);
+  }catch(e){
+    // silencioso; cache já pode ter pintado; splash tem timeout
+  }
+}
 
-    modal.classList.add("show");
+async function softRefresh(){
+  if (OFFLINE_MODE) return;
+  try{
+    const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+    if (!resp.ok) return;
+    const data = await resp.json();
+    safeRender(data);
+  }catch{}
+}
+
+function startPolling(){
+  if (OFFLINE_MODE) return;
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async ()=>{
+    try{
+      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
+      if (resp.ok){
+        const data = await resp.json();
+        safeRender(data);
+        backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
+      }
+    }catch{}
+  }, backoffMs);
+  backoffMs = Math.min(backoffMs * 2, 30000); // cresce até 30s
+}
+
+function startSSE(){
+  if (OFFLINE_MODE) return;
+  try{
+    if (sse) sse.close();
+    sse = new EventSource(url("/api/stream"));
+    sse.onmessage = (evt) => {
+      try{
+        const payload = JSON.parse(evt.data);
+        if (payload.type === "snapshot") safeRender(payload.records || []);
+      }catch{}
+    };
+    sse.onerror = () => { startPolling(); };
+  }catch{
+    startPolling();
+  }
+}
+
+/* ======================== FORM ADD ========================== */
+const form = document.getElementById("formDisparo");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const tipo  = document.getElementById("tipo").value.trim();
+  const tempo = Number(document.getElementById("tempo").value);
+  const potes = Number(document.getElementById("potes").value);
+  const volume= Number(document.getElementById("volume").value || 0);
+  const horario = document.getElementById("horario").value;
+  const template = document.getElementById("template").value || "";
+
+  if(!tipo) return;
+
+  const optimisticRecord = { id: uid(), tipo, tempo, potes, volume, horario, status:"Em andamento", template };
+  (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
+  safeRender(lastNonEmpty);
+
+  if (OFFLINE_MODE) { e.target.reset(); return; }
+  if(!isAuthed){
+    toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
+    lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+    safeRender(lastNonEmpty);
+    return;
   }
 
-  function chip(label, value){
-    const d = document.createElement("div");
-    d.className = "chip";
-    d.innerHTML = `<strong>${label}</strong>&nbsp;${value}`;
-    return d;
+  try{
+    const resp = await fetch(url("/api/disparos"), {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"include",
+      body:JSON.stringify(optimisticRecord) // inclui template e volume!
+    });
+    if (!resp.ok){
+      if (resp.status === 401){
+        toast("Sessão expirada. Faça login novamente.", "warn", 4000, "sessao");
+        isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+      }else{
+        const t = await resp.text().catch(()=> "");
+        toast("Não consegui salvar no servidor.", "error");
+        console.warn("POST falhou:", resp.status, t);
+      }
+      // desfaz otimista
+      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+      safeRender(lastNonEmpty);
+    } else {
+      e.target.reset();
+      setTimeout(softRefresh, 400);
+      toast("Disparo criado!", "ok", 2200);
+    }
+  }catch{
+    toast("Falha de rede ao salvar.", "error");
+    lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
+    safeRender(lastNonEmpty);
+  }
+});
+
+/* ====================== LOGIN / LOGOUT ====================== */
+const loginForm = document.getElementById("loginForm");
+const btnLogin  = document.getElementById("btnLogin");
+const btnLogout = document.getElementById("btnLogout");
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const u = (document.getElementById("loginUser").value || "").trim();
+  const p = (document.getElementById("loginPass").value || "").trim();
+  if (!u || !p){ return; }
+  btnLogin.disabled = true;
+
+  if (u !== "energia" || p !== "energia1") {
+    toast("Usuário ou senha inválidos.", "error");
+    btnLogin.disabled = false;
+    return;
   }
 
-  function calcRestante(r){
-    const base = Number(r.tempo||0);
-    // sem dados reais de início/fim, mostramos o mesmo tempo (mock)
-    return base;
+  isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
+
+  // tenta sessão backend (não bloqueia a UI)
+  try{
+    const r = await fetch(url("/api/login"), {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"include",
+      body: JSON.stringify({ username:u, password:p })
+    });
+    if (!r.ok){
+      toast("Não consegui criar sessão segura no servidor. Tente novamente mais tarde.", "warn");
+    }else{
+      setTimeout(softRefresh, 150);
+    }
+  }catch{
+    toast("Rede instável ao criar sessão. Continuando em modo UI.", "warn");
+  }finally{
+    btnLogin.disabled = false;
   }
+});
 
-  document.getElementById("btnCopyTpl").addEventListener("click", async ()=>{
-    const name = currentRec?.template || "";
-    const gen = TEMPLATE_LIB[name];
-    const text = gen ? gen({
-      nome:"${nome}", valor:"${valor}", data_vencimento:"${data_vencimento}",
-      dias_vencidos:"${dias_vencidos}", quantidade_boletos:"${quantidade_boletos}"
-    }) : "(Sem template)";
-    try{ await navigator.clipboard.writeText(text); toast("Template copiado!","ok"); }catch{ toast("Falha ao copiar.","error"); }
-  });
+btnLogout.addEventListener("click", () => {
+  isAuthed = false; localStorage.removeItem(AUTH_KEY);
+  updateAuthUI(); switchTab("login");
+  try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+});
 
-  document.getElementById("btnCopyResumo").addEventListener("click", async ()=>{
-    const r = currentRec || {};
-    const resumo =
-`Disparo: ${r.tipo||""}
-Status: ${r.status||""}
-Horário: ${r.horario||""}
-Potes: ${r.potes??0}
-Volume: ${r.volume??0}
-Tempo médio: ${r.tempo??0} min
-Template: ${r.template||"—"}`;
-    try{ await navigator.clipboard.writeText(resumo); toast("Resumo copiado!","ok"); }catch{ toast("Falha ao copiar.","error"); }
-  });
+/* ================== COPIAR TEMPLATE/RESUMO ================== */
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(
+    ()=> toast("Copiado para a área de transferência!", "ok", 1800),
+    ()=> {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand("copy"); ta.remove();
+      toast("Copiado!", "ok", 1800);
+    }
+  );
+}
+document.getElementById("copyTpl").addEventListener("click", ()=>{
+  copyToClipboard(document.getElementById("m-tpl-body").textContent || "");
+});
+document.getElementById("copyResumo").addEventListener("click", ()=>{
+  const tipo = document.getElementById("m-title").textContent.trim();
+  const st   = document.getElementById("m-status").textContent.trim();
+  const hor  = document.getElementById("m-horario").textContent.trim();
+  const pt   = document.getElementById("m-potes").textContent.trim();
+  const vol  = document.getElementById("m-volume").textContent.trim();
+  const tm   = document.getElementById("m-tempo").textContent.trim();
+  const rest = document.getElementById("m-restante").textContent.trim();
+  const tplN = document.getElementById("m-tpl-name").textContent.trim();
 
-  /* ===================== START ===================== */
-  (async ()=>{
-    switchTab("painel");
-    updateAuthUI();
-    startSSE();
-    await loadInitial();
-  })();
-  </script>
+  const resumo =
+`Status: ${st}
+Horário: ${hor} • Potes: ${pt} • Volume: ${vol}
+Tempo médio: ${tm} min • Tempo restante: ${rest} min
+Template: ${tplN}
+Disparo: ${tipo}`;
+  copyToClipboard(resumo);
+});
+
+/* ========================== START =========================== */
+(async () => {
+  switchTab("painel");
+  updateAuthUI();
+
+  if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
+
+  startSSE();    // começa ouvindo atualizações
+  loadInitial(); // busca inicial rápida (timeout curto)
+})();
+</script>
 </body>
 </html>
