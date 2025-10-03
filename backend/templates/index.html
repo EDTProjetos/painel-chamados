@@ -39,7 +39,7 @@
     input,select,button{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#111827; font-size:14px}
     button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
 
-    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted); padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
+    .badge-info{display:inline-block; background:#fff; border:1px dashed var(--border); color:#666; padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px}
 
     .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
     .grid{display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%}
@@ -58,7 +58,7 @@
     .login-actions{display:flex; gap:10px; margin-top:12px}
     .btn-danger{background:#ef4444}
 
-    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted); font-size:13px; text-align:center; padding:14px 12px}
+    .footer{width:100%; background:#fff; border-top:1px solid var(--border); color:#6b7280; font-size:13px; text-align:center; padding:14px 12px}
 
     /* Splash/Spinner */
     .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease}
@@ -196,9 +196,9 @@
         <h2 class="login-title">Acessar</h2>
         <form id="loginForm">
           <label for="loginUser">Usuário</label>
-          <input type="text" id="loginUser" placeholder="usuário" required value="" />
+          <input type="text" id="loginUser" placeholder="usuário" required value="energia" />
           <label for="loginPass" style="margin-top:10px;">Senha</label>
-          <input type="password" id="loginPass" placeholder="senha" required value="" />
+          <input type="password" id="loginPass" placeholder="senha" required value="energia1" />
           <div class="login-actions">
             <button type="submit" id="btnLogin">Entrar</button>
             <button type="button" id="btnLogout" class="btn-danger">Sair</button>
@@ -241,7 +241,6 @@
 
 <script>
 /* ========================== CONFIG ========================== */
-// Mesmo host → deixe vazio (""). Se usar domínio, sem barra no final.
 const API_BASE = "";
 const IS_FILE = location.protocol === "file:";
 const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
@@ -253,7 +252,7 @@ const url = (p) => `${BASE}${p}`;
 /* ====================== SPLASH & TOASTS ===================== */
 const splash = document.getElementById("splash");
 const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
-const splashTimer = setTimeout(hideSplashSoon, 1200); // segurança anti “travar”
+const splashTimer = setTimeout(hideSplashSoon, 1200);
 addEventListener("error", hideSplashSoon);
 addEventListener("unhandledrejection", hideSplashSoon);
 
@@ -422,7 +421,6 @@ function openModalFor(rec){
   document.getElementById("m-potes").textContent   = rec.potes ?? 0;
   document.getElementById("m-volume").textContent  = rec.volume ?? 0;
   document.getElementById("m-tempo").textContent   = rec.tempo ?? 0;
-  // “restante” é uma aproximação simples (potes * tempo)
   const restante = ((Number(rec.potes)||0) * (Number(rec.tempo)||0));
   document.getElementById("m-restante").textContent = restante;
 
@@ -455,7 +453,6 @@ function cardTemplate(r){
     <div class="meta">Tempo médio: <strong>${r.tempo ?? 0} min</strong> • Potes: <strong>${r.potes ?? 0}</strong> • Vol: <strong>${r.volume ?? 0}</strong></div>
   `;
 
-  // Clique abre modal (somente leitura)
   div.addEventListener("click", () => openModalFor(r));
   return div;
 }
@@ -473,7 +470,7 @@ function renderSnapshot(records){
 
 /* ============= Data (Cache + SSE + Polling Backoff) ========= */
 const CACHE_KEY = "painel_snapshot_v2";
-const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
+const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
 let lastNonEmpty = [];
 let lastHash = "";
 let sse = null;
@@ -481,7 +478,6 @@ let pollTimer = null;
 let backoffMs = 5000;
 let gotFirstPaint = false;
 
-// Pinta do cache (rápido)
 (function paintFromCache(){
   try{
     const raw = localStorage.getItem(CACHE_KEY);
@@ -506,14 +502,22 @@ function saveCache(records){
   }catch{}
 }
 
-function safeRender(records){
+/* >>>>>>> ALTERADO: agora aceita allowEmpty para refletir deleções <<<<<< */
+function safeRender(records, {allowEmpty=false} = {}){
   const incomingHash = calcHash(records);
   if (incomingHash === lastHash) return;
-  // se vier vazio e já temos dados, ignore (evita "apagar" em falha temporária)
-  if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) return;
+
+  // antes bloqueava "empty" quando já tínhamos dados — isso impedia deleção
+  if (!allowEmpty && (records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) {
+    return;
+  }
+
   renderSnapshot(records);
   lastHash = incomingHash;
-  if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
+  // atualiza estado/cache mesmo que vazio (para limpar tela)
+  lastNonEmpty = records || [];
+  saveCache(lastNonEmpty);
+
   if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
 }
 
@@ -523,9 +527,10 @@ async function loadInitial(){
     const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
     if (!resp.ok) throw new Error(resp.status);
     const data = await resp.json();
-    safeRender(data);
+    // permite vazio (se tudo foi apagado)
+    safeRender(data, {allowEmpty:true});
   }catch(e){
-    // silencioso; cache já pode ter pintado; splash tem timeout
+    // silencioso
   }
 }
 
@@ -535,7 +540,7 @@ async function softRefresh(){
     const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
     if (!resp.ok) return;
     const data = await resp.json();
-    safeRender(data);
+    safeRender(data, {allowEmpty:true});
   }catch{}
 }
 
@@ -547,12 +552,12 @@ function startPolling(){
       const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
       if (resp.ok){
         const data = await resp.json();
-        safeRender(data);
-        backoffMs = Math.max(5000, Math.floor(backoffMs/2)); // melhora se recuperar
+        safeRender(data, {allowEmpty:true});
+        backoffMs = Math.max(5000, Math.floor(backoffMs/2));
       }
     }catch{}
   }, backoffMs);
-  backoffMs = Math.min(backoffMs * 2, 30000); // cresce até 30s
+  backoffMs = Math.min(backoffMs * 2, 30000);
 }
 
 function startSSE(){
@@ -563,7 +568,10 @@ function startSSE(){
     sse.onmessage = (evt) => {
       try{
         const payload = JSON.parse(evt.data);
-        if (payload.type === "snapshot") safeRender(payload.records || []);
+        if (payload.type === "snapshot") {
+          // permite vazio — garante que deleções reflitam imediatamente
+          safeRender(payload.records || [], {allowEmpty:true});
+        }
       }catch{}
     };
     sse.onerror = () => { startPolling(); };
@@ -588,13 +596,13 @@ form.addEventListener("submit", async (e) => {
 
   const optimisticRecord = { id: uid(), tipo, tempo, potes, volume, horario, status:"Em andamento", template };
   (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
-  safeRender(lastNonEmpty);
+  safeRender(lastNonEmpty, {allowEmpty:true});
 
   if (OFFLINE_MODE) { e.target.reset(); return; }
   if(!isAuthed){
     toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3500, "readonly-add");
     lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-    safeRender(lastNonEmpty);
+    safeRender(lastNonEmpty, {allowEmpty:true});
     return;
   }
 
@@ -603,7 +611,7 @@ form.addEventListener("submit", async (e) => {
       method:"POST",
       headers:{"Content-Type":"application/json"},
       credentials:"include",
-      body:JSON.stringify(optimisticRecord) // inclui template e volume!
+      body:JSON.stringify(optimisticRecord)
     });
     if (!resp.ok){
       if (resp.status === 401){
@@ -614,9 +622,8 @@ form.addEventListener("submit", async (e) => {
         toast("Não consegui salvar no servidor.", "error");
         console.warn("POST falhou:", resp.status, t);
       }
-      // desfaz otimista
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      safeRender(lastNonEmpty);
+      safeRender(lastNonEmpty, {allowEmpty:true});
     } else {
       e.target.reset();
       setTimeout(softRefresh, 400);
@@ -625,7 +632,7 @@ form.addEventListener("submit", async (e) => {
   }catch{
     toast("Falha de rede ao salvar.", "error");
     lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-    safeRender(lastNonEmpty);
+    safeRender(lastNonEmpty, {allowEmpty:true});
   }
 });
 
@@ -649,7 +656,6 @@ loginForm.addEventListener("submit", async (e) => {
 
   isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
 
-  // tenta sessão backend (não bloqueia a UI)
   try{
     const r = await fetch(url("/api/login"), {
       method:"POST",
@@ -680,7 +686,6 @@ function copyToClipboard(text){
   navigator.clipboard.writeText(text).then(
     ()=> toast("Copiado para a área de transferência!", "ok", 1800),
     ()=> {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = text; document.body.appendChild(ta);
       ta.select(); document.execCommand("copy"); ta.remove();
@@ -717,8 +722,8 @@ Disparo: ${tipo}`;
 
   if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
 
-  startSSE();    // começa ouvindo atualizações
-  loadInitial(); // busca inicial rápida (timeout curto)
+  startSSE();
+  loadInitial();
 })();
 </script>
 </body>
