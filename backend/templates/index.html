@@ -897,7 +897,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }
 
     // Objeto enviado para o servidor, sem campos que ele deve gerar (id, status, etc)
-    const serverPayload = { tipo, tempo, potes, horario, template, volume };
+    const serverPayload = { tipo, tempo, potes, horario, template, volume, status: "Em andamento" };
 
     try{
       const resp = await fetch(url("/api/disparos"), {
