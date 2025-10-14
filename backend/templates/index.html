@@ -896,12 +896,15 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
+    // Objeto enviado para o servidor, sem campos que ele deve gerar (id, status, etc)
+    const serverPayload = { tipo, tempo, potes, horario, template, volume };
+
     try{
       const resp = await fetch(url("/api/disparos"), {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         credentials:"include",
-        body:JSON.stringify(optimisticRecord)
+        body:JSON.stringify(serverPayload)
       });
       if (!resp.ok){
         if (resp.status === 401){
