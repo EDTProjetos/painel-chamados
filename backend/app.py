@@ -1,6 +1,6 @@
 import os, time, json, hashlib, logging, requests
 from functools import wraps
-from datetime import timedelta, datetime # NOVO: Importar datetime
+from datetime import timedelta, datetime
 
 from flask import Flask, jsonify, request, Response, render_template, session
 from flask_cors import CORS
@@ -33,7 +33,10 @@ MAX_RETRIES = int(os.getenv("AIRTABLE_MAX_RETRIES", "4"))
 APP_USER = os.getenv("APP_USER", "energia")
 APP_PASS = os.getenv("APP_PASS", "energia1")
 
-app = Flask(__name__, template_folder=".") # CORRIGIDO: para encontrar o index.html na raiz
+# ===== CORREÇÃO DEFINITIVA AQUI =====
+# Garante que o Flask procure os templates na pasta 'templates'
+app = Flask(__name__, template_folder="templates")
+
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 app.config.update(
     SECRET_KEY=os.getenv("APP_SECRET", "change-this-in-prod"),
@@ -174,7 +177,6 @@ def api_disparos():
 def create_disparo():
     b = request.json or {}
     
-    # FORMATO DE DATA/HORA ESPERADO PELO AIRTABLE (ISO 8601)
     now_iso = datetime.utcnow().isoformat() + "Z"
 
     fields = {
@@ -184,26 +186,19 @@ def create_disparo():
         "Volume": b.get("volume", 0),
         "Horário": b.get("horario", "08:00"),
         "Status": b.get("status", "Em andamento"),
-        # ===== CORREÇÃO PRINCIPAL AQUI =====
-        # Adiciona o campo 'AtualizadoEm' com o valor enviado pelo frontend,
-        # ou usa a data/hora atual como fallback.
         "AtualizadoEm": b.get("atualizadoEm", now_iso)
     }
     
-    # Template é opcional
     if "template" in b and b["template"]:
         fields["Template"] = b["template"]
 
-    # typecast=true permite criar opções em Single select automaticamente
     r = _airtable_request("POST", AIRTABLE_API, json={"fields": fields}, params={"typecast":"true"})
+    
     if r.ok:
         try: get_snapshot(force=True)
         except: pass
-    
-    # Se a requisição para o Airtable falhar, retorne o erro detalhado.
-    if not r.ok:
+    else:
         log.error(f"Airtable respondeu com {r.status_code}: {r.text}")
-        return (r.text, r.status_code, {"Content-Type": "application/json"})
 
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
