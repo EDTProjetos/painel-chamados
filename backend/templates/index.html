@@ -257,13 +257,11 @@
       <button id="themeToggle" class="theme-toggle" title="Alternar tema"></button>
     </div>
 
-    <!-- Tabs -->
     <nav class="tabs">
       <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
 
-    <!-- Filtro por data -->
     <div id="dateFilters" class="date-filters">
         <div class="date-filter-group">
             <span class="label">Data:</span>
@@ -271,7 +269,6 @@
         </div>
     </div>
 
-    <!-- VIEW: PAINEL -->
     <section id="view-painel">
       <div class="legenda">
         <div class="legenda-item"><span class="cor andamento"></span> Em andamento</div>
@@ -279,7 +276,6 @@
         <div class="legenda-item"><span class="cor insucesso"></span> Insucesso</div>
       </div>
 
-      <!-- Form (só logado) -->
       <div id="form-wrapper" class="form-container" style="display:none;">
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
@@ -325,12 +321,10 @@
         </form>
       </div>
 
-      <!-- Aviso quando deslogado -->
       <div id="readOnlyHint" class="badge-info" style="display:none; text-align:center;">
         Você está em <strong>modo leitura</strong>. Faça login para adicionar/alterar disparos.
       </div>
 
-      <!-- Tabela -->
       <div class="table-card" style="margin-top:12px;">
         <div class="grid" id="painel-grid">
           <div class="header">Horário</div>
@@ -348,7 +342,6 @@
       </div>
     </section>
 
-    <!-- VIEW: LOGIN -->
     <section id="view-login" style="display:none;">
       <div class="login-card">
         <h2 class="login-title">Acessar</h2>
@@ -366,7 +359,6 @@
     </section>
   </div>
 
-  <!-- Modal -->
   <div id="modal" class="modal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="modal-header">
@@ -875,16 +867,28 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const tipo  = document.getElementById("tipo").value.trim();
-    const tempo = Number(document.getElementById("tempo").value);
-    const potes = Number(document.getElementById("potes").value);
-    const horario = document.getElementById("horario").value;
+    const tipo     = document.getElementById("tipo").value.trim();
+    const tempo    = Number(document.getElementById("tempo").value);
+    const potes    = Number(document.getElementById("potes").value);
+    const horario  = document.getElementById("horario").value;
     const template = (document.getElementById("template").value || "").trim();
-    const volume = Number(document.getElementById("volume").value || 0);
+    const volume   = Number(document.getElementById("volume").value || 0);
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
 
-    const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento", template, volume, atualizadoEm: new Date().toISOString().slice(0,19).replace("T"," ") };
+    // Objeto para a atualização otimista da UI (com ID temporário)
+    const optimisticRecord = { 
+      id: uid(), 
+      tipo, 
+      tempo, 
+      potes, 
+      horario, 
+      status:"Em andamento", 
+      template, 
+      volume, 
+      atualizadoEm: new Date().toISOString().slice(0,19).replace("T"," ") 
+    };
+    
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
     softRender(lastNonEmpty);
 
@@ -896,28 +900,46 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
+    // Cria um payload limpo apenas com os dados que a API precisa, sem o ID temporário.
+    const payload = {
+      tipo: optimisticRecord.tipo,
+      tempo: optimisticRecord.tempo,
+      potes: optimisticRecord.potes,
+      horario: optimisticRecord.horario,
+      status: optimisticRecord.status,
+      template: optimisticRecord.template,
+      volume: optimisticRecord.volume,
+      atualizadoEm: optimisticRecord.atualizadoEm
+    };
+
     try{
       const resp = await fetch(url("/api/disparos"), {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         credentials:"include",
-        body:JSON.stringify(optimisticRecord)
+        body:JSON.stringify(payload) // Envia o payload limpo
       });
       if (!resp.ok){
         if (resp.status === 401){
           toast("Sessão expirada. Faça login novamente.", "warn", 3200, "sessao");
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-        }else{
-          toast("Não consegui salvar no servidor.", "error");
+        } else {
+          // Mostra o erro exato do Airtable, se possível.
+          const errData = await resp.json();
+          const errMsg = errData?.error?.message || "Não consegui salvar no servidor.";
+          toast(errMsg, "error");
+          console.error("Erro do servidor:", errData);
         }
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
         softRender(lastNonEmpty);
       } else {
         e.target.reset();
+        toast("Disparo adicionado!", "ok"); // Feedback positivo
         setTimeout(softRefresh, 300);
       }
-    }catch{
+    }catch(err){
       toast("Falha de rede ao salvar.", "error");
+      console.error("Falha na requisição:", err);
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
       softRender(lastNonEmpty);
     }
