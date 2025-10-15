@@ -84,6 +84,7 @@
       border-color: #4b5563;
     }
     button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
+    button:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .badge-info{display:inline-block; background:var(--card); border:1px dashed var(--border); color:var(--muted); padding:6px 8px; border-radius:10px; font-size:12px; margin-top:6px}
 
@@ -452,12 +453,12 @@
   }
 
   /* ========================== CONFIG ========================== */
-  const API_BASE = "";
+  const API_BASE = ".";
   const IS_FILE = location.protocol === "file:";
   const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
   let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
   const BASE = (API_BASE || "").replace(/\/+$/,"");
-  const url = (p) => `${BASE}${p}`;
+  const url = (p) => `${BASE}${p.startsWith('/') ? p.substring(1) : p}`;
 
   /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
@@ -896,7 +897,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
-    // Objeto enviado para o servidor, sem campos que ele deve gerar (id, status, etc)
     const serverPayload = { tipo, tempo, potes, horario, template, volume, status: "Em andamento" };
 
     try{
@@ -936,35 +936,43 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
 
-    if (!u || !p){ return; }
+    if (!u || !p) { return; }
     btnLogin.disabled = true;
+    btnLogin.textContent = "Entrando..."; // Feedback visual
 
-    if (u !== "energia" || p !== "energia1") {
-      toast("Usuário ou senha inválidos.", "error");
-      btnLogin.disabled = false;
-      return;
-    }
-
-    isAuthed = true; localStorage.setItem(AUTH_KEY, "1"); updateAuthUI(); switchTab("painel");
-
-    try{
+    try {
       const r = await fetch(url("/api/login"), {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        credentials:"include",
-        body: JSON.stringify({ username:u, password:p })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: u, password: p })
       });
-      if (!r.ok){
-        toast("Não consegui criar sessão segura no servidor.", "warn");
-      }else{
-        setTimeout(softRefresh, 150);
+
+      if (r.ok) {
+        // SUCESSO: O servidor confirmou o login
+        isAuthed = true;
+        localStorage.setItem(AUTH_KEY, "1");
+        updateAuthUI();
+        switchTab("painel");
+        toast("Login efetuado com sucesso!", "ok");
+        setTimeout(softRefresh, 150); // Atualiza os dados do painel
+      } else {
+        // FALHA: O servidor rejeitou o login (senha errada, etc)
+        toast("Usuário ou senha inválidos.", "error");
+        isAuthed = false;
+        localStorage.removeItem(AUTH_KEY);
       }
-    }catch{
-      toast("Rede instável ao criar sessão.", "warn");
-    }finally{
+    } catch (err) {
+      // FALHA DE REDE: Não foi possível conectar ao servidor
+      toast("Rede instável. Não consegui conectar ao servidor.", "error");
+      console.error("Login fetch failed:", err);
+    } finally {
+      // Independentemente do resultado, reativa o botão
       btnLogin.disabled = false;
+      btnLogin.textContent = "Entrar";
     }
   });
+
 
   btnLogout.addEventListener("click", () => {
     isAuthed = false; localStorage.removeItem(AUTH_KEY);
