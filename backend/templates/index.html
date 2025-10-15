@@ -6,271 +6,138 @@
   <title>Painel de Disparos</title>
   <style>
     :root{
-      --bg:#f4f6f9; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
-      --primary:#0b4a8f; --primary-2:#0f6ad8;
-      --andamento:#ff9f1a; --finalizado:#1fb36a; --insucesso:#e23b3b;
-      --warn:#fbbf24; --error:#ef4444; --ok:#10b981;
+      --bg:#f4f6f9;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --primary:#0b4a8f;
+      --primary-2:#0f6ad8;
+
+      --andamento:#ff9f1a;
+      --finalizado:#1fb36a;
+      --insucesso:#e23b3b;
     }
-    html.dark {
-        --bg: #111827;
-        --card: #1f2937;
-        --text: #f3f4f6;
-        --muted: #9ca3af;
-        --border: #374151;
-    }
-    *{box-sizing:border-box} html,body{height:100%}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg); color: var(--text); margin:0; display:flex; flex-direction:column; min-height:100vh;
-      transition: background-color .3s, color .3s;
+      background: var(--bg);
+      color: var(--text);
+      margin:0; display:flex; flex-direction:column; min-height:100vh;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px;width:100%;flex:1}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px; width:100%; flex:1}
 
-    .app-header{background: linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18); margin:0 0 12px 0}
-    .app-title{margin:0; padding:18px 16px; text-align:center; font-size:24px; letter-spacing:.3px}
+    .app-header{
+      background: linear-gradient(90deg,var(--primary),var(--primary-2));
+      color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.18);
+      margin:0 0 12px 0;
+    }
+    .app-title{margin:0; padding:20px 16px; text-align:center; font-size:26px; letter-spacing:.3px}
 
-    /* Theme Toggle */
-    .theme-toggle-wrap {
-        display: flex;
-        justify-content: flex-end;
-        padding-top: 12px;
-    }
-    .theme-toggle {
-        background: #e2e8f0;
-        border: 1px solid var(--border);
-        color: var(--text);
-        width: 40px; height: 40px;
-        border-radius: 999px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; padding: 0;
-        transition: background .2s, transform .2s, border-color .2s;
-    }
-    .theme-toggle:hover {
-        transform: scale(1.05);
-    }
-    .theme-toggle svg { width: 20px; height: 20px; }
-    html.dark .theme-toggle {
-        background: #374151;
-        color: var(--text);
-    }
-    html.dark .theme-toggle:hover { background: #4b5563; }
-
-
-    .tabs{display:flex; gap:8px; justify-content:center; margin:10px 0 0}
+    .tabs{display:flex; gap:10px; justify-content:center; margin:12px 0 0}
     .tab{
-      background:var(--card); border:1px solid var(--border); color:var(--text);
-      padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:700; font-size:13px;
-      transition:transform .15s ease, box-shadow .2s ease, background-color .2s, color .2s, border-color .2s;
+      background:#fff; border:1px solid var(--border); color:#111827;
+      padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:700;
+      transition:transform .15s ease, box-shadow .2s ease;
     }
-    .tab:hover{ transform:translateY(-1px); box-shadow:0 6px 12px rgba(0,0,0,.08) }
-    .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 2px rgba(15,106,216,.12) }
+    .tab:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(0,0,0,.08) }
+    .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.12) }
 
-    .legenda{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:10px 0 6px}
-    .legenda-item{display:flex; align-items:center; gap:8px; font-weight:600; background:var(--card); padding:6px 10px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.06); border:1px solid var(--border); font-size:13px}
-    .cor{width:12px;height:12px;border-radius:3px;display:inline-block}
-    .cor.andamento{background:var(--andamento)} .cor.finalizado{background:var(--finalizado)} .cor.insucesso{background:var(--insucesso)}
+    .legenda{
+      display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
+      margin:16px 0 8px;
+    }
+    .legenda-item{
+      display:flex; align-items:center; gap:8px; font-weight:600;
+      background:var(--card); padding:8px 12px; border-radius:10px;
+      box-shadow:0 4px 16px rgba(0,0,0,.06);
+      border:1px solid var(--border);
+    }
+    .cor{width:16px;height:16px;border-radius:4px;display:inline-block}
+    .cor.andamento{background:var(--andamento)}
+    .cor.finalizado{background:var(--finalizado)}
+    .cor.insucesso{background:var(--insucesso)}
 
-    .form-container{background:var(--card); border:1px solid var(--border); padding:16px; margin:16px 0; border-radius:14px; box-shadow:0 8px 18px rgba(0,0,0,.08)}
-    .form-container h2{margin:0 0 10px; color:var(--primary); font-size:18px}
-    .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+    .form-container{
+      background:var(--card); border:1px solid var(--border);
+      padding:20px; margin:18px 0; border-radius:14px;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
+    }
+    .form-container h2{margin:0 0 12px; color:var(--primary)}
+    .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
     .form-grid > .full{grid-column:1 / -1}
-    label{font-size:12px; color:var(--muted); display:block; margin-bottom:4px}
+    label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
     input,select,button{
-      width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px;
-      background:var(--card); color:var(--text); font-size:13px
+      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+      background:#fff; color:var(--text); font-size:14px;
     }
-    html.dark input, html.dark select {
-      background: #374151;
-      border-color: #4b5563;
+    button{
+      background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer;
+      letter-spacing:.2px;
     }
-    button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px}
-    button:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    .badge-info{display:inline-block; background:var(--card); border:1px dashed var(--border); color:var(--muted); padding:6px 8px; border-radius:10px; font-size:12px; margin-top:6px}
+    .badge-info{
+      display:inline-block; background:#fff; border:1px dashed var(--border); color:var(--muted);
+      padding:8px 10px; border-radius:10px; font-size:13px; margin-top:8px;
+    }
 
-    .table-card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden}
-    .grid{display:grid; grid-template-columns: 140px repeat(4, minmax(180px,1fr)); width:100%}
-    .grid > div{border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:10px; min-height:64px; background:var(--card)}
-    .header{background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center; font-size:12px}
-    html.dark .header { background: #111827; color: #d1d5db; }
+    .table-card{
+      background:var(--card); border:1px solid var(--border); border-radius:14px;
+      box-shadow:0 10px 24px rgba(0,0,0,.08); overflow:hidden;
+    }
+    .grid{
+      display:grid; grid-template-columns: 160px repeat(4, minmax(200px,1fr)); width:100%;
+    }
+    .grid > div{
+      border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+      padding:12px; min-height:72px; background:#fff;
+    }
+    .header{
+      background:#f8fafc; color:#0f172a; font-weight:800; text-transform:uppercase; text-align:center;
+    }
 
-
-    .disparo{border-radius:12px; padding:10px; margin:6px 0; color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.15); cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; animation:pop .18s ease-out both; font-size:13px}
-    .disparo:hover{ transform:translateY(-2px); box-shadow:0 10px 18px rgba(0,0,0,.22) }
-    .disparo[aria-busy="true"]{ filter:grayscale(.25); opacity:.75; cursor:wait }
-    .status-andamento{ background:var(--andamento) } .status-finalizado{ background:var(--finalizado) } .status-insucesso{ background:var(--insucesso) }
-    .badge{ font-size:10px; font-weight:800; padding:3px 6px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:4px; display:inline-block }
-    .title{font-weight:800; font-size:13px; margin-bottom:2px} .meta{font-size:11.5px; opacity:.95}
+    .disparo{
+      border-radius:12px; padding:12px; margin:8px 0; color:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.15); cursor:pointer;
+      transition:transform .15s ease, box-shadow .2s ease; animation:pop .2s ease-out both;
+    }
+    .disparo:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.22) }
+    .status-andamento{ background:var(--andamento) }
+    .status-finalizado{ background:var(--finalizado) }
+    .status-insucesso{ background:var(--insucesso) }
+    .badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.25); margin-bottom:6px; display:inline-block }
+    .title{font-weight:800; font-size:14px; margin-bottom:4px}
+    .meta{font-size:12px; opacity:.95}
     @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
 
-    .login-card{background:var(--card); border:1px solid var(--border); padding:16px; margin:16px auto; border-radius:14px; max-width:420px; box-shadow:0 8px 18px rgba(0,0,0,.08)}
-    .login-title{margin:0 0 10px; color:var(--primary); text-align:center; font-size:18px}
-    .login-actions{display:flex; gap:8px; margin-top:8px}
-
-    .footer{width:100%; background:var(--card); border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center; padding:12px}
-
-    /* Splash/Spinner */
-    .splash{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:9999; transition:opacity .25s ease, background-color .3s}
-    .splash.hide{ opacity:0; pointer-events:none }
-    .ring{ width:40px; height:40px; border:3px solid #e5e7eb; border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite }
-    html.dark .ring { border-color: #374151; border-top-color: var(--primary-2); }
-    @keyframes spin{ to{ transform:rotate(360deg) } }
-
-    /* ===== Toast (Suavizado) ===== */
-    .topbar{position:fixed; top:16px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:9999; pointer-events:none}
-    .toast{
-        pointer-events:auto; padding:10px 16px; border-radius:12px;
-        border: 1px solid var(--border);
-        background:var(--card);
-        box-shadow:0 10px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.1);
-        font-size:14px; display:flex; align-items:center; gap:10px;
-        animation: slideIn .3s ease-out both;
+    .login-card{
+      background:var(--card); border:1px solid var(--border);
+      padding:20px; margin:18px auto; border-radius:14px; max-width:420px;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
     }
-    .toast-icon { width: 20px; height: 20px; }
-    .toast.warn{ border-color:rgba(251, 191, 36, 0.5); background:#fffbeb; color:#92400e; }
-    .toast.warn .toast-icon { color: #f59e0b; }
-    .toast.error{ border-color:rgba(239, 68, 68, 0.5); background:#fef2f2; color:#991b1b; }
-    .toast.error .toast-icon { color: #ef4444; }
-    .toast.ok{ border-color:rgba(16, 185, 129, 0.5); background:#f0fdf4; color:#065f46; }
-    .toast.ok .toast-icon { color: #10b981; }
-    .toast button{background:transparent; color:inherit; border:none; cursor:pointer; padding:0 4px; font-weight:700; opacity:0.6; margin-left:auto;}
-    .toast button:hover{ opacity:1; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
-    html.dark .toast { background: #374151; border-color: #4b5563; color: var(--text); }
-    html.dark .toast.warn { background: #422006; color: #fef3c7; border-color: #78350f; }
-    html.dark .toast.error { background: #4c0519; color: #fee2e2; border-color: #881337; }
-    html.dark .toast.ok { background: #064e3b; color: #d1fae5; border-color: #047857; }
+    .login-title{margin:0 0 12px; color:var(--primary); text-align:center}
+    .login-actions{display:flex; gap:10px; margin-top:8px}
+    .muted-tip{font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
 
-    /* ===== Filtro por data (Aprimorado) ===== */
-    .date-filters{
-      display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center;
-      margin:16px 0 10px; background:var(--card); padding:10px; border-radius:12px;
-      box-shadow:0 4px 12px rgba(0,0,0,.06); border:1px solid var(--border);
+    .footer{
+      width:100%; background:#fff; border-top:1px solid var(--border); color:var(--muted);
+      font-size:13px; text-align:center; padding:14px 12px;
     }
-    .date-filter-group{
-      display:flex; align-items:center; gap:8px; background:#f8fafc;
-      border:1px solid var(--border); border-radius:10px; padding:4px 8px;
-    }
-    html.dark .date-filter-group { background: #111827; }
-    .date-filter-group .label{ color:var(--muted); font-weight:700; font-size:12px; }
-    .date-filters input[type="date"]{
-      background:transparent; border:none; color:var(--text); font-size:13px; padding:2px;
-    }
-    .date-filters input[type="date"]:focus{ outline:none; }
-    .date-filters input[type="date"]::-webkit-calendar-picker-indicator{ cursor:pointer; opacity:0.6; }
-    .date-filters input[type="date"]::-webkit-calendar-picker-indicator:hover{ opacity:1; }
-    html.dark .date-filters input[type="date"]::-webkit-calendar-picker-indicator{ filter: invert(1); }
-
-
-    /* ===== Modal (Repaginado) ===== */
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(15, 23, 42, 0.6); z-index:10000; backdrop-filter: blur(4px);}
-    .modal.show{display:flex}
-    .modal-card{
-      width:min(720px, calc(100% - 24px));
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow:0 25px 50px -12px rgba(0,0,0,.25); overflow:hidden;
-      animation:pop .25s cubic-bezier(0.165, 0.84, 0.44, 1) both; position:relative;
-      border: 1px solid var(--border);
-    }
-    html.dark .modal-card { background: #1f2937; }
-    .modal-header{
-      padding: 16px 20px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      position:relative;
-    }
-    html.dark .modal-header { background: #111827; }
-    .modal-title-wrapper { display: flex; align-items: center; gap: 12px; }
-    .modal-title{margin:0; font-weight:800; font-size: 18px; color: var(--text); }
-    .modal-sub{margin: 2px 0 0; font-size:12px; opacity:.75; color: var(--muted); }
-    .modal-close{
-      position:absolute; top: 12px; right: 12px; width:32px; height:32px;
-      display:flex; align-items:center; justify-content:center;
-      background: #f1f5f9; border:1px solid #e2e8f0;
-      border-radius:999px; color:var(--muted); font-weight:900; cursor:pointer; line-height:1; font-size:16px;
-      transition: background-color .2s, color .2s;
-    }
-    .modal-close:hover{ background-color: #e2e8f0; color: var(--text); }
-    html.dark .modal-close { background: #374151; border-color: #4b5563; color: var(--muted); }
-    html.dark .modal-close:hover { background: #4b5563; color: var(--text); }
-    .modal-body{ padding: 20px; max-height: calc(90vh - 80px); overflow-y: auto;}
-
-    .pill{
-      display:inline-flex; align-items:center; gap:6px;
-      padding: 6px 12px; border-radius:999px; font-weight:700; font-size:12px;
-      text-transform: uppercase; letter-spacing: .5px;
-    }
-    .pill.andamento{ background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .pill.finalizado{ background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0; }
-    .pill.insucesso{ background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    
-    .info-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 16px 0; }
-    .info-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-    html.dark .info-item { background: #111827; }
-    .info-item b{ display:block; font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
-    .info-item span { font-size: 16px; font-weight: 600; color: var(--text); }
-
-    .template-box{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:16px }
-    html.dark .template-box { background: #111827; }
-    .template-header { display:flex;align-items:center;justify-content:space-between;gap:8px; }
-    .template-header b { font-size: 16px; }
-    
-    .btns{ display:flex; flex-wrap:wrap; gap:8px; }
-    .btn{
-      background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; border:none; border-radius:10px;
-      padding:8px 14px; font-weight:700; cursor:pointer;
-      box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
-      font-size:13px; transition: transform .15s, box-shadow .15s;
-      display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); }
-    .btn.ghost{ background:var(--card); color:var(--primary); border:1px solid var(--primary); box-shadow:none; }
-    .btn.ghost:hover { background: #f0f9ff; }
-    html.dark .btn.ghost { background: #1e293b; color: #60a5fa; border-color: #2563eb; }
-    html.dark .btn.ghost:hover { background: #334155; }
-    .btn.warn{ background:linear-gradient(90deg,#f97316,#fb923c); }
-    .btn.success{ background:linear-gradient(90deg,#059669,#10b981); }
-
-    #mText {
-      white-space:pre-wrap; font-family:inherit; margin:16px 0 0;
-      background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-      line-height: 1.6; color: #334155;
-    }
-    html.dark #mText { background: #1f2937; border-color: var(--border); color: var(--muted); }
-    .template-vars { color:var(--muted); font-size:12px; margin-top:12px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
-    html.dark .template-vars { background: #374151; }
-
-    @media (max-width: 860px){ .info-list{ grid-template-columns:1fr } }
   </style>
 </head>
 <body>
-  <div id="splash" class="splash"><div class="ring" aria-label="Carregando"></div></div>
-  <div id="topbar" class="topbar" aria-live="polite" aria-atomic="true"></div>
-
   <header class="app-header">
     <h1 class="app-title">Painel de Disparos</h1>
   </header>
 
   <div class="wrap">
-    <div class="theme-toggle-wrap">
-      <button id="themeToggle" class="theme-toggle" title="Alternar tema"></button>
-    </div>
-
     <!-- Tabs -->
     <nav class="tabs">
       <button class="tab active" data-tab="painel">Painel</button>
       <button class="tab" data-tab="login">Login</button>
     </nav>
-
-    <!-- Filtro por data -->
-    <div id="dateFilters" class="date-filters">
-        <div class="date-filter-group">
-            <span class="label">Data:</span>
-            <input type="date" id="datePick" title="Escolher dia" />
-        </div>
-    </div>
 
     <!-- VIEW: PAINEL -->
     <section id="view-painel">
@@ -285,35 +152,20 @@
         <h2>Novo Disparo</h2>
         <form id="formDisparo" class="form-grid">
           <div>
-            <label for="tipo">Nome do Disparo</label>
-            <input type="text" id="tipo" placeholder="Ex.: Lote Preventivo" />
+            <label for="tipo">Tipo de Disparo</label>
+            <input type="text" id="tipo" required />
           </div>
           <div>
-            <label for="template">Template</label>
-            <select id="template">
-              <option value="">(nenhum)</option>
-              <option>Preventivo D0</option>
-              <option>Preventivo D3 e D10</option>
-              <option>Vencidos 1</option>
-              <option>Vencidos 2</option>
-              <option>Vencidos 5</option>
-            </select>
-          </div>
-          <div>
-            <label for="volume">Volume (qtd disparos)</label>
-            <input type="number" id="volume" min="0" placeholder="Ex.: 120"/>
-          </div>
-          <div>
-            <label for="tempo">Tempo Médio (min)</label>
-            <input type="number" id="tempo" min="0" />
+            <label for="tempo">Tempo Médio (minutos)</label>
+            <input type="number" id="tempo" min="0" required />
           </div>
           <div>
             <label for="potes">Quantidade de Potes</label>
-            <input type="number" id="potes" min="0" />
+            <input type="number" id="potes" min="1" required />
           </div>
           <div>
             <label for="horario">Horário</label>
-            <select id="horario">
+            <select id="horario" required>
               <option value="08:00">08:00</option>
               <option value="12:00">12:00</option>
               <option value="16:00">16:00</option>
@@ -332,7 +184,7 @@
       </div>
 
       <!-- Tabela -->
-      <div class="table-card" style="margin-top:12px;">
+      <div class="table-card" style="margin-top:14px;">
         <div class="grid" id="painel-grid">
           <div class="header">Horário</div>
           <div class="header">08:00</div>
@@ -353,62 +205,17 @@
     <section id="view-login" style="display:none;">
       <div class="login-card">
         <h2 class="login-title">Acessar</h2>
-        <form id="loginForm">
-          <label for="loginUser">Usuário</label>
-          <input type="text" id="loginUser" placeholder="usuário" required />
-          <label for="loginPass" style="margin-top:8px;">Senha</label>
-          <input type="password" id="loginPass" placeholder="senha" required />
-          <div class="login-actions">
-            <button type="submit" id="btnLogin">Entrar</button>
-            <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
-          </div>
-        </form>
+        <label>Usuário</label>
+        <input type="text" id="loginUser" placeholder="usuário" />
+        <label style="margin-top:10px;">Senha</label>
+        <input type="password" id="loginPass" placeholder="senha" />
+        <div class="login-actions">
+          <button id="btnLogin">Entrar</button>
+          <button type="button" id="btnLogout" style="display:none;background:#ef4444;">Sair</button>
+        </div>
+        <div class="muted-tip">Credenciais: <code>energia</code> / <code>energia1</code></div>
       </div>
     </section>
-  </div>
-
-  <!-- Modal -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true">
-      <div class="modal-header">
-        <div class="modal-title-wrapper">
-          <div id="mStatusPill" class="pill"></div>
-          <div>
-            <h3 class="modal-title" id="mTitle">Detalhes do disparo</h3>
-            <div class="modal-sub" id="mSub"></div>
-          </div>
-        </div>
-        <button class="modal-close" id="mClose" title="Fechar">×</button>
-      </div>
-      <div class="modal-body">
-          <div class="info-list">
-              <div class="info-item"><b>Volume</b><span id="mVolume">—</span></div>
-              <div class="info-item"><b>Potes</b><span id="mPotes">—</span></div>
-              <div class="info-item"><b>Tempo (min)</b><span id="mTempo">—</span></div>
-              <div class="info-item"><b>Tempo restante</b><span id="mRestante">—</span></div>
-              <div class="info-item"><b>Horário</b><span id="mHora">—</span></div>
-              <div class="info-item"><b>Template</b><span id="mTpl">—</span></div>
-          </div>
-
-          <div class="template-box">
-              <div class="template-header">
-                  <b>Fraseologia</b>
-                  <div class="btns">
-                      <button class="btn success" id="mCopy">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                          Copiar
-                      </button>
-                      <button class="btn ghost" id="mRefresh">Atualizar</button>
-                  </div>
-              </div>
-              <pre id="mText"></pre>
-              <div class="template-vars">Variáveis: $[nome], $[valor], $[data_vencimento], $[dias_vencidos], $[quantidade_boletos]</div>
-               <div class="btns" style="margin-top: 16px; justify-content: flex-end;">
-                  <button class="btn warn" id="mCycle" style="display:none;">Alterar status</button>
-              </div>
-          </div>
-      </div>
-    </div>
   </div>
 
   <footer class="footer">
@@ -416,96 +223,25 @@
   </footer>
 
   <script>
-  /* ========================= THEME TOGGLE ======================= */
-  const themeToggleBtn = document.getElementById("themeToggle");
-  const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591M12 12a2.25 2.25 0 00-2.25 2.25 2.25 2.25 0 002.25 2.25 2.25 2.25 0 002.25-2.25A2.25 2.25 0 0012 12z" /></svg>`;
-  const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>`;
-  const THEME_KEY = "painel_theme";
+  // ===== CONFIG =====
+  // Use MESMO HOST (string vazia) para cookies de sessão funcionarem sem CORS:
+  // Se preferir domínio, NÃO coloque barra no fim, ex.: const API_BASE = "https://painelchamados.fly.dev";
+  const API_BASE = "";
+  const OFFLINE_MODE = false;
 
-  function applyTheme(theme) {
-      if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-          themeToggleBtn.innerHTML = sunIcon;
-      } else {
-          document.documentElement.classList.remove('dark');
-          themeToggleBtn.innerHTML = moonIcon;
-      }
-  }
-
-  function toggleTheme() {
-      const currentTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem(THEME_KEY, newTheme);
-      applyTheme(newTheme);
-  }
-
-  // Set initial theme
-  const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme) {
-      applyTheme(savedTheme);
-  } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      applyTheme(prefersDark ? 'dark' : 'light');
-  }
-
-  if(themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", toggleTheme);
-  }
-
-  /* ========================== CONFIG ========================== */
-  const API_BASE = ".";
-  const IS_FILE = location.protocol === "file:";
-  const FORCE_OFFLINE = (new URLSearchParams(location.search)).get("offline") === "1";
-  let OFFLINE_MODE = IS_FILE || FORCE_OFFLINE;
+  // Normaliza base e monta URLs
   const BASE = (API_BASE || "").replace(/\/+$/,"");
-  const url = (p) => `${BASE}${p.startsWith('/') ? p.substring(1) : p}`;
+  const url = (p) => `${BASE}${p}`;
 
-  /* ====================== SPLASH & TOASTS ===================== */
-  const splash = document.getElementById("splash");
-  const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
-  const splashTimer = setTimeout(hideSplashSoon, 1200);
-  window.addEventListener("error", hideSplashSoon);
-  window.addEventListener("unhandledrejection", hideSplashSoon);
-
-  const topbar = document.getElementById("topbar");
-  const toasts = new Set();
-  function toast(msg, type="ok", ms=2500, key=null){
-      if (key && toasts.has(key)) return;
-      const div = document.createElement("div");
-      div.className = `toast ${type}`;
-
-      const icons = {
-          ok: `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
-          warn: `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>`,
-          error: `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>`
-      };
-
-      div.innerHTML = `${icons[type] || ""}<span>${msg}</span><button aria-label="fechar">×</button>`;
-      const btn = div.querySelector("button");
-      const removeToast = ()=> {
-          div.style.animation = "slideOut .3s ease-in forwards";
-          div.addEventListener('animationend', () => {
-              try{ div.remove(); } catch(e){}
-              if (key) toasts.delete(key);
-          }, { once: true });
-      };
-
-      btn.onclick = removeToast;
-      topbar.appendChild(div);
-      if (key) toasts.add(key);
-
-      setTimeout(removeToast, ms);
-  }
-
-  /* ============================ AUTH =========================== */
+  // ===== Auth (UI) =====
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
-  let lastSessionWarnAt = 0;
 
   function updateAuthUI(){
     const formWrap = document.getElementById("form-wrapper");
     const hint = document.getElementById("readOnlyHint");
     const logoutBtn = document.getElementById("btnLogout");
+
     if(isAuthed){
       formWrap && (formWrap.style.display = "");
       hint && (hint.style.display = "none");
@@ -517,91 +253,21 @@
     }
   }
 
-  /* ============================ TABS =========================== */
+  // ===== Tabs =====
   const tabs = document.querySelectorAll(".tab");
   function switchTab(name){
     tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
     document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
     document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
-    if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
-  /* ============================ UTILS ========================== */
-  const TEMPLATE_TEXTS = {
-    "Preventivo D0": `Olá $[nome]!😊
-
-Seu boleto vence Hoje! Para facilitar vamos encaminhar ele novamente por aqui.
-Clique no documento para ver seu consumo de energia e o código de barras.(Caso já tenha pago é só desconsiderar)
-
-*Valor* R$: $[valor]
-*Vencimento* : $[data_vencimento]
-
-📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
-
-Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`,
-    "Preventivo D3 e D10": `Olá $[nome]!😊
-
-Seu boleto vence em $[data_vencimento]! Para facilitar vamos encaminhar ele novamente por aqui.
-Clique no documento para ver seu consumo de energia e o código de barras (Caso já tenha pago é só desconsiderar).
-
-*Valor* R$ : $[valor]
-
-📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
-
-Energia de TODOS: A Energia que Retorna!🌎`,
-    "Vencidos 1": `Olá $[nome]!😊
-
-*ATENÇÃO! Sua conta de energia venceu há $[dias_vencidos] dias atrás e não identificamos seu pagamento*
-
-*Valor* R$ :$[valor]
-*Vencimento* : $[data_vencimento]
-
-*Atenção*: não deixe de pagar em dia suas faturas para evitar juros e continuar economizando! (Favor desconsiderar essa mensagem, caso já tenha pago).
-
-👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
-
-Clique no documento para ver seu consumo de energia e o código de barras.
-
-❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
-
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-    "Vencidos 2": `Olá $[nome]!😊
-
-*ATENÇÃO! Sua conta de energia venceu há  $[dias_vencidos]  dias atrás e não identificamos seu pagamento*
-
-Por conta disso poderá haver a suspensão de energia solar. A boa notícia é que ainda há chances de regularizar antes que isso aconteça.  (Favor desconsiderar essa mensagem, caso já tenha pago).
-
-*Valor* R$ :  $[valor]
-*Vencimento* : $[data_vencimento]
-
-👉 Caso não tenha recebido o boleto *Energia de TODOS* vamos enviar ele aqui agora mesmo!
-
-Clique no documento para ver seu consumo de energia e o código de barras.
-
-❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
-
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-    "Vencidos 5": `Olá $[nome]!😊
-
-⚠ Até o momento não identificamos o pagamento do seu débito com a Energia de TODOS. Após várias tentativas de contato e de negociação sem sucesso, encaminhamos o seu cadastro ao Serviço de Proteção ao Crédito - SPC.
-
-👉 Quantidade de boletos sem pagamento:  $[quantidade_boletos]
-👉 Valor pendente: R$  $[valor]
-
-Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelamento, fale abaixo com nossos atendentes.
-
-📞 Este é nosso número oficial de atendimento via WhatsApp. Se tiver alguma dúvida é só entrar em contato por aqui, combinado? 👍
-
-*Mais Sol, Energia e Economia para TODOS* 🌎💚`
-  };
-  function tplText(name){ return TEMPLATE_TEXTS[(name||"").trim()] || "(nenhum template associado)"; }
-
+  // ===== Utils =====
   function clsForStatus(status){
     switch((status||"").toLowerCase()){
-      case "finalizado": return "finalizado";
-      case "insucesso":  return "insucesso";
-      default:           return "andamento";
+      case "finalizado": return "status-finalizado";
+      case "insucesso":  return "status-insucesso";
+      default:           return "status-andamento";
     }
   }
   function nextStatus(current){
@@ -610,36 +276,15 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     return order[(i+1) % order.length];
   }
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
+
+  // Hash simples p/ detectar mudanças
   function calcHash(records){
     try{
-      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.template||""}|${r.volume||""}|${r.atualizadoEm||""}`).join("§");
+      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}`).join("§");
     }catch{ return Math.random().toString(36); }
   }
-  function fetchWithTimeout(resource, options = {}, timeout = 3000) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
-  }
-  function fmtDateOnly(s){
-    if(!s) return null;
-    const d = s.split(" ")[0];
-    return d || null;
-  }
 
-  /* ================== FILTRO POR DATA (apenas data) ============ */
-  let currentRange = "all"; // "all" ou "YYYY-MM-DD"
-  function setRange(range){
-    currentRange = range || "all";
-    softRender(lastNonEmpty);
-  }
-  function inRange(rec){
-    if (!rec || !rec.atualizadoEm) return currentRange === 'all';
-    const d = fmtDateOnly(rec.atualizadoEm);
-    if (currentRange === 'all') return true;
-    return d === currentRange; // filtra exatamente o dia selecionado
-  }
-
-  /* =========================== RENDER ========================== */
+  // ===== Render =====
   function clearColumns(){
     ["08","12","16","20"].forEach(h => {
       const el = document.getElementById("col-"+h);
@@ -647,378 +292,248 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     });
   }
 
-  function cardTemplate(r){
+  function cardTemplate(r, {optimistic=false} = {}){
     const div = document.createElement("div");
-    div.className = `disparo status-${clsForStatus(r.status)}`;
+    div.className = `disparo ${clsForStatus(r.status)}`;
     div.dataset.id = r.id || uid();
     div.dataset.status = r.status || "Em andamento";
     div.dataset.horario = r["horario"] || "08:00";
-    div.dataset.template = r.template || "";
-    div.dataset.volume = r.volume || "";
-    div.dataset.atualizadoEm = r.atualizadoEm || "";
+    if (optimistic) div.dataset.optimistic = "1";
 
     div.innerHTML = `
       <span class="badge">${r.status || "Em andamento"}</span>
       <div class="title">${r.tipo || ""}</div>
-      <div class="meta">Tempo: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong>${r.volume ? ` • Vol.: <strong>${r.volume}</strong>`:""}</div>
+      <div class="meta">Tempo médio: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong></div>
     `;
-    div.addEventListener("click", () => openModal(r));
+
+    // Troca de status — exige login (backend também valida sessão)
+    div.addEventListener("click", async () => {
+      if (!isAuthed){
+        alert("Faça login para alterar o status.");
+        return;
+      }
+      const current = div.dataset.status;
+      const next = nextStatus(current);
+
+      if (OFFLINE_MODE) {
+        div.querySelector(".badge").textContent = next;
+        div.className = `disparo ${clsForStatus(next)}`;
+        div.dataset.status = next;
+        return;
+      }
+      try{
+        const id = div.dataset.id;
+        const res = await fetch(url(`/api/disparos/${id}`), {
+          method: "PATCH",
+          headers: {"Content-Type":"application/json"},
+          credentials: "include", // envia cookie de sessão
+          body: JSON.stringify({ status: next })
+        });
+        if (res.ok){
+          // otimista + confirmado
+          div.querySelector(".badge").textContent = next;
+          div.className = `disparo ${clsForStatus(next)}`;
+          div.dataset.status = next;
+          // puxa estado do servidor logo depois
+          setTimeout(softRefresh, 600);
+        }else if(res.status === 401){
+          alert("Sessão expirada. Faça login novamente.");
+          isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
+        }
+      }catch(e){ console.error(e); }
+    });
+
     return div;
   }
 
-  function placeRecord(r){
+  function placeRecord(r, opts){
     const hh = (r["horario"] || "08:00").split(":")[0];
     const col = document.getElementById("col-"+hh);
-    if (col) col.appendChild(cardTemplate(r));
+    if (col) col.appendChild(cardTemplate(r, opts));
   }
 
   function renderSnapshot(records){
     clearColumns();
-    (records||[]).filter(inRange).forEach(r => placeRecord(r));
+    (records||[]).forEach(r => placeRecord(r));
   }
 
-  /* ===== Modal ===== */
-  const modal = document.getElementById('modal');
-  const mClose = document.getElementById('mClose');
-  const mTitle = document.getElementById('mTitle');
-  const mSub   = document.getElementById('mSub');
-  const mPill  = document.getElementById('mStatusPill');
-  const mVolume= document.getElementById('mVolume');
-  const mPotes = document.getElementById('mPotes');
-  const mTempo = document.getElementById('mTempo');
-  const mRest  = document.getElementById('mRestante');
-  const mHora  = document.getElementById('mHora');
-  const mTpl   = document.getElementById('mTpl');
-  const mText  = document.getElementById('mText');
-  const mCopy  = document.getElementById('mCopy');
-  const mRefresh = document.getElementById('mRefresh');
-  const mCycle = document.getElementById('mCycle');
+  // ===== Data / Robustez =====
+  let lastNonEmpty = [];     // último snapshot não-vazio
+  let lastHash = "";         // hash do último snapshot aplicado
+  let sse;                   // EventSource
+  let sseFailures = 0;       # falhas consecutivas do SSE
+  let pollTimer = null;      // polling fallback
 
-  let currentRecord = null;
-
-  function openModal(r){
-    currentRecord = r;
-    mTitle.textContent = r.tipo || "(sem nome)";
-    const dstr = r.atualizadoEm ? `Atualizado: ${r.atualizadoEm}` : "";
-    mSub.textContent = dstr;
-
-    const c = clsForStatus(r.status);
-    mPill.className = `pill ${c}`;
-    mPill.textContent = r.status || "Em andamento";
-
-    mVolume.textContent = r.volume ?? "—";
-    mPotes.textContent  = r.potes ?? "—";
-    mTempo.textContent  = r.tempo ?? "—";
-    mHora.textContent   = r.horario || "—";
-    const tplName = (r.template || "").trim() || "(nenhum)";
-    mTpl.textContent = tplName;
-    mText.textContent = tplText(tplName);
-
-    mRest.textContent = calcRestante(r);
-    mCycle.style.display = isAuthed ? "" : "none";
-
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden','false');
-  }
-  function closeModal(){
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden','true');
-    currentRecord = null;
-  }
-  mClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
-
-  function calcRestante(r){
-    try{
-      const mins = Number(r.tempo||0);
-      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm.replace(" ","T")) : NaN;
-      if (!mins || isNaN(ts)) return "—";
-      const end = ts + mins*60000;
-      const diff = end - Date.now();
-      if (diff <= 0) return "Concluído/estourado";
-      const mm = Math.floor(diff/60000), ss = Math.floor((diff%60000)/1000);
-      return `${mm}m ${ss}s`;
-    }catch{ return "—"; }
-  }
-
-  mCopy.addEventListener('click', async ()=>{
-    try{
-      await navigator.clipboard.writeText(mText.textContent || "");
-      toast("Texto copiado!", "ok", 1800, "copy-ok");
-    }catch{
-      toast("Não consegui copiar 😕", "error");
+  function safeRender(records){
+    const incomingHash = calcHash(records);
+    if (incomingHash === lastHash) return;                // ignora duplicados
+    if ((records?.length || 0) === 0 && (lastNonEmpty?.length || 0) > 0) {
+      console.warn("[UI] Snapshot vazio ignorado para manter estado estável.");
+      return;                                             // ignora vazios
     }
-  });
-  mRefresh.addEventListener('click', ()=> {
-    if (currentRecord) {
-      mRest.textContent = calcRestante(currentRecord);
-      toast("Atualizado.", "ok", 1100, "upd");
-    }
-  });
-  mCycle.addEventListener('click', async ()=>{
-    if (!currentRecord) return;
-    if (!isAuthed){ toast("Faça login para alterar.", "warn"); return; }
-    const next = nextStatus(currentRecord.status || "Em andamento");
-    try{
-      const res = await fetch(url(`/api/disparos/${currentRecord.id}`), {
-        method:"PATCH", headers:{"Content-Type":"application/json"}, credentials:"include",
-        body: JSON.stringify({ status: next })
-      });
-      if (res.ok){
-        toast("Status atualizado", "ok", 1300, "upd-status");
-        setTimeout(softRefresh, 250);
-        closeModal();
-      }else if(res.status===401){
-        isAuthed=false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
-        toast("Sessão expirada.", "warn");
-      }else{
-        toast("Falha ao atualizar status.", "error");
-      }
-    }catch{ toast("Rede instável.", "error"); }
-  });
-
-  /* ============= Data (Cache + SSE + Polling Backoff) ========= */
-  const CACHE_KEY = "painel_snapshot_v2";
-  const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
-  let lastNonEmpty = [];
-  let lastHash = "";
-  let sse = null, pollTimer = null, backoffMs = 5000, gotFirstPaint = false;
-
-  (function paintFromCache(){
-    try{
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return;
-      const {ts, data} = JSON.parse(raw);
-      if (!data || (Date.now() - ts) > CACHE_TTL_MS) return;
-      lastNonEmpty = data;
-      lastHash = calcHash(data);
-      renderSnapshot(data);
-      clearTimeout(splashTimer);
-      hideSplashSoon();
-      gotFirstPaint = true;
-    }catch{}
-  })();
-
-  function saveCache(records){
-    try{
-      const payload = { ts: Date.now(), data: records };
-      (window.requestIdleCallback || setTimeout)(() =>
-        localStorage.setItem(CACHE_KEY, JSON.stringify(payload)), 0
-      );
-    }catch{}
-  }
-
-  function softRender(records){
-    const filtered = (records||[]).filter(inRange);
-    const incomingHash = calcHash(filtered);
-    if (incomingHash === lastHash) return;
     renderSnapshot(records);
     lastHash = incomingHash;
-    if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
-    if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
+    if ((records?.length || 0) > 0) lastNonEmpty = records;
   }
 
   async function loadInitial(){
     if (OFFLINE_MODE) return;
     try{
-      const resp = await fetchWithTimeout(url("/api/disparos"), {cache:"no-store", credentials:"include"}, 3000);
+      const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
       if (!resp.ok) throw new Error(resp.status);
       const data = await resp.json();
-      softRender(data);
-    }catch(e){ /* silencioso */ }
+      safeRender(data);
+    }catch(e){
+      console.warn("[loadInitial] falhou:", e);
+    }
   }
 
   async function softRefresh(){
-    if (OFFLINE_MODE) return;
     try{
       const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
       if (!resp.ok) return;
       const data = await resp.json();
-      softRender(data);
+      safeRender(data);
     }catch{}
   }
 
   function startPolling(){
-    if (OFFLINE_MODE) return;
-    if (pollTimer) clearInterval(pollTimer);
+    if (pollTimer) return;
+    console.warn("[poll] iniciando fallback por polling");
     pollTimer = setInterval(async ()=>{
       try{
         const resp = await fetch(url("/api/disparos"), {cache:"no-store", credentials:"include"});
-        if (resp.ok){
-          const data = await resp.json();
-          softRender(data);
-          backoffMs = Math.max(5000, Math.floor(backoffMs/2));
-        }
-      }catch{}
-    }, backoffMs);
-    backoffMs = Math.min(backoffMs * 2, 30000);
+        if (!resp.ok) return;
+        const data = await resp.json();
+        safeRender(data);
+      }catch(e){ /* silencioso */ }
+    }, 8000);
   }
-  function stopPolling(){ if (pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+
+  function stopPolling(){
+    if (pollTimer){
+      clearInterval(pollTimer);
+      pollTimer = null;
+      console.warn("[poll] parado");
+    }
+  }
 
   function startSSE(){
-    if (OFFLINE_MODE) return;
     try{
       if (sse) sse.close();
+      sseFailures = 0;
       sse = new EventSource(url("/api/stream"));
+      console.info("[sse] conectado");
+
       sse.onmessage = (evt) => {
         try{
           const payload = JSON.parse(evt.data);
-          if (payload.type === "snapshot") softRender(payload.records || []);
-        }catch{}
+          if (payload.type === "snapshot"){
+            safeRender(payload.records || []);
+          }
+        }catch(e){ console.error("[sse] parse erro:", e); }
       };
-      sse.onerror = () => { startPolling(); };
-    }catch{ startPolling(); }
+      sse.onerror = () => {
+        sseFailures++;
+        console.warn("[sse] erro (contagem):", sseFailures);
+        if (sseFailures >= 3){ startPolling(); }
+      };
+    }catch(e){
+      console.warn("[sse] falha ao iniciar, ativando polling", e);
+      startPolling();
+    }
   }
-  function stopSSE(){ if (sse){ try{sse.close();}catch{} sse=null; } }
 
-  /* ======================== FORM ADD ========================== */
+  // ===== Form Add (somente logado) =====
   const form = document.getElementById("formDisparo");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
+    if(!isAuthed){
+      alert("Faça login para adicionar disparos.");
+      return;
+    }
     const tipo  = document.getElementById("tipo").value.trim();
     const tempo = Number(document.getElementById("tempo").value);
     const potes = Number(document.getElementById("potes").value);
     const horario = document.getElementById("horario").value;
-    const template = (document.getElementById("template").value || "").trim();
-    const volume = Number(document.getElementById("volume").value || 0);
+    if(!tipo) return;
 
-    if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
-
-    const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento", template, volume, atualizadoEm: new Date().toISOString().slice(0,19).replace("T"," ") };
+    // Render otimista
+    const optimisticRecord = { id: uid(), tipo, tempo, potes, horario, status:"Em andamento" };
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
-    softRender(lastNonEmpty);
+    safeRender(lastNonEmpty);
 
-    if (OFFLINE_MODE) { e.target.reset(); return; }
-    if(!isAuthed){
-      toast("Você está em modo leitura. Faça login para adicionar.", "warn", 3000, "readonly-add");
-      lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      softRender(lastNonEmpty);
-      return;
-    }
-
-    const serverPayload = { tipo, tempo, potes, horario, template, volume, status: "Em andamento" };
+    if (OFFLINE_MODE) { form.reset(); return; }
 
     try{
       const resp = await fetch(url("/api/disparos"), {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         credentials:"include",
-        body:JSON.stringify(serverPayload)
+        body:JSON.stringify(optimisticRecord)
       });
       if (!resp.ok){
         if (resp.status === 401){
-          toast("Sessão expirada. Faça login novamente.", "warn", 3200, "sessao");
+          alert("Sessão expirada. Faça login novamente.");
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         }else{
-          toast("Não consegui salvar no servidor.", "error");
+          throw new Error("POST falhou: " + resp.status);
         }
-        lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-        softRender(lastNonEmpty);
       } else {
-        e.target.reset();
-        setTimeout(softRefresh, 300);
+        form.reset();
+        setTimeout(softRefresh, 600);
       }
-    }catch{
-      toast("Falha de rede ao salvar.", "error");
+    }catch(e){
+      console.error("Erro ao criar disparo:", e);
+      alert("Não consegui salvar no servidor.");
+      // desfaz otimista
       lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
-      softRender(lastNonEmpty);
+      safeRender(lastNonEmpty);
     }
   });
 
-  /* ====================== LOGIN / LOGOUT ====================== */
-  const loginForm = document.getElementById("loginForm");
+  // ===== Login / Logout (sessão no backend) =====
   const btnLogin  = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
 
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (btnLogin) btnLogin.addEventListener("click", async () => {
     const u = (document.getElementById("loginUser").value || "").trim();
     const p = (document.getElementById("loginPass").value || "").trim();
-
-    if (!u || !p) { return; }
-    btnLogin.disabled = true;
-    btnLogin.textContent = "Entrando..."; // Feedback visual
-
-    try {
-      const r = await fetch(url("/api/login"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username: u, password: p })
+    try{
+      const resp = await fetch(url("/api/login"), {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        credentials:"include",
+        body: JSON.stringify({ username:u, password:p })
       });
-
-      if (r.ok) {
-        // SUCESSO: O servidor confirmou o login
-        isAuthed = true;
+      if (resp.ok){
+        isAuthed = True;
         localStorage.setItem(AUTH_KEY, "1");
         updateAuthUI();
         switchTab("painel");
-        toast("Login efetuado com sucesso!", "ok");
-        setTimeout(softRefresh, 150); // Atualiza os dados do painel
-      } else {
-        // FALHA: O servidor rejeitou o login (senha errada, etc)
-        toast("Usuário ou senha inválidos.", "error");
-        isAuthed = false;
-        localStorage.removeItem(AUTH_KEY);
+        setTimeout(softRefresh, 300);
+      }else{
+        alert("Usuário ou senha inválidos.");
       }
-    } catch (err) {
-      // FALHA DE REDE: Não foi possível conectar ao servidor
-      toast("Rede instável. Não consegui conectar ao servidor.", "error");
-      console.error("Login fetch failed:", err);
-    } finally {
-      // Independentemente do resultado, reativa o botão
-      btnLogin.disabled = false;
-      btnLogin.textContent = "Entrar";
-    }
+    }catch(e){ console.error(e); }
   });
 
-
-  btnLogout.addEventListener("click", () => {
-    isAuthed = false; localStorage.removeItem(AUTH_KEY);
-    updateAuthUI(); switchTab("login");
-    stopSSE(); stopPolling();
-
-    const u = document.getElementById("loginUser"), p = document.getElementById("loginPass");
-    if (p) p.value = ""; if (u) { u.value = ""; u.focus(); }
-
-    try{ fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
-    setTimeout(()=>{ startSSE(); }, 300);
+  if (btnLogout) btnLogout.addEventListener("click", async () => {
+    try{ await fetch(url("/api/logout"), { method:"POST", credentials:"include" }); }catch{}
+    isAuthed = false;
+    localStorage.removeItem(AUTH_KEY);
+    updateAuthUI();
+    switchTab("login");
   });
 
-  /* ======================= DATE FILTER UI ===================== */
-  (() => {
-    const dp = document.getElementById('datePick');
-    if (!dp) return;
-    
-    // Define a data de hoje como valor padrão e aplica o filtro inicial
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Meses são base 0
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayString = `${yyyy}-${mm}-${dd}`;
-    
-    dp.value = todayString;
-    setRange(todayString);
-    
-    // Atualiza o filtro quando a data for alterada
-    dp.addEventListener('change', () => {
-      // Se a data for limpa (em alguns navegadores é possível), mostra todos os registros
-      setRange(dp.value || "all");
-    });
-  })();
-
-  /* ========================== START =========================== */
+  // ===== Start =====
   (async () => {
     switchTab("painel");
     updateAuthUI();
-
-    if (OFFLINE_MODE) { clearTimeout(splashTimer); hideSplashSoon(); return; }
-
+    await loadInitial();
     startSSE();
-    loadInitial();
+    stopPolling();
   })();
   </script>
 </body>
 </html>
-
