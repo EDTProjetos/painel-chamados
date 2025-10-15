@@ -613,7 +613,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   }
   function fmtDateOnly(s){
     if(!s) return null;
-    const d = s.split(" ")[0];
+    const d = s.split("T")[0]; // CORRIGIDO: usa 'T' como separador
     return d || null;
   }
 
@@ -722,7 +722,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function calcRestante(r){
     try{
       const mins = Number(r.tempo||0);
-      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm.replace(" ","T")) : NaN;
+      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm) : NaN; // CORRIGIDO: não precisa mais do replace
       if (!mins || isNaN(ts)) return "—";
       const end = ts + mins*60000;
       const diff = end - Date.now();
@@ -886,7 +886,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       status:"Em andamento", 
       template, 
       volume, 
-      atualizadoEm: new Date().toISOString().slice(0,19).replace("T"," ") 
+      atualizadoEm: new Date().toISOString() // ===== CORREÇÃO APLICADA AQUI =====
     };
     
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
