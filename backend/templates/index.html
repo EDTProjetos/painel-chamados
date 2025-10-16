@@ -287,11 +287,11 @@
             <label for="template">Template</label>
             <select id="template">
               <option value="">(nenhum)</option>
-              <option>Preventivo D0</option>
-              <option>Preventivo D3 e D10</option>
-              <option>Vencidos 1</option>
-              <option>Vencidos 2</option>
-              <option>Vencidos 5</option>
+              <option value="preventivo_d0">Preventivo D0</option>
+              <option value="preventivo_d3_d10">Preventivo D3 e D10</option>
+              <option value="vencidos_1">Vencidos 1</option>
+              <option value="vencidos_2">Vencidos 2</option>
+              <option value="vencidos_5">Vencidos 5</option>
             </select>
           </div>
           <div>
@@ -624,10 +624,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     softRender(lastNonEmpty);
   }
   function inRange(rec){
-    if (!rec || !rec.atualizadoEm) return currentRange === 'all';
-    const d = fmtDateOnly(rec.atualizadoEm);
+    if (!rec || !rec.data) return true; // Mostra registros antigos que não tem o campo 'Data'
     if (currentRange === 'all') return true;
-    return d === currentRange;
+    return rec.data === currentRange;
   }
 
   /* =========================== RENDER ========================== */
@@ -690,7 +689,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function openModal(r){
     currentRecord = r;
     mTitle.textContent = r.tipo || "(sem nome)";
-    const dstr = r.atualizadoEm ? `Atualizado: ${r.atualizadoEm}` : "";
+    const dstr = r.atualizadoEm ? `Atualizado: ${new Date(r.atualizadoEm).toLocaleString()}` : "";
     mSub.textContent = dstr;
 
     const c = clsForStatus(r.status);
@@ -877,12 +876,11 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const tempo    = Number(document.getElementById("tempo").value);
     const potes    = Number(document.getElementById("potes").value);
     const horario  = document.getElementById("horario").value;
-    const template = (document.getElementById("template").value || "").trim();
+    const template = document.getElementById("template").value || "";
     const volume   = Number(document.getElementById("volume").value || 0);
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
 
-    // Objeto para a UI, sem o campo 'atualizadoEm'
     const optimisticRecord = { 
       id: uid(), 
       tipo, 
@@ -906,7 +904,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
-    // Payload para a API, também sem o campo 'atualizadoEm'
     const payload = {
       tipo: optimisticRecord.tipo,
       tempo: optimisticRecord.tempo,
@@ -931,9 +928,8 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         } else {
           const errData = await resp.json();
-          // Exibe a mensagem de erro específica do Airtable, se disponível
           const errMsg = errData?.error?.message || "Não consegui salvar no servidor.";
-          toast(errMsg, "error", 4000); // Aumenta o tempo do toast para dar tempo de ler
+          toast(errMsg, "error", 4000);
           console.error("Erro do servidor:", errData);
         }
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
