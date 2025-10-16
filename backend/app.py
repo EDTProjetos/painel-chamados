@@ -33,8 +33,6 @@ MAX_RETRIES = int(os.getenv("AIRTABLE_MAX_RETRIES", "4"))
 APP_USER = os.getenv("APP_USER", "energia")
 APP_PASS = os.getenv("APP_PASS", "energia1")
 
-# ===== CORREÇÃO DEFINITIVA AQUI =====
-# Garante que o Flask procure os templates na pasta 'templates'
 app = Flask(__name__, template_folder="templates")
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -179,15 +177,23 @@ def create_disparo():
     
     now_iso = datetime.utcnow().isoformat() + "Z"
 
-    fields = {
-        "Tipo": b.get("tipo", ""),
-        "Tempo": b.get("tempo", 0),
-        "Potes": b.get("potes", 0),
-        "Volume": b.get("volume", 0),
-        "Horário": b.get("horario", "08:00"),
-        "Status": b.get("status", "Em andamento"),
-        "AtualizadoEm": b.get("atualizadoEm", now_iso)
-    }
+    try:
+        fields = {
+            "Tipo": b.get("tipo", ""),
+            # ===== ALTERAÇÃO IMPORTANTE AQUI =====
+            # Força a conversão para inteiro para garantir compatibilidade
+            "Tempo": int(b.get("tempo", 0)),
+            "Potes": int(b.get("potes", 0)),
+            "Volume": int(b.get("volume", 0)),
+            "Horário": b.get("horario", "08:00"),
+            "Status": b.get("status", "Em andamento"),
+            "AtualizadoEm": b.get("atualizadoEm", now_iso)
+        }
+    except (ValueError, TypeError) as e:
+        # Se a conversão para int() falhar, retorna um erro claro.
+        log.error(f"Erro de tipo de dado ao criar disparo: {e}")
+        return jsonify({"error": "invalid_data_type", "message": "Os campos de tempo, potes e volume devem ser números inteiros."}), 400
+
     
     if "template" in b and b["template"]:
         fields["Template"] = b["template"]
@@ -211,9 +217,9 @@ def update_disparo(rid):
     if "status" in b:   fields["Status"] = b["status"]
     if "horario" in b:  fields["Horário"] = b["horario"]
     if "tipo" in b:     fields["Tipo"] = b["tipo"]
-    if "tempo" in b:    fields["Tempo"] = b["tempo"]
-    if "potes" in b:    fields["Potes"] = b["potes"]
-    if "volume" in b:   fields["Volume"] = b["volume"]
+    if "tempo" in b:    fields["Tempo"] = int(b.get("tempo", 0))
+    if "potes" in b:    fields["Potes"] = int(b.get("potes", 0))
+    if "volume" in b:   fields["Volume"] = int(b.get("volume", 0))
     if "template" in b: fields["Template"] = b["template"] or ""
 
     r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields}, params={"typecast":"true"})
