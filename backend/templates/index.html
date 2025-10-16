@@ -613,7 +613,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   }
   function fmtDateOnly(s){
     if(!s) return null;
-    const d = s.split("T")[0]; // CORRIGIDO: usa 'T' como separador
+    const d = s.split("T")[0];
     return d || null;
   }
 
@@ -627,7 +627,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     if (!rec || !rec.atualizadoEm) return currentRange === 'all';
     const d = fmtDateOnly(rec.atualizadoEm);
     if (currentRange === 'all') return true;
-    return d === currentRange; // filtra exatamente o dia selecionado
+    return d === currentRange;
   }
 
   /* =========================== RENDER ========================== */
@@ -722,7 +722,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function calcRestante(r){
     try{
       const mins = Number(r.tempo||0);
-      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm) : NaN; // CORRIGIDO: não precisa mais do replace
+      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm) : NaN;
       if (!mins || isNaN(ts)) return "—";
       const end = ts + mins*60000;
       const diff = end - Date.now();
@@ -867,7 +867,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // ===== ALTERAÇÃO 1: Pegar a data do filtro =====
     const data = document.getElementById("datePick").value;
     if (!data) {
       toast("Por favor, selecione uma data no filtro.", "warn");
@@ -883,6 +882,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
 
+    // Objeto para a UI, sem o campo 'atualizadoEm'
     const optimisticRecord = { 
       id: uid(), 
       tipo, 
@@ -892,9 +892,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       status:"Em andamento", 
       template, 
       volume,
-      // ===== ALTERAÇÃO 2: Adicionar a data aqui =====
-      data: data,
-      atualizadoEm: new Date().toISOString()
+      data: data
     };
     
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
@@ -908,6 +906,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
+    // Payload para a API, também sem o campo 'atualizadoEm'
     const payload = {
       tipo: optimisticRecord.tipo,
       tempo: optimisticRecord.tempo,
@@ -916,9 +915,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       status: optimisticRecord.status,
       template: optimisticRecord.template,
       volume: optimisticRecord.volume,
-      // ===== ALTERAÇÃO 3: Adicionar a data no payload para a API =====
-      data: optimisticRecord.data,
-      atualizadoEm: optimisticRecord.atualizadoEm
+      data: optimisticRecord.data
     };
 
     try{
@@ -934,8 +931,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         } else {
           const errData = await resp.json();
+          // Exibe a mensagem de erro específica do Airtable, se disponível
           const errMsg = errData?.error?.message || "Não consegui salvar no servidor.";
-          toast(errMsg, "error");
+          toast(errMsg, "error", 4000); // Aumenta o tempo do toast para dar tempo de ler
           console.error("Erro do servidor:", errData);
         }
         lastNonEmpty = (lastNonEmpty || []).filter(x => x !== optimisticRecord);
