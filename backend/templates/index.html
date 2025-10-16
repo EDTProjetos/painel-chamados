@@ -430,7 +430,6 @@
       applyTheme(newTheme);
   }
 
-  // Set initial theme
   const savedTheme = localStorage.getItem(THEME_KEY);
   if (savedTheme) {
       applyTheme(savedTheme);
@@ -491,8 +490,7 @@
   /* ============================ AUTH =========================== */
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
-  let lastSessionWarnAt = 0;
-
+  
   function updateAuthUI(){
     const formWrap = document.getElementById("form-wrapper");
     const hint = document.getElementById("readOnlyHint");
@@ -519,8 +517,9 @@
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
 
   /* ============================ UTILS ========================== */
+  // ===== ALTERAÇÃO 1: Mudar chaves para corresponder ao Airtable =====
   const TEMPLATE_TEXTS = {
-    "Preventivo D0": `Olá $[nome]!😊
+    "preventivo_d0": `Olá $[nome]!😊
 
 Seu boleto vence Hoje! Para facilitar vamos encaminhar ele novamente por aqui.
 Clique no documento para ver seu consumo de energia e o código de barras.(Caso já tenha pago é só desconsiderar)
@@ -531,7 +530,7 @@ Clique no documento para ver seu consumo de energia e o código de barras.(Caso 
 📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
 Energia de TODOS: Faz bem para o seu bolso e para o planeta!🌎 💚`,
-    "Preventivo D3 e D10": `Olá $[nome]!😊
+    "preventivo_d3_d10": `Olá $[nome]!😊
 
 Seu boleto vence em $[data_vencimento]! Para facilitar vamos encaminhar ele novamente por aqui.
 Clique no documento para ver seu consumo de energia e o código de barras (Caso já tenha pago é só desconsiderar).
@@ -541,7 +540,7 @@ Clique no documento para ver seu consumo de energia e o código de barras (Caso 
 📞 Este é nosso número oficial de atendimento. Caso tenha alguma dúvida é só entrar em contato por aqui, combinado? 👍
 
 Energia de TODOS: A Energia que Retorna!🌎`,
-    "Vencidos 1": `Olá $[nome]!😊
+    "vencidos_1": `Olá $[nome]!😊
 
 *ATENÇÃO! Sua conta de energia venceu há $[dias_vencidos] dias atrás e não identificamos seu pagamento*
 
@@ -557,7 +556,7 @@ Clique no documento para ver seu consumo de energia e o código de barras.
 ❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
 
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-    "Vencidos 2": `Olá $[nome]!😊
+    "vencidos_2": `Olá $[nome]!😊
 
 *ATENÇÃO! Sua conta de energia venceu há  $[dias_vencidos]  dias atrás e não identificamos seu pagamento*
 
@@ -573,7 +572,7 @@ Clique no documento para ver seu consumo de energia e o código de barras.
 ❗ Caso tenha dúvida, fale abaixo com nossos atendentes .
 
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`,
-    "Vencidos 5": `Olá $[nome]!😊
+    "vencidos_5": `Olá $[nome]!😊
 
 ⚠ Até o momento não identificamos o pagamento do seu débito com a Energia de TODOS. Após várias tentativas de contato e de negociação sem sucesso, encaminhamos o seu cadastro ao Serviço de Proteção ao Crédito - SPC.
 
@@ -586,6 +585,16 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
 *Mais Sol, Energia e Economia para TODOS* 🌎💚`
   };
+  
+  // ===== ALTERAÇÃO 2: Adicionar um mapa para nomes de exibição =====
+  const TEMPLATE_DISPLAY_NAMES = {
+      "preventivo_d0": "Preventivo D0",
+      "preventivo_d3_d10": "Preventivo D3 e D10",
+      "vencidos_1": "Vencidos 1",
+      "vencidos_2": "Vencidos 2",
+      "vencidos_5": "Vencidos 5"
+  };
+
   function tplText(name){ return TEMPLATE_TEXTS[(name||"").trim()] || "(nenhum template associado)"; }
 
   function clsForStatus(status){
@@ -613,18 +622,17 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   }
   function fmtDateOnly(s){
     if(!s) return null;
-    const d = s.split("T")[0];
-    return d || null;
+    return s.split("T")[0];
   }
 
-  /* ================== FILTRO POR DATA (apenas data) ============ */
-  let currentRange = "all"; // "all" ou "YYYY-MM-DD"
+  /* ================== FILTRO POR DATA ============ */
+  let currentRange = "all";
   function setRange(range){
     currentRange = range || "all";
     softRender(lastNonEmpty);
   }
   function inRange(rec){
-    if (!rec || !rec.data) return true; // Mostra registros antigos que não tem o campo 'Data'
+    if (!rec || !rec.data) return true; 
     if (currentRange === 'all') return true;
     return rec.data === currentRange;
   }
@@ -646,6 +654,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     div.dataset.template = r.template || "";
     div.dataset.volume = r.volume || "";
     div.dataset.atualizadoEm = r.atualizadoEm || "";
+    div.dataset.data = r.data || "";
 
     div.innerHTML = `
       <span class="badge">${r.status || "Em andamento"}</span>
@@ -700,8 +709,10 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     mPotes.textContent  = r.potes ?? "—";
     mTempo.textContent  = r.tempo ?? "—";
     mHora.textContent   = r.horario || "—";
-    const tplName = (r.template || "").trim() || "(nenhum)";
-    mTpl.textContent = tplName;
+    
+    const tplName = (r.template || "").trim();
+    // ===== ALTERAÇÃO 3: Usar o mapa para exibir o nome correto =====
+    mTpl.textContent = TEMPLATE_DISPLAY_NAMES[tplName] || tplName || "(nenhum)";
     mText.textContent = tplText(tplName);
 
     mRest.textContent = calcRestante(r);
@@ -876,7 +887,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const tempo    = Number(document.getElementById("tempo").value);
     const potes    = Number(document.getElementById("potes").value);
     const horario  = document.getElementById("horario").value;
-    const template = document.getElementById("template").value || "";
+    const template = document.getElementById("template").value;
     const volume   = Number(document.getElementById("volume").value || 0);
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
