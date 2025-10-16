@@ -92,6 +92,7 @@ def _normalize_records(records):
             "status": f.get("Status", ""),
             "template": f.get("Template", ""),
             "atualizadoEm": f.get("AtualizadoEm", ""),
+            "data": f.get("Data", ""),
         })
     return out
 
@@ -176,21 +177,22 @@ def create_disparo():
     b = request.json or {}
     
     now_iso = datetime.utcnow().isoformat() + "Z"
+    today_str = datetime.utcnow().strftime('%Y-%m-%d')
 
     try:
         fields = {
             "Tipo": b.get("tipo", ""),
-            # ===== ALTERAÇÃO IMPORTANTE AQUI =====
-            # Força a conversão para inteiro para garantir compatibilidade
             "Tempo": int(b.get("tempo", 0)),
             "Potes": int(b.get("potes", 0)),
             "Volume": int(b.get("volume", 0)),
             "Horário": b.get("horario", "08:00"),
             "Status": b.get("status", "Em andamento"),
-            "AtualizadoEm": b.get("atualizadoEm", now_iso)
+            "AtualizadoEm": b.get("atualizadoEm", now_iso),
+            # ===== ALTERAÇÃO FINAL AQUI =====
+            # Adiciona o campo 'Data' que estava faltando
+            "Data": b.get("data", today_str)
         }
     except (ValueError, TypeError) as e:
-        # Se a conversão para int() falhar, retorna um erro claro.
         log.error(f"Erro de tipo de dado ao criar disparo: {e}")
         return jsonify({"error": "invalid_data_type", "message": "Os campos de tempo, potes e volume devem ser números inteiros."}), 400
 
