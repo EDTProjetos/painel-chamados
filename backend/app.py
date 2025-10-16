@@ -176,7 +176,6 @@ def api_disparos():
 def create_disparo():
     b = request.json or {}
     
-    now_iso = datetime.utcnow().isoformat() + "Z"
     today_str = datetime.utcnow().strftime('%Y-%m-%d')
 
     try:
@@ -187,9 +186,7 @@ def create_disparo():
             "Volume": int(b.get("volume", 0)),
             "Horário": b.get("horario", "08:00"),
             "Status": b.get("status", "Em andamento"),
-            "AtualizadoEm": b.get("atualizadoEm", now_iso),
-            # ===== ALTERAÇÃO FINAL AQUI =====
-            # Adiciona o campo 'Data' que estava faltando
+            # LINHA REMOVIDA: Não enviamos mais 'AtualizadoEm'
             "Data": b.get("data", today_str)
         }
     except (ValueError, TypeError) as e:
@@ -223,6 +220,8 @@ def update_disparo(rid):
     if "potes" in b:    fields["Potes"] = int(b.get("potes", 0))
     if "volume" in b:   fields["Volume"] = int(b.get("volume", 0))
     if "template" in b: fields["Template"] = b["template"] or ""
+    if "data" in b:     fields["Data"] = b.get("data")
+
 
     r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields}, params={"typecast":"true"})
     if r.ok:
