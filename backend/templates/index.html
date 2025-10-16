@@ -867,6 +867,13 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // ===== ALTERAÇÃO 1: Pegar a data do filtro =====
+    const data = document.getElementById("datePick").value;
+    if (!data) {
+      toast("Por favor, selecione uma data no filtro.", "warn");
+      return;
+    }
+
     const tipo     = document.getElementById("tipo").value.trim();
     const tempo    = Number(document.getElementById("tempo").value);
     const potes    = Number(document.getElementById("potes").value);
@@ -876,7 +883,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
 
-    // Objeto para a atualização otimista da UI (com ID temporário)
     const optimisticRecord = { 
       id: uid(), 
       tipo, 
@@ -885,8 +891,10 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       horario, 
       status:"Em andamento", 
       template, 
-      volume, 
-      atualizadoEm: new Date().toISOString() // ===== CORREÇÃO APLICADA AQUI =====
+      volume,
+      // ===== ALTERAÇÃO 2: Adicionar a data aqui =====
+      data: data,
+      atualizadoEm: new Date().toISOString()
     };
     
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
@@ -900,7 +908,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       return;
     }
 
-    // Cria um payload limpo apenas com os dados que a API precisa, sem o ID temporário.
     const payload = {
       tipo: optimisticRecord.tipo,
       tempo: optimisticRecord.tempo,
@@ -909,6 +916,8 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       status: optimisticRecord.status,
       template: optimisticRecord.template,
       volume: optimisticRecord.volume,
+      // ===== ALTERAÇÃO 3: Adicionar a data no payload para a API =====
+      data: optimisticRecord.data,
       atualizadoEm: optimisticRecord.atualizadoEm
     };
 
@@ -917,14 +926,13 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         method:"POST",
         headers:{"Content-Type":"application/json"},
         credentials:"include",
-        body:JSON.stringify(payload) // Envia o payload limpo
+        body:JSON.stringify(payload)
       });
       if (!resp.ok){
         if (resp.status === 401){
           toast("Sessão expirada. Faça login novamente.", "warn", 3200, "sessao");
           isAuthed = false; localStorage.removeItem(AUTH_KEY); updateAuthUI(); switchTab("login");
         } else {
-          // Mostra o erro exato do Airtable, se possível.
           const errData = await resp.json();
           const errMsg = errData?.error?.message || "Não consegui salvar no servidor.";
           toast(errMsg, "error");
@@ -934,7 +942,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
         softRender(lastNonEmpty);
       } else {
         e.target.reset();
-        toast("Disparo adicionado!", "ok"); // Feedback positivo
+        toast("Disparo adicionado!", "ok");
         setTimeout(softRefresh, 300);
       }
     }catch(err){
@@ -1002,19 +1010,16 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const dp = document.getElementById('datePick');
     if (!dp) return;
     
-    // Define a data de hoje como valor padrão e aplica o filtro inicial
     const today = new Date();
     const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Meses são base 0
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayString = `${yyyy}-${mm}-${dd}`;
     
     dp.value = todayString;
     setRange(todayString);
     
-    // Atualiza o filtro quando a data for alterada
     dp.addEventListener('change', () => {
-      // Se a data for limpa (em alguns navegadores é possível), mostra todos os registros
       setRange(dp.value || "all");
     });
   })();
