@@ -68,6 +68,14 @@
   .app-title{margin:0; font-size:26px; letter-spacing:.3px; color:var(--text);}
   .app-subtitle{margin:4px 0 0; color:var(--muted); font-size:14px;}
   .header-actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;}
+  .header-nav{display:flex; align-items:center; gap:8px;}
+  .header-chip{
+    background:rgba(15,106,216,.12); color:var(--primary);
+    border-radius:999px; padding:8px 14px; font-weight:600; font-size:12px;
+    border:1px solid rgba(15,106,216,.18);
+    display:flex; align-items:center; gap:6px;
+  }
+  .header-chip svg{width:16px; height:16px;}
   .header-chip{
     background:rgba(15,106,216,.12); color:var(--primary);
     border-radius:999px; padding:8px 16px; font-weight:600; font-size:13px;
@@ -96,6 +104,7 @@
   .tabs{display:flex; gap:12px; justify-content:center; margin:16px 0 0; flex-wrap:wrap}
   .tab{
     background:var(--card); border:1px solid var(--border); color:var(--text);
+    padding:6px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:12px; letter-spacing:.15px;
     padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:13px; letter-spacing:.2px;
     transition:transform .15s ease, box-shadow .2s ease, background-color .2s, color .2s, border-color .2s;
   }
@@ -147,11 +156,27 @@
     background:rgba(255,255,255,.88); color:var(--text); font-size:13px;
     transition:border-color .2s ease, box-shadow .2s ease, background-color .2s;
   }
+  .tempo-group{
+    display:flex; align-items:center; gap:6px; border:1px solid var(--border);
+    border-radius:12px; padding:6px 10px; background:rgba(255,255,255,.88);
+  }
+  .tempo-group input{
+    width:60px; border:none; padding:4px 6px; background:transparent; text-align:center; font-weight:600;
+  }
+  .tempo-group input[type="number"]::-webkit-outer-spin-button,
+  .tempo-group input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .tempo-group input[type="number"]{ -moz-appearance: textfield; }
+  .tempo-sep{font-size:12px; color:var(--muted); font-weight:600;}
   html.dark input, html.dark select {
     background: #1f2937;
     border-color: #374151;
     color:var(--text);
   }
+  html.dark .tempo-group{background:#1f2937; border-color:#374151;}
+  html.dark .tempo-group input{color:var(--text);}
+  input:focus, select:focus{outline:none; border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15); background:#fff;}
+  .tempo-group:focus-within{border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15);}
+  .tempo-group input:focus{outline:none; box-shadow:none;}
   input:focus, select:focus{outline:none; border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15); background:#fff;}
   html.dark input:focus, html.dark select:focus{background:#111827;}
   button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px; box-shadow:0 16px 28px -20px rgba(15,106,216,.6); transition:transform .2s ease, box-shadow .2s ease;}
@@ -324,6 +349,8 @@
 
   @media (max-width: 860px){
     .app-banner{flex-direction:column; align-items:flex-start; gap:18px;}
+    .header-actions{width:100%; justify-content:space-between; flex-direction:column; align-items:flex-start; gap:10px;}
+    .header-nav{width:100%; flex-wrap:wrap; justify-content:flex-start;}
     .header-actions{width:100%; justify-content:space-between;}
     .metrics{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
     .grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
@@ -346,6 +373,17 @@
         </span>
         <div>
           <h1 class="app-title">Painel de Disparos</h1>
+          <p class="app-subtitle">Monitoramento em tempo real dos disparos</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="header-nav" role="tablist" aria-label="Navegação principal">
+          <button class="tab active" type="button" data-tab="painel">Painel</button>
+          <button class="tab" type="button" data-tab="login">Login</button>
+        </div>
+        <span class="header-chip" id="currentTimeChip" aria-live="polite">—</span>
+        <span class="header-chip">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
           <p class="app-subtitle">Monitoramento em tempo real dos chamados</p>
         </div>
       </div>
@@ -365,10 +403,51 @@
       <button id="themeToggle" class="theme-toggle" title="Alternar tema"></button>
     </div>
 
-    <nav class="tabs">
-      <button class="tab active" data-tab="painel">Painel</button>
-      <button class="tab" data-tab="login">Login</button>
-    </nav>
+    <section class="metrics" aria-live="polite" aria-label="Resumo do dia">
+      <article class="metric-card">
+        <span class="metric-icon icon-total" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5h15v15h-15z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9h6v6H9z" />
+          </svg>
+        </span>
+        <span class="metric-label">Total de disparos</span>
+        <strong class="metric-value" id="metricTotal">0</strong>
+        <span class="metric-foot" id="metricsRangeLabel">Nenhum dia selecionado</span>
+      </article>
+      <article class="metric-card content-warn">
+        <span class="metric-icon icon-progress" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l7.5-7.5L18 13.5" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12" />
+          </svg>
+        </span>
+        <span class="metric-label">Em andamento</span>
+        <strong class="metric-value" id="metricAndamento">0</strong>
+        <span class="metric-foot">Disparos ativos</span>
+      </article>
+      <article class="metric-card content-success">
+        <span class="metric-icon icon-done" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </span>
+        <span class="metric-label">Finalizados</span>
+        <strong class="metric-value" id="metricFinalizado">0</strong>
+        <span class="metric-foot">Disparos concluídos</span>
+      </article>
+      <article class="metric-card content-error">
+        <span class="metric-icon icon-error" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
+        <span class="metric-label">Insucessos</span>
+        <strong class="metric-value" id="metricInsucesso">0</strong>
+        <span class="metric-foot">Atenção necessária</span>
+      </article>
+    </section>
 
     <section class="metrics" aria-live="polite" aria-label="Resumo do dia">
       <article class="metric-card">
@@ -453,8 +532,13 @@
             <input type="number" id="volume" min="0" placeholder="Ex.: 120"/>
           </div>
           <div>
-            <label for="tempo">Tempo Médio (min)</label>
-            <input type="number" id="tempo" min="0" />
+            <label for="tempoHoras">Tempo Médio</label>
+            <div class="tempo-group">
+              <input type="number" id="tempoHoras" min="0" max="23" placeholder="0" aria-label="Horas" />
+              <span class="tempo-sep">h</span>
+              <input type="number" id="tempoMinutos" min="0" max="59" placeholder="00" aria-label="Minutos" />
+              <span class="tempo-sep">min</span>
+            </div>
           </div>
           <div>
             <label for="potes">Quantidade de Potes</label>
@@ -529,7 +613,7 @@
           <div class="info-list">
               <div class="info-item"><b>Volume</b><span id="mVolume">—</span></div>
               <div class="info-item"><b>Potes</b><span id="mPotes">—</span></div>
-              <div class="info-item"><b>Tempo (min)</b><span id="mTempo">—</span></div>
+              <div class="info-item"><b>Tempo total</b><span id="mTempo">—</span></div>
               <div class="info-item"><b>Tempo restante</b><span id="mRestante">—</span></div>
               <div class="info-item"><b>Horário</b><span id="mHora">—</span></div>
               <div class="info-item"><b>Template</b><span id="mTpl">—</span></div>
@@ -604,6 +688,8 @@
     insucesso: document.getElementById("metricInsucesso"),
     range: document.getElementById("metricsRangeLabel")
   };
+  const headerDateChip = document.getElementById("currentDateChip");
+  const headerTimeChip = document.getElementById("currentTimeChip");
   const headerClock = document.getElementById("currentDateChip");
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
@@ -639,6 +725,18 @@
   }
 
   function updateHeaderClock(){
+    const now = new Date();
+    if (headerTimeChip){
+      headerTimeChip.textContent = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+    if (headerDateChip){
+      const formatted = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+      headerDateChip.textContent = capitalize(formatted);
+    }
+  }
+
+  updateHeaderClock();
+  if (headerDateChip || headerTimeChip) setInterval(updateHeaderClock, 1000);
     if (!headerClock) return;
     const now = new Date();
     const options = { weekday: "long", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
@@ -717,7 +815,11 @@
   /* ============================ TABS =========================== */
   const tabs = document.querySelectorAll(".tab");
   function switchTab(name){
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+    tabs.forEach(t => {
+      const isActive = t.dataset.tab === name;
+      t.classList.toggle("active", isActive);
+      t.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
     document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
     document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
     if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
@@ -833,6 +935,43 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     return s.split("T")[0];
   }
 
+  function minutesToParts(totalMinutes){
+    const mins = Math.max(0, Number(totalMinutes) || 0);
+    return { hours: Math.floor(mins / 60), minutes: mins % 60 };
+  }
+  function formatTempoLabel(totalMinutes){
+    const { hours, minutes } = minutesToParts(totalMinutes);
+    const parts = [];
+    if (hours) parts.push(`${hours}h`);
+    if (minutes) parts.push(`${minutes}min`);
+    if (!parts.length) parts.push("0min");
+    return parts.join(" ");
+  }
+  function formatRemainingLabel(ms){
+    if (ms === null) return "—";
+    if (ms <= 0) return "Finalizado";
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const parts = [];
+    if (hours) parts.push(`${hours}h`);
+    parts.push(`${String(minutes).padStart(2, '0')}m`);
+    parts.push(`${String(seconds).padStart(2, '0')}s`);
+    return parts.join(' ');
+  }
+  function remainingMsFromRecord(r){
+    try{
+      const mins = Number(r?.tempo || 0);
+      const ts = r?.atualizadoEm ? Date.parse(r.atualizadoEm) : NaN;
+      if (!mins || isNaN(ts)) return null;
+      const end = ts + mins * 60000;
+      return end - Date.now();
+    }catch{
+      return null;
+    }
+  }
+
   /* ================== FILTRO POR DATA ============ */
   let currentRange = "all";
   function setRange(range){
@@ -863,11 +1002,23 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     div.dataset.volume = r.volume || "";
     div.dataset.atualizadoEm = r.atualizadoEm || "";
     div.dataset.data = r.data || "";
+    div.dataset.tempo = r.tempo ?? "";
 
+    const remainingLabel = formatRemainingLabel(remainingMsFromRecord(r));
+    const metaParts = [
+      `Tempo: <strong>${formatTempoLabel(r.tempo)}</strong>`,
+      `Restante: <strong data-restante>${remainingLabel}</strong>`
+    ];
+    if (r.potes !== undefined && r.potes !== null && r.potes !== "") {
+      metaParts.push(`Potes: <strong>${r.potes}</strong>`);
+    }
+    if (r.volume) {
+      metaParts.push(`Vol.: <strong>${r.volume}</strong>`);
+    }
     div.innerHTML = `
-      <span class="badge">${r.status || "Em andamento"}</span>
+      <span class="badge" data-role="badge">${r.status || "Em andamento"}</span>
       <div class="title">${r.tipo || ""}</div>
-      <div class="meta">Tempo: <strong>${r.tempo ?? ""} min</strong> • Potes: <strong>${r.potes ?? ""}</strong>${r.volume ? ` • Vol.: <strong>${r.volume}</strong>`:""}</div>
+      <div class="meta">${metaParts.join(' • ')}</div>
     `;
     div.addEventListener("click", () => openModal(r));
     return div;
@@ -876,13 +1027,112 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function placeRecord(r){
     const hh = (r["horario"] || "08:00").split(":")[0];
     const col = document.getElementById("col-"+hh);
-    if (col) col.appendChild(cardTemplate(r));
+    if (col) {
+      const card = cardTemplate(r);
+      col.appendChild(card);
+      registerCountdown(r, card);
+    }
   }
 
   function renderSnapshot(records){
     clearColumns();
     const filtered = (records||[]).filter(inRange);
     updateMetrics(filtered);
+    countdownEntries.clear();
+    if (countdownEntries.size === 0 && countdownInterval){
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+    filtered.forEach(r => placeRecord(r));
+  }
+
+  function updateCardAppearance(card, status){
+    const cls = clsForStatus(status);
+    card.className = `disparo status-${cls}`;
+    card.dataset.status = status;
+    const badge = card.querySelector('[data-role="badge"]');
+    if (badge) badge.textContent = status;
+  }
+
+  function updateCardCountdown(card, remainingMs){
+    const target = card.querySelector('[data-restante]');
+    if (target) target.textContent = formatRemainingLabel(remainingMs);
+  }
+
+  function ensureCountdownRunner(){
+    if (countdownInterval) return;
+    countdownInterval = setInterval(()=>{
+      countdownEntries.forEach((entry, id) => {
+        const remaining = remainingMsFromRecord(entry.record);
+        updateCardCountdown(entry.element, remaining);
+        if (remaining !== null && remaining <= 0){
+          countdownEntries.delete(id);
+          updateCardAppearance(entry.element, "Finalizado");
+          triggerAutoFinalize(id);
+        }
+      });
+      if (countdownEntries.size === 0 && countdownInterval){
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    }, 1000);
+  }
+
+  function registerCountdown(record, element){
+    const id = String(record.id || element.dataset.id || "");
+    const status = (record.status || "").toLowerCase();
+    const remaining = remainingMsFromRecord(record);
+    updateCardCountdown(element, remaining);
+    if (!id){ return; }
+    if (status.includes("andamento")){
+      autoFinalizedIds.delete(id);
+    }
+    if (!record.tempo || !record.atualizadoEm || status.includes("final") || status.includes("insu")){
+      countdownEntries.delete(id);
+      return;
+    }
+    countdownEntries.set(id, { record: { id: record.id, tempo: record.tempo, atualizadoEm: record.atualizadoEm, status: record.status }, element });
+    ensureCountdownRunner();
+  }
+
+  async function triggerAutoFinalize(id){
+    if (!id || autoFinalizedIds.has(id)) return;
+    autoFinalizedIds.add(id);
+    const record = (lastNonEmpty || []).find(r => `${r.id}` === `${id}`);
+    if (!record) return;
+    const status = (record.status || "").toLowerCase();
+    if (status.includes("final") || status.includes("insu")) return;
+
+    record.status = "Finalizado";
+    record.atualizadoEm = new Date().toISOString();
+    toast("Disparo finalizado automaticamente.", "ok", 2200, `auto-finish-${id}`);
+
+    const rerender = () => softRender((lastNonEmpty || []).slice());
+    const isTempId = String(record.id || "").startsWith("tmp_");
+
+    if (!OFFLINE_MODE && isAuthed && record.id && !isTempId){
+      try{
+        const resp = await fetch(url(`/api/disparos/${record.id}`), {
+          method: "PATCH",
+          headers: {"Content-Type":"application/json"},
+          credentials: "include",
+          body: JSON.stringify({ status: "Finalizado" })
+        });
+        if (resp.status === 401){
+          isAuthed = false;
+          localStorage.removeItem(AUTH_KEY);
+          updateAuthUI();
+          switchTab("login");
+          toast("Sessão expirada ao finalizar automaticamente.", "warn", 3200, "auto-expired");
+        }
+      }catch{
+        /* silencioso */
+      }finally{
+        setTimeout(rerender, 60);
+      }
+    }else{
+      setTimeout(rerender, 60);
+    }
     filtered.forEach(r => placeRecord(r));
   }
 
@@ -904,6 +1154,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   const mCycle = document.getElementById('mCycle');
 
   let currentRecord = null;
+  let modalTimer = null;
 
   function openModal(r){
     currentRecord = r;
@@ -917,7 +1168,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
     mVolume.textContent = r.volume ?? "—";
     mPotes.textContent  = r.potes ?? "—";
-    mTempo.textContent  = r.tempo ?? "—";
+    mTempo.textContent  = formatTempoLabel(r.tempo);
     mHora.textContent   = r.horario || "—";
     
     const tplName = (r.template || "").trim();
@@ -926,6 +1177,11 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     mText.textContent = tplText(tplName);
 
     mRest.textContent = calcRestante(r);
+    if (modalTimer) clearInterval(modalTimer);
+    modalTimer = setInterval(() => {
+      if (!currentRecord) return;
+      mRest.textContent = calcRestante(currentRecord);
+    }, 1000);
     mCycle.style.display = isAuthed ? "" : "none";
 
     modal.classList.add('show');
@@ -934,22 +1190,20 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function closeModal(){
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden','true');
+    if (modalTimer) { clearInterval(modalTimer); modalTimer = null; }
     currentRecord = null;
   }
   mClose.addEventListener('click', closeModal);
   modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
 
   function calcRestante(r){
-    try{
-      const mins = Number(r.tempo||0);
-      const ts = r.atualizadoEm ? Date.parse(r.atualizadoEm) : NaN;
-      if (!mins || isNaN(ts)) return "—";
-      const end = ts + mins*60000;
-      const diff = end - Date.now();
-      if (diff <= 0) return "Concluído/estourado";
-      const mm = Math.floor(diff/60000), ss = Math.floor((diff%60000)/1000);
-      return `${mm}m ${ss}s`;
-    }catch{ return "—"; }
+    if (!r) return "—";
+    const status = (r.status || "").toLowerCase();
+    if (status.includes("final")) return "Finalizado";
+    if (status.includes("insu")) return "—";
+    const remaining = remainingMsFromRecord(r);
+    if (remaining === null) return "—";
+    return formatRemainingLabel(remaining);
   }
 
   mCopy.addEventListener('click', async ()=>{
@@ -994,6 +1248,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   let lastNonEmpty = [];
   let lastHash = "";
   let sse = null, pollTimer = null, backoffMs = 5000, gotFirstPaint = false;
+  const countdownEntries = new Map();
+  const autoFinalizedIds = new Set();
+  let countdownInterval = null;
 
   (function paintFromCache(){
     try{
@@ -1095,13 +1352,19 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }
 
     const tipo     = document.getElementById("tipo").value.trim();
-    const tempo    = Number(document.getElementById("tempo").value);
+    let tempoHoras = parseInt(document.getElementById("tempoHoras").value || "0", 10);
+    let tempoMin   = parseInt(document.getElementById("tempoMinutos").value || "0", 10);
+    tempoHoras = isNaN(tempoHoras) ? 0 : Math.max(0, tempoHoras);
+    tempoMin   = isNaN(tempoMin) ? 0 : tempoMin;
+    if (tempoMin < 0 || tempoMin > 59){ toast("Minutos devem estar entre 0 e 59.", "warn"); return; }
+    const tempo    = (tempoHoras * 60) + tempoMin;
     const potes    = Number(document.getElementById("potes").value);
     const horario  = document.getElementById("horario").value;
     const template = document.getElementById("template").value;
     const volume   = Number(document.getElementById("volume").value || 0);
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
+    if(tempo <= 0){ toast("Informe um tempo médio válido.", "warn"); return; }
 
     const optimisticRecord = { 
       id: uid(), 
@@ -1110,9 +1373,10 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       potes, 
       horario, 
       status:"Em andamento", 
-      template, 
+      template,
       volume,
-      data: data
+      data: data,
+      atualizadoEm: new Date().toISOString()
     };
     
     (lastNonEmpty = lastNonEmpty || []).push(optimisticRecord);
