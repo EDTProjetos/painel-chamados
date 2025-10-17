@@ -76,12 +76,6 @@
     display:flex; align-items:center; gap:6px;
   }
   .header-chip svg{width:16px; height:16px;}
-  .header-chip{
-    background:rgba(15,106,216,.12); color:var(--primary);
-    border-radius:999px; padding:8px 16px; font-weight:600; font-size:13px;
-    border:1px solid rgba(15,106,216,.18);
-    display:flex; align-items:center; gap:6px;
-  }
   html.dark .header-chip{background:rgba(37,99,235,.18); color:#bfdbfe; border-color:rgba(59,130,246,.35);}
 
   /* Theme Toggle */
@@ -105,7 +99,6 @@
   .tab{
     background:var(--card); border:1px solid var(--border); color:var(--text);
     padding:6px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:12px; letter-spacing:.15px;
-    padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:13px; letter-spacing:.2px;
     transition:transform .15s ease, box-shadow .2s ease, background-color .2s, color .2s, border-color .2s;
   }
   .tab:hover{ transform:translateY(-1px); box-shadow:0 6px 12px rgba(15,106,216,.15) }
@@ -177,7 +170,6 @@
   input:focus, select:focus{outline:none; border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15); background:#fff;}
   .tempo-group:focus-within{border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15);}
   .tempo-group input:focus{outline:none; box-shadow:none;}
-  input:focus, select:focus{outline:none; border-color:var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.15); background:#fff;}
   html.dark input:focus, html.dark select:focus{background:#111827;}
   button{background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:700; border:none; cursor:pointer; letter-spacing:.2px; box-shadow:0 16px 28px -20px rgba(15,106,216,.6); transition:transform .2s ease, box-shadow .2s ease;}
   button:hover{transform:translateY(-1px); box-shadow:0 20px 36px -22px rgba(15,106,216,.6);}
@@ -351,7 +343,6 @@
     .app-banner{flex-direction:column; align-items:flex-start; gap:18px;}
     .header-actions{width:100%; justify-content:space-between; flex-direction:column; align-items:flex-start; gap:10px;}
     .header-nav{width:100%; flex-wrap:wrap; justify-content:flex-start;}
-    .header-actions{width:100%; justify-content:space-between;}
     .metrics{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
     .grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
     .grid > div:nth-child(1){border-top-left-radius:18px;}
@@ -384,12 +375,6 @@
         <span class="header-chip" id="currentTimeChip" aria-live="polite">—</span>
         <span class="header-chip">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-          <p class="app-subtitle">Monitoramento em tempo real dos chamados</p>
-        </div>
-      </div>
-      <div class="header-actions">
-        <span class="header-chip">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" width="18" height="18">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span id="currentDateChip">—</span>
@@ -435,52 +420,6 @@
         <span class="metric-label">Finalizados</span>
         <strong class="metric-value" id="metricFinalizado">0</strong>
         <span class="metric-foot">Disparos concluídos</span>
-      </article>
-      <article class="metric-card content-error">
-        <span class="metric-icon icon-error" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </span>
-        <span class="metric-label">Insucessos</span>
-        <strong class="metric-value" id="metricInsucesso">0</strong>
-        <span class="metric-foot">Atenção necessária</span>
-      </article>
-    </section>
-
-    <section class="metrics" aria-live="polite" aria-label="Resumo do dia">
-      <article class="metric-card">
-        <span class="metric-icon icon-total" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5h15v15h-15z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9h6v6H9z" />
-          </svg>
-        </span>
-        <span class="metric-label">Total de disparos</span>
-        <strong class="metric-value" id="metricTotal">0</strong>
-        <span class="metric-foot" id="metricsRangeLabel">Nenhum dia selecionado</span>
-      </article>
-      <article class="metric-card content-warn">
-        <span class="metric-icon icon-progress" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l7.5-7.5L18 13.5" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12" />
-          </svg>
-        </span>
-        <span class="metric-label">Em andamento</span>
-        <strong class="metric-value" id="metricAndamento">0</strong>
-        <span class="metric-foot">Chamados ativos</span>
-      </article>
-      <article class="metric-card content-success">
-        <span class="metric-icon icon-done" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
-        </span>
-        <span class="metric-label">Finalizados</span>
-        <strong class="metric-value" id="metricFinalizado">0</strong>
-        <span class="metric-foot">Chamados resolvidos</span>
       </article>
       <article class="metric-card content-error">
         <span class="metric-icon icon-error" aria-hidden="true">
@@ -698,7 +637,6 @@
   };
   const headerDateChip = document.getElementById("currentDateChip");
   const headerTimeChip = document.getElementById("currentTimeChip");
-  const headerClock = document.getElementById("currentDateChip");
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 
@@ -745,15 +683,6 @@
 
   updateHeaderClock();
   if (headerDateChip || headerTimeChip) setInterval(updateHeaderClock, 1000);
-    if (!headerClock) return;
-    const now = new Date();
-    const options = { weekday: "long", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
-    let formatted = now.toLocaleDateString("pt-BR", options).replace(",", " •");
-    headerClock.textContent = capitalize(formatted);
-  }
-
-  updateHeaderClock();
-  if (headerClock) setInterval(updateHeaderClock, 60000);
   updateMetrics([]);
 
   /* ========================== CONFIG ========================== */
@@ -934,9 +863,16 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }catch{ return Math.random().toString(36); }
   }
   function fetchWithTimeout(resource, options = {}, timeout = 3000) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+    try{
+      if (typeof AbortController === "undefined"){
+        return fetch(resource, options);
+      }
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      return fetch(resource, { ...options, signal: controller.signal }).finally(() => clearTimeout(id));
+    }catch{
+      return fetch(resource, options);
+    }
   }
   function fmtDateOnly(s){
     if(!s) return null;
@@ -1141,7 +1077,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }else{
       setTimeout(rerender, 60);
     }
-    filtered.forEach(r => placeRecord(r));
   }
 
   /* ===== Modal ===== */
