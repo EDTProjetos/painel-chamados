@@ -651,30 +651,38 @@
   const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>`;
   const THEME_KEY = "painel_theme";
 
+  function getStoredTheme(){
+    try{ return localStorage.getItem(THEME_KEY); }
+    catch{ return null; }
+  }
+
+  function setStoredTheme(value){
+    try{ localStorage.setItem(THEME_KEY, value); }
+    catch{}
+  }
+
   function applyTheme(theme) {
-      if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-          themeToggleBtn.innerHTML = sunIcon;
-      } else {
-          document.documentElement.classList.remove('dark');
-          themeToggleBtn.innerHTML = moonIcon;
+      const isDark = theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (themeToggleBtn){
+        themeToggleBtn.innerHTML = isDark ? sunIcon : moonIcon;
       }
   }
 
+  function detectPreferredTheme(){
+      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      catch{ return 'light'; }
+  }
+
   function toggleTheme() {
-      const currentTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const currentTheme = getStoredTheme() || detectPreferredTheme();
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem(THEME_KEY, newTheme);
+      setStoredTheme(newTheme);
       applyTheme(newTheme);
   }
 
-  const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme) {
-      applyTheme(savedTheme);
-  } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      applyTheme(prefersDark ? 'dark' : 'light');
-  }
+  const savedTheme = getStoredTheme();
+  applyTheme(savedTheme || detectPreferredTheme());
 
   if(themeToggleBtn) {
     themeToggleBtn.addEventListener("click", toggleTheme);
