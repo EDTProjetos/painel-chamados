@@ -511,10 +511,10 @@
           <div class="header">20:00</div>
 
           <div class="header">Disparos</div>
-          <div id="col-08"></div>
-          <div id="col-12"></div>
-          <div id="col-16"></div>
-          <div id="col-20"></div>
+          <div id="col-08" data-schedule-column data-horario="08:00"></div>
+          <div id="col-12" data-schedule-column data-horario="12:00"></div>
+          <div id="col-16" data-schedule-column data-horario="16:00"></div>
+          <div id="col-20" data-schedule-column data-horario="20:00"></div>
         </div>
       </div>
     </section>
@@ -693,6 +693,16 @@
   const BASE = (API_BASE || "").replace(/\/+$/,"");
   const url = (p) => `${BASE}${p}`;
 
+  let lastNonEmpty = [];
+  let lastHash = "";
+  let sse = null, pollTimer = null, backoffMs = 5000, gotFirstPaint = false;
+  const countdownEntries = new Map();
+  const autoFinalizedIds = new Set();
+  let countdownInterval = null;
+  let dragState = null;
+  const dropZones = [];
+  const deletingIds = new Set();
+
   /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
   const hideSplashSoon = () => { splash?.classList.add("hide"); setTimeout(()=>{ try{splash.remove();}catch{} }, 300); };
@@ -746,6 +756,9 @@
       formWrap && (formWrap.style.display = "none");
       hint && (hint.style.display = "");
       logoutBtn && (logoutBtn.style.display = "none");
+    }
+    if (gotFirstPaint){
+      renderSnapshot(lastNonEmpty);
     }
   }
 
@@ -964,8 +977,210 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       <div class="title">${r.tipo || ""}</div>
       <div class="meta">${metaParts.join(' • ')}</div>
     `;
-    div.addEventListener("click", () => openModal(r));
+
+    let dragged = false;
+    const markDragStart = () => { dragged = true; };
+    const markDragEnd = () => { setTimeout(() => { dragged = false; }, 0); };
+
+    div.addEventListener("click", () => {
+      if (dragged){ dragged = false; return; }
+      openModal(r);
+    });
+    setupCardInteractions(div, r, markDragStart, markDragEnd);
+
+    if (isAuthed){
+      const delBtn = div.querySelector('[data-role="delete"]');
+      if (delBtn){
+        delBtn.addEventListener('click', (evt) => {
+          evt.preventDefault();
+          evt.stopPropagation();
+          deleteRecord(r, div);
+        });
+      }
+    }
     return div;
+  }
+
+  function setupCardInteractions(element, record, onDragStart, onDragEnd){
+    if (!element) return;
+    if (!isAuthed){
+      element.removeAttribute('draggable');
+      return;
+    }
+    element.setAttribute('draggable', 'true');
+    element.addEventListener('dragstart', (event) => {
+      if (!isAuthed){ event.preventDefault(); return; }
+      dragState = { record, element, sourceHorario: record?.horario || element.dataset.horario || "" };
+      element.classList.add('dragging');
+      onDragStart && onDragStart();
+      try{
+        if (event.dataTransfer){
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', record?.id || element.dataset.id || '');
+        }
+      }catch{}
+    });
+    element.addEventListener('dragend', () => {
+      element.classList.remove('dragging');
+      dropZones.forEach(z => z.classList.remove('drop-target'));
+      dragState = null;
+      onDragEnd && onDragEnd();
+    });
+  }
+
+  function handleDragEnter(event){
+    if (!isAuthed || !dragState) return;
+    event.preventDefault();
+    event.currentTarget.classList.add('drop-target');
+  }
+
+  function handleDragOver(event){
+    if (!isAuthed || !dragState) return;
+    event.preventDefault();
+    try{ event.dataTransfer.dropEffect = 'move'; }
+    catch{}
+  }
+
+  function handleDragLeave(event){
+    if (!isAuthed) return;
+    const current = event.currentTarget;
+    const related = event.relatedTarget;
+    if (!current.contains(related)){
+      current.classList.remove('drop-target');
+    }
+  }
+
+  async function handleDrop(event){
+    if (!isAuthed || !dragState) return;
+    event.preventDefault();
+    const zone = event.currentTarget;
+    dropZones.forEach(z => z.classList.remove('drop-target'));
+    const state = dragState;
+    dragState = null;
+    const record = state?.record;
+    if (!record) return;
+    const newHorario = zone?.dataset?.horario || "";
+    if (!newHorario){
+      softRender((lastNonEmpty || []).slice());
+      return;
+    }
+    const previousHorario = record.horario || state.sourceHorario || "";
+    if (previousHorario === newHorario){
+      softRender((lastNonEmpty || []).slice());
+      return;
+    }
+
+    record.horario = newHorario;
+    softRender((lastNonEmpty || []).slice());
+    toast(`Disparo movido para ${newHorario}`, "ok", 2200, `move-${record.id || record.tipo || newHorario}`);
+
+    if (OFFLINE_MODE || !record.id || String(record.id).startsWith('tmp_')){
+      if (OFFLINE_MODE){
+        toast("Mudança registrada localmente (offline).", "warn", 2400, "move-offline");
+      }
+      return;
+    }
+
+    try{
+      const resp = await fetch(url(`/api/disparos/${record.id}`), {
+        method: "PATCH",
+        headers: {"Content-Type":"application/json"},
+        credentials: "include",
+        body: JSON.stringify({ horario: newHorario })
+      });
+      if (resp.status === 401){
+        isAuthed = false;
+        localStorage.removeItem(AUTH_KEY);
+        updateAuthUI();
+        switchTab("login");
+        toast("Sessão expirada ao mover disparo.", "warn", 2600, "move-auth");
+        record.horario = previousHorario;
+        setTimeout(() => softRender((lastNonEmpty || []).slice()), 120);
+        return;
+      }
+      if (!resp.ok){
+        throw new Error(`status_${resp.status}`);
+      }
+    }catch(err){
+      console.error("Falha ao atualizar horário", err);
+      toast("Não consegui salvar o novo horário.", "error", 2800, "move-error");
+      record.horario = previousHorario;
+      setTimeout(() => softRender((lastNonEmpty || []).slice()), 150);
+    }
+  }
+
+  function initializeDragAndDrop(){
+    document.querySelectorAll('[data-schedule-column]').forEach(col => {
+      if (!dropZones.includes(col)){
+        dropZones.push(col);
+        col.addEventListener('dragenter', handleDragEnter);
+        col.addEventListener('dragover', handleDragOver);
+        col.addEventListener('dragleave', handleDragLeave);
+        col.addEventListener('drop', handleDrop);
+      }
+    });
+  }
+
+  initializeDragAndDrop();
+
+  async function deleteRecord(record, element){
+    if (!isAuthed){ toast("Faça login para excluir.", "warn"); return; }
+    if (!record){ return; }
+
+    const id = record.id;
+    if (id && deletingIds.has(id)) return;
+
+    if (!id){
+      lastNonEmpty = (lastNonEmpty || []).filter(r => r !== record);
+      softRender((lastNonEmpty || []).slice());
+      toast("Disparo removido localmente.", "warn", 2200, "delete-local");
+      return;
+    }
+
+    if (!confirm("Deseja remover este disparo?")) return;
+
+    deletingIds.add(id);
+    element?.setAttribute('aria-busy', 'true');
+
+    try{
+      if (OFFLINE_MODE){
+        lastNonEmpty = (lastNonEmpty || []).filter(r => `${r.id}` !== `${id}`);
+        softRender((lastNonEmpty || []).slice());
+        toast("Disparo removido (offline).", "warn", 2400, "delete-offline");
+        return;
+      }
+
+      const resp = await fetch(url(`/api/disparos/${id}`), {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      if (resp.status === 401){
+        isAuthed = false;
+        localStorage.removeItem(AUTH_KEY);
+        updateAuthUI();
+        switchTab("login");
+        toast("Sessão expirada.", "warn", 2400, "delete-auth");
+        return;
+      }
+
+      if (!resp.ok){
+        const errorText = await resp.text().catch(() => "");
+        console.error("Falha ao excluir disparo:", errorText || resp.status);
+        toast("Não consegui excluir o disparo.", "error", 2800, "delete-error");
+        return;
+      }
+
+      lastNonEmpty = (lastNonEmpty || []).filter(r => `${r.id}` !== `${id}`);
+      softRender((lastNonEmpty || []).slice());
+      toast("Disparo excluído.", "ok", 2000, `delete-${id}`);
+    }catch(err){
+      console.error("Erro ao excluir disparo", err);
+      toast("Falha de rede ao excluir.", "error", 2800, "delete-network");
+    }finally{
+      deletingIds.delete(id);
+      element?.removeAttribute('aria-busy');
+    }
   }
 
   function placeRecord(r){
