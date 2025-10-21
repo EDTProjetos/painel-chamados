@@ -229,6 +229,17 @@ def update_disparo(rid):
         except: pass
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
+
+@app.delete("/api/disparos/<rid>")
+@require_auth
+def delete_disparo(rid):
+    r = _airtable_request("DELETE", f"{AIRTABLE_API}/{rid}")
+    if r.ok:
+        try: get_snapshot(force=True)
+        except: pass
+    return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+
 # ---- SSE ----
 @app.get("/api/stream")
 def stream():
