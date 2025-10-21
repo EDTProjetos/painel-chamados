@@ -1,6 +1,7 @@
 import os, time, json, hashlib, logging, requests
 from functools import wraps
 from datetime import timedelta, datetime
+from collections import deque
 
 from flask import Flask, jsonify, request, Response, render_template, session
 from flask_cors import CORS
@@ -28,6 +29,9 @@ REQ.headers.update({
 
 DEFAULT_TIMEOUT = int(os.getenv("AIRTABLE_TIMEOUT", "12"))
 MAX_RETRIES = int(os.getenv("AIRTABLE_MAX_RETRIES", "4"))
+
+# ===== Blip Analytics =====
+BLIP_EVENTS = deque(maxlen=int(os.getenv("BLIP_MAX_EVENTS", "50")))
 
 # ===== App / Auth =====
 APP_USER = os.getenv("APP_USER", "energia")
