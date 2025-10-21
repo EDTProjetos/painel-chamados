@@ -99,10 +99,12 @@
   .tab{
     background:var(--card); border:1px solid var(--border); color:var(--text);
     padding:6px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:12px; letter-spacing:.15px;
+    display:inline-flex; align-items:center; gap:6px; line-height:1.2;
     transition:transform .15s ease, box-shadow .2s ease, background-color .2s, color .2s, border-color .2s;
   }
   .tab:hover{ transform:translateY(-1px); box-shadow:0 6px 12px rgba(15,106,216,.15) }
   .tab.active{ border-color: var(--primary-2); box-shadow:0 0 0 3px rgba(15,106,216,.16); background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; }
+  .tab svg{width:16px; height:16px;}
 
   .metrics{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:16px; margin:22px 0 14px;}
   .metric-card{
@@ -347,10 +349,48 @@
   .template-vars { color:var(--muted); font-size:12px; margin-top:12px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
   html.dark .template-vars { background: #374151; }
 
+  #view-analytics{margin-top:24px;}
+  .analytics-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 26px 48px -30px rgba(15,106,216,.45);
+  }
+  html.dark .analytics-card{background:rgba(17,24,39,.95); border-color:rgba(59,130,246,.25); box-shadow:0 30px 60px -36px rgba(15,23,42,.85);}
+  .analytics-header{display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap;}
+  .analytics-title{margin:0; font-size:22px; letter-spacing:.3px;}
+  .analytics-sub{margin:6px 0 0; font-size:13px; color:var(--muted);}
+  .analytics-meta{margin:8px 0 0; font-size:12px; color:var(--muted);}
+  .analytics-actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .analytics-updated{font-size:12px; color:var(--muted);}
+  .analytics-refresh{width:auto; padding:8px 14px;}
+  .analytics-body{margin-top:20px; display:flex; flex-direction:column; gap:14px;}
+  .analytics-empty{
+    padding:24px; text-align:center; font-size:14px; color:var(--muted);
+    border:1px dashed var(--border); border-radius:16px;
+    background:rgba(15,106,216,.06);
+  }
+  html.dark .analytics-empty{background:rgba(37,99,235,.12); border-color:rgba(59,130,246,.35); color:#bfdbfe;}
+  .analytics-list{list-style:none; margin:0; padding:0; display:grid; gap:14px;}
+  .analytics-event{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 20px 38px -30px rgba(15,106,216,.45);}
+  html.dark .analytics-event{background:rgba(15,23,42,.95); border-color:rgba(59,130,246,.25); box-shadow:0 24px 50px -32px rgba(15,23,42,.9);}
+  .analytics-event-header{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted);}
+  .analytics-event-badge{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; background:rgba(15,106,216,.12); color:var(--primary);}
+  html.dark .analytics-event-badge{background:rgba(37,99,235,.22); color:#bfdbfe;}
+  .analytics-event-pre{
+    margin:12px 0 0; font-size:12px; line-height:1.5; border-radius:12px;
+    background:#f8fafc; border:1px solid #e2e8f0; padding:12px;
+    max-height:260px; overflow:auto;
+  }
+  html.dark .analytics-event-pre{background:#1f2937; border-color:#374151; color:#e2e8f0;}
+
   @media (max-width: 860px){
     .app-banner{flex-direction:column; align-items:flex-start; gap:18px;}
     .header-actions{width:100%; justify-content:space-between; flex-direction:column; align-items:flex-start; gap:10px;}
     .header-nav{width:100%; flex-wrap:wrap; justify-content:flex-start;}
+    .analytics-actions{width:100%; justify-content:flex-start;}
+    .analytics-refresh{width:100%; justify-content:center;}
     .metrics{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
     .grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
     .grid > div:nth-child(1){border-top-left-radius:18px;}
@@ -378,6 +418,13 @@
       <div class="header-actions">
         <div class="header-nav" role="tablist" aria-label="Navegação principal">
           <button class="tab active" type="button" data-tab="painel">Painel</button>
+          <button class="tab" type="button" data-tab="analytics">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5.25H19V13.5H13L9 17.25V13.5H5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8.75h7M8.5 11.25h4.5" />
+            </svg>
+            <span>Analitcs Blip</span>
+          </button>
           <button class="tab" type="button" data-tab="login">Login</button>
         </div>
         <span class="header-chip" id="currentTimeChip" aria-live="polite">—</span>
@@ -524,6 +571,26 @@
           <div id="col-12" data-schedule-column data-horario="12:00"></div>
           <div id="col-16" data-schedule-column data-horario="16:00"></div>
           <div id="col-20" data-schedule-column data-horario="20:00"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-analytics" style="display:none;">
+      <div class="analytics-card">
+        <div class="analytics-header">
+          <div>
+            <h2 class="analytics-title">Analytics Blip</h2>
+            <p class="analytics-sub">Os dados são preenchidos automaticamente via webhook da Blip.</p>
+            <p class="analytics-meta">Eventos recebidos: <strong id="blipCount">0</strong></p>
+          </div>
+          <div class="analytics-actions">
+            <span class="analytics-updated">Última atualização: <strong id="blipUpdated">—</strong></span>
+            <button type="button" class="btn ghost analytics-refresh" id="blipRefresh">Atualizar agora</button>
+          </div>
+        </div>
+        <div class="analytics-body" aria-live="polite">
+          <div id="blipEmpty" class="analytics-empty">Aguardando dados do Blip...</div>
+          <ul id="blipEvents" class="analytics-list" hidden></ul>
         </div>
       </div>
     </section>
@@ -759,6 +826,138 @@
       setTimeout(removeToast, ms);
   }
 
+  /* ======================= BLIP ANALYTICS ===================== */
+  const analyticsList = document.getElementById("blipEvents");
+  const analyticsEmpty = document.getElementById("blipEmpty");
+  const analyticsUpdated = document.getElementById("blipUpdated");
+  const analyticsCount = document.getElementById("blipCount");
+  const analyticsRefreshBtn = document.getElementById("blipRefresh");
+  const analyticsEmptyDefault = analyticsEmpty ? analyticsEmpty.textContent : "";
+  const ANALYTICS_OFFLINE_MSG = "Painel em modo offline. Dados do Blip indisponíveis.";
+  const BLIP_POLL_INTERVAL = 15000;
+  let blipPollTimer = null;
+  let blipLoading = false;
+
+  function formatBlipTimestamp(value){
+    if (!value) return "—";
+    try{
+      return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "medium" });
+    }catch{
+      return value;
+    }
+  }
+
+  function renderBlipEvents(events = []){
+    if (analyticsCount) analyticsCount.textContent = String(events.length || 0);
+    if (!analyticsList) return;
+    analyticsList.innerHTML = "";
+    if (!events.length){
+      analyticsList.hidden = true;
+      if (analyticsEmpty){
+        if (analyticsEmpty.textContent !== ANALYTICS_OFFLINE_MSG && analyticsEmptyDefault){
+          analyticsEmpty.textContent = analyticsEmptyDefault;
+        }
+        analyticsEmpty.hidden = false;
+      }
+      if (analyticsUpdated) analyticsUpdated.textContent = "—";
+      return;
+    }
+    analyticsList.hidden = false;
+    if (analyticsEmpty){
+      analyticsEmpty.hidden = true;
+    }
+    events.forEach((evt, index) => {
+      const li = document.createElement("li");
+      li.className = "analytics-event";
+      let pretty;
+      const payload = evt?.payload;
+      try{
+        const normalized = (payload === null || typeof payload === "undefined") ? {} : payload;
+        pretty = JSON.stringify(normalized, null, 2);
+      }catch{
+        pretty = String(payload ?? "");
+      }
+      const badgeLabel = (() => {
+        const candidate = evt?.payload?.type || evt?.payload?.event || evt?.payload?.categoria || evt?.payload?.nome;
+        if (candidate) return candidate;
+        return `Evento ${index + 1}`;
+      })();
+      const received = formatBlipTimestamp(evt?.received_at);
+      li.innerHTML = `
+        <div class="analytics-event-header">
+          <span class="analytics-event-badge">${escapeHtml(String(badgeLabel))}</span>
+          <span>${escapeHtml(received)}</span>
+        </div>
+        <pre class="analytics-event-pre">${escapeHtml(pretty || "{}")}</pre>
+      `;
+      analyticsList.appendChild(li);
+    });
+    if (analyticsUpdated) analyticsUpdated.textContent = formatBlipTimestamp(events[0]?.received_at);
+  }
+
+  async function loadBlipEvents({ notifyOnError = false } = {}){
+    if (!analyticsList){
+      return;
+    }
+    if (blipLoading){
+      return;
+    }
+    if (OFFLINE_MODE){
+      renderBlipEvents([]);
+      if (analyticsEmpty){
+        analyticsEmpty.textContent = ANALYTICS_OFFLINE_MSG;
+        analyticsEmpty.hidden = false;
+      }
+      if (analyticsUpdated) analyticsUpdated.textContent = "—";
+      return;
+    }
+    if (analyticsEmpty && analyticsEmptyDefault){
+      analyticsEmpty.textContent = analyticsEmptyDefault;
+    }
+    blipLoading = true;
+    if (analyticsRefreshBtn){
+      analyticsRefreshBtn.disabled = true;
+      analyticsRefreshBtn.setAttribute("aria-busy", "true");
+    }
+    try{
+      const resp = await fetchWithTimeout(url("/api/blip/events"), { cache: "no-store" }, 5000);
+      if (!resp.ok){
+        throw new Error(`status_${resp.status}`);
+      }
+      const data = await resp.json();
+      renderBlipEvents(data?.events || []);
+    }catch(err){
+      console.error("Falha ao carregar eventos do Blip", err);
+      if (notifyOnError){
+        toast("Não consegui carregar os dados do Blip.", "warn", 3200, "blip-load");
+      }
+    }finally{
+      if (analyticsRefreshBtn){
+        analyticsRefreshBtn.disabled = false;
+        analyticsRefreshBtn.removeAttribute("aria-busy");
+      }
+      blipLoading = false;
+    }
+  }
+
+  function startBlipPolling(){
+    if (blipPollTimer || OFFLINE_MODE || !analyticsList){
+      return;
+    }
+    blipPollTimer = setInterval(() => loadBlipEvents(), BLIP_POLL_INTERVAL);
+  }
+
+  function stopBlipPolling(){
+    if (blipPollTimer){
+      clearInterval(blipPollTimer);
+      blipPollTimer = null;
+    }
+  }
+
+  if (analyticsRefreshBtn){
+    analyticsRefreshBtn.addEventListener("click", () => loadBlipEvents({ notifyOnError: true }));
+  }
+
   /* ============================ AUTH =========================== */
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
@@ -789,8 +988,18 @@
       t.classList.toggle("active", isActive);
       t.setAttribute("aria-selected", isActive ? "true" : "false");
     });
-    document.getElementById("view-painel").style.display = (name==="painel") ? "" : "none";
-    document.getElementById("view-login").style.display  = (name==="login") ? "" : "none";
+    const painelView = document.getElementById("view-painel");
+    if (painelView) painelView.style.display = (name === "painel") ? "" : "none";
+    const loginView = document.getElementById("view-login");
+    if (loginView) loginView.style.display = (name === "login") ? "" : "none";
+    const analyticsView = document.getElementById("view-analytics");
+    if (analyticsView) analyticsView.style.display = (name === "analytics") ? "" : "none";
+    if (name === "analytics"){
+      loadBlipEvents({ notifyOnError: true });
+      startBlipPolling();
+    }else{
+      stopBlipPolling();
+    }
     if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
@@ -935,6 +1144,14 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     parts.push(`${String(minutes).padStart(2, '0')}m`);
     parts.push(`${String(seconds).padStart(2, '0')}s`);
     return parts.join(' ');
+  }
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
   function remainingMsFromRecord(r){
     try{
