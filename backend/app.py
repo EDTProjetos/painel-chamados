@@ -244,36 +244,6 @@ def delete_disparo(rid):
     return (r.text, r.status_code, {"Content-Type": "application/json"})
 
 
-@app.post("/blip/webhook")
-def blip_webhook():
-    payload = request.get_json(force=True, silent=True) or {}
-    event = {
-        "received_at": datetime.utcnow().isoformat() + "Z",
-        "payload": payload,
-    }
-    BLIP_EVENTS.append(event)
-    if isinstance(payload, dict):
-        summary = ", ".join(sorted(map(str, payload.keys()))) or "sem campos"
-    elif isinstance(payload, list):
-        summary = f"lista com {len(payload)} itens"
-    else:
-        summary = f"tipo {type(payload).__name__}"
-    log.info("Webhook Blip recebido (%s)", summary)
-    return jsonify({"ok": True})
-
-
-@app.get("/api/blip/events")
-def blip_events():
-    limit = request.args.get("limit", type=int) or 20
-    limit = max(1, min(limit, BLIP_EVENTS.maxlen or limit))
-    events = list(BLIP_EVENTS)[-limit:]
-    events = list(reversed(events))
-    return jsonify({
-        "events": events,
-        "count": len(events),
-        "max": BLIP_EVENTS.maxlen,
-    })
-
 # ---- SSE ----
 @app.get("/api/stream")
 def stream():

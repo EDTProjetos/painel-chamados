@@ -349,48 +349,10 @@
   .template-vars { color:var(--muted); font-size:12px; margin-top:12px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
   html.dark .template-vars { background: #374151; }
 
-  #view-analytics{margin-top:24px;}
-  .analytics-card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:24px;
-    box-shadow:0 26px 48px -30px rgba(15,106,216,.45);
-  }
-  html.dark .analytics-card{background:rgba(17,24,39,.95); border-color:rgba(59,130,246,.25); box-shadow:0 30px 60px -36px rgba(15,23,42,.85);}
-  .analytics-header{display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap;}
-  .analytics-title{margin:0; font-size:22px; letter-spacing:.3px;}
-  .analytics-sub{margin:6px 0 0; font-size:13px; color:var(--muted);}
-  .analytics-meta{margin:8px 0 0; font-size:12px; color:var(--muted);}
-  .analytics-actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
-  .analytics-updated{font-size:12px; color:var(--muted);}
-  .analytics-refresh{width:auto; padding:8px 14px;}
-  .analytics-body{margin-top:20px; display:flex; flex-direction:column; gap:14px;}
-  .analytics-empty{
-    padding:24px; text-align:center; font-size:14px; color:var(--muted);
-    border:1px dashed var(--border); border-radius:16px;
-    background:rgba(15,106,216,.06);
-  }
-  html.dark .analytics-empty{background:rgba(37,99,235,.12); border-color:rgba(59,130,246,.35); color:#bfdbfe;}
-  .analytics-list{list-style:none; margin:0; padding:0; display:grid; gap:14px;}
-  .analytics-event{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 20px 38px -30px rgba(15,106,216,.45);}
-  html.dark .analytics-event{background:rgba(15,23,42,.95); border-color:rgba(59,130,246,.25); box-shadow:0 24px 50px -32px rgba(15,23,42,.9);}
-  .analytics-event-header{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted);}
-  .analytics-event-badge{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; background:rgba(15,106,216,.12); color:var(--primary);}
-  html.dark .analytics-event-badge{background:rgba(37,99,235,.22); color:#bfdbfe;}
-  .analytics-event-pre{
-    margin:12px 0 0; font-size:12px; line-height:1.5; border-radius:12px;
-    background:#f8fafc; border:1px solid #e2e8f0; padding:12px;
-    max-height:260px; overflow:auto;
-  }
-  html.dark .analytics-event-pre{background:#1f2937; border-color:#374151; color:#e2e8f0;}
-
   @media (max-width: 860px){
     .app-banner{flex-direction:column; align-items:flex-start; gap:18px;}
     .header-actions{width:100%; justify-content:space-between; flex-direction:column; align-items:flex-start; gap:10px;}
     .header-nav{width:100%; flex-wrap:wrap; justify-content:flex-start;}
-    .analytics-actions{width:100%; justify-content:flex-start;}
-    .analytics-refresh{width:100%; justify-content:center;}
     .metrics{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
     .grid{grid-template-columns: repeat(2, minmax(160px,1fr));}
     .grid > div:nth-child(1){border-top-left-radius:18px;}
@@ -418,13 +380,6 @@
       <div class="header-actions">
         <div class="header-nav" role="tablist" aria-label="Navegação principal">
           <button class="tab active" type="button" data-tab="painel">Painel</button>
-          <button class="tab" type="button" data-tab="analytics">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5.25H19V13.5H13L9 17.25V13.5H5z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8.75h7M8.5 11.25h4.5" />
-            </svg>
-            <span>Analitcs Blip</span>
-          </button>
           <button class="tab" type="button" data-tab="login">Login</button>
         </div>
         <span class="header-chip" id="currentTimeChip" aria-live="polite">—</span>
@@ -571,26 +526,6 @@
           <div id="col-12" data-schedule-column data-horario="12:00"></div>
           <div id="col-16" data-schedule-column data-horario="16:00"></div>
           <div id="col-20" data-schedule-column data-horario="20:00"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-analytics" style="display:none;">
-      <div class="analytics-card">
-        <div class="analytics-header">
-          <div>
-            <h2 class="analytics-title">Analytics Blip</h2>
-            <p class="analytics-sub">Os dados são preenchidos automaticamente via webhook da Blip.</p>
-            <p class="analytics-meta">Eventos recebidos: <strong id="blipCount">0</strong></p>
-          </div>
-          <div class="analytics-actions">
-            <span class="analytics-updated">Última atualização: <strong id="blipUpdated">—</strong></span>
-            <button type="button" class="btn ghost analytics-refresh" id="blipRefresh">Atualizar agora</button>
-          </div>
-        </div>
-        <div class="analytics-body" aria-live="polite">
-          <div id="blipEmpty" class="analytics-empty">Aguardando dados do Blip...</div>
-          <ul id="blipEvents" class="analytics-list" hidden></ul>
         </div>
       </div>
     </section>
@@ -992,14 +927,6 @@
     if (painelView) painelView.style.display = (name === "painel") ? "" : "none";
     const loginView = document.getElementById("view-login");
     if (loginView) loginView.style.display = (name === "login") ? "" : "none";
-    const analyticsView = document.getElementById("view-analytics");
-    if (analyticsView) analyticsView.style.display = (name === "analytics") ? "" : "none";
-    if (name === "analytics"){
-      loadBlipEvents({ notifyOnError: true });
-      startBlipPolling();
-    }else{
-      stopBlipPolling();
-    }
     if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
