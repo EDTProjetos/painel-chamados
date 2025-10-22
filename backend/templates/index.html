@@ -865,6 +865,8 @@
   };
   const TIPO_DISPARO_OPTIONS = Object.keys(COST_PER_TIPO).filter(Boolean);
 
+  let currentRange = "all";
+
   const metricEls = {
     total: document.getElementById("metricTotal"),
     andamento: document.getElementById("metricAndamento"),
@@ -1378,7 +1380,6 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   }
 
   /* ================== FILTRO POR DATA ============ */
-  let currentRange = "all";
   function setRange(range){
     currentRange = range || "all";
     softRender(lastNonEmpty);
