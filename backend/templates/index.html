@@ -122,12 +122,29 @@
     .metric-card.content-error::after{background:radial-gradient(circle, rgba(220,38,38,.24) 0%, transparent 70%);}
   html.dark .metric-card{border-color:rgba(59,130,246,.25); box-shadow:0 30px 55px -32px rgba(15,23,42,.9);}
   html.dark .metric-card::after{opacity:.35;}
+  .metric-card.budget-card{
+    background:#ffffff;
+    border:1px solid rgba(15,23,42,.08);
+    color:#0f172a;
+  }
+  .metric-card.budget-card::after{
+    background:radial-gradient(circle, rgba(14,165,233,.24) 0%, transparent 70%);
+  }
+  html.dark .metric-card.budget-card{
+    background:#ffffff;
+    border-color:rgba(15,23,42,.18);
+    box-shadow:0 26px 48px -28px rgba(15,23,42,.85);
+  }
+  html.dark .metric-card.budget-card::after{opacity:.45;}
+  .metric-card.budget-card .metric-label{color:#2563eb;}
+  .metric-card.budget-card .metric-foot{color:#475569;}
   .metric-icon{width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:#fff; z-index:1;}
   .metric-icon svg{width:22px; height:22px;}
   .icon-total{background:linear-gradient(135deg,var(--primary),var(--primary-2));}
   .icon-progress{background:linear-gradient(135deg,#f59e0b,#f97316);}
   .icon-done{background:linear-gradient(135deg,#059669,#10b981);}
   .icon-error{background:linear-gradient(135deg,#dc2626,#ef4444);}
+  .icon-budget{background:linear-gradient(135deg,#0ea5e9,#6366f1);}
   .metric-label{font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); z-index:1;}
   .metric-value{font-size:34px; font-weight:800; line-height:1; z-index:1;}
   .metric-foot{font-size:13px; color:var(--muted); margin-top:auto; z-index:1;}
@@ -201,6 +218,8 @@
   .badge{ font-size:10px; font-weight:800; padding:3px 6px; border-radius:999px; background:rgba(255,255,255,.25); display:inline-flex; align-items:center; gap:4px; }
   .tag-pill{font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; background:rgba(15,23,42,.28); color:#fff; text-transform:uppercase; letter-spacing:.3px; display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,.25);}
   html.dark .tag-pill{background:rgba(255,255,255,.2); color:#e2e8f0; border-color:rgba(148,163,184,.35);}
+  .type-pill{font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; background:rgba(14,165,233,.18); color:#0369a1; text-transform:uppercase; letter-spacing:.3px; display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(14,165,233,.28);}
+  html.dark .type-pill{background:rgba(14,165,233,.28); color:#0ea5e9; border-color:rgba(59,130,246,.35);}
   .title{font-weight:800; font-size:13px; margin-bottom:2px} .meta{font-size:11.5px; opacity:.95}
   @keyframes pop{from{opacity:0; transform:translateY(4px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
   .card-delete{position:absolute; top:6px; right:6px; background:rgba(15,23,42,.4); border:none; color:#fff; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; cursor:pointer; font-weight:700; font-size:12px; padding:0; transition:background .2s ease, transform .2s ease;}
@@ -565,6 +584,18 @@
         <strong class="metric-value" id="metricInsucesso">0</strong>
         <span class="metric-foot">Atenção necessária</span>
       </article>
+      <article class="metric-card budget-card">
+        <span class="metric-icon icon-budget" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-9h6m-9 6h12" />
+            <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="metric-label">Orçamento total</span>
+        <strong class="metric-value" id="metricBudgetHighlight">R$ 0,00</strong>
+        <span class="metric-foot">Gasto mês: <strong id="metricBudgetMonth">R$ 0,00</strong></span>
+        <span class="metric-foot">Gasto dia: <strong id="metricBudgetDay">R$ 0,00</strong></span>
+      </article>
     </section>
 
     <div id="dateFilters" class="date-filters">
@@ -607,6 +638,16 @@
               <option value="Conciliação">Conciliação</option>
               <option value="SAC">SAC</option>
               <option value="Recup de Crédito">Recup de Crédito</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipoDisparo">Tipo do Disparo</label>
+            <select id="tipoDisparo">
+              <option value="">(Sem tipo)</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Marketing Lite">Marketing Lite</option>
+              <option value="Utilidade">Utilidade</option>
+              <option value="Autenticação">Autenticação</option>
             </select>
           </div>
           <div>
@@ -700,6 +741,7 @@
               <div class="info-item"><b>Horário</b><span id="mHora">—</span></div>
               <div class="info-item"><b>Template</b><span id="mTpl">—</span></div>
               <div class="info-item"><b>Tag</b><span id="mTag">—</span></div>
+              <div class="info-item"><b>Tipo Disparo</b><span id="mTipoDisparo">—</span></div>
           </div>
 
           <div class="modal-editor" id="modalTagEditor" style="display:none;">
@@ -713,6 +755,20 @@
                       <option value="Recup de Crédito">Recup de Crédito</option>
                   </select>
                   <button class="btn ghost" type="button" id="mTagSave">Salvar tag</button>
+              </div>
+          </div>
+
+          <div class="modal-editor" id="modalTipoEditor" style="display:none;">
+              <label for="mTipoSelect">Atualizar tipo do disparo</label>
+              <div class="modal-editor-row">
+                  <select id="mTipoSelect">
+                      <option value="">(Sem tipo)</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Marketing Lite">Marketing Lite</option>
+                      <option value="Utilidade">Utilidade</option>
+                      <option value="Autenticação">Autenticação</option>
+                  </select>
+                  <button class="btn ghost" type="button" id="mTipoSave">Salvar tipo</button>
               </div>
           </div>
 
@@ -793,13 +849,32 @@
     catch { return String(n); }
   };
 
+  const formatCurrency = (value) => {
+    const n = Number(value || 0);
+    if (!Number.isFinite(n)) return "R$ 0,00";
+    try { return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+    catch { return `R$ ${n.toFixed(2)}`; }
+  };
+
+  const COST_PER_TIPO = {
+    "Marketing": 0.62,
+    "Marketing Lite": 0.54,
+    "Utilidade": 0.09,
+    "Autenticação": 0.09,
+    "": 0,
+  };
+  const TIPO_DISPARO_OPTIONS = Object.keys(COST_PER_TIPO).filter(Boolean);
+
   const metricEls = {
     total: document.getElementById("metricTotal"),
     andamento: document.getElementById("metricAndamento"),
     finalizado: document.getElementById("metricFinalizado"),
     insucesso: document.getElementById("metricInsucesso"),
     range: document.getElementById("metricsRangeLabel"),
-    volume: document.getElementById("metricVolume")
+    volume: document.getElementById("metricVolume"),
+    budgetHighlight: document.getElementById("metricBudgetHighlight"),
+    budgetMonth: document.getElementById("metricBudgetMonth"),
+    budgetDay: document.getElementById("metricBudgetDay"),
   };
   const headerDateChip = document.getElementById("currentDateChip");
   const headerTimeChip = document.getElementById("currentTimeChip");
@@ -821,21 +896,55 @@
     }
   }
 
-  function updateMetrics(records = []){
-    const totals = { total: records.length, andamento: 0, finalizado: 0, insucesso: 0, volume: 0 };
-    records.forEach(r => {
+  function costForRecord(r){
+    const volume = Number(r?.volume || 0) || 0;
+    const tipo = (r?.tipoDisparo || "").trim();
+    const unit = COST_PER_TIPO.hasOwnProperty(tipo) ? COST_PER_TIPO[tipo] : 0;
+    return volume * unit;
+  }
+
+  function monthKeyFromRange(){
+    if (currentRange && currentRange !== "all"){
+      return currentRange.slice(0, 7);
+    }
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function updateMetrics(filteredRecords = [], allRecords = []){
+    const totals = { total: filteredRecords.length, andamento: 0, finalizado: 0, insucesso: 0, volume: 0 };
+    filteredRecords.forEach(r => {
       const status = (r?.status || "").toLowerCase();
       if (status.includes("final")) totals.finalizado++;
       else if (status.includes("insu")) totals.insucesso++;
       else totals.andamento++;
       totals.volume += Number(r?.volume || 0) || 0;
     });
+
+    let dayCost = 0;
+    filteredRecords.forEach(r => { dayCost += costForRecord(r); });
+
+    const monthKey = monthKeyFromRange();
+    let monthCost = 0;
+    const base = Array.isArray(allRecords) && allRecords.length ? allRecords : filteredRecords;
+    base.forEach(r => {
+      const recMonth = ((r?.data) || "").slice(0, 7);
+      if (recMonth && monthKey){
+        if (recMonth === monthKey) monthCost += costForRecord(r);
+      } else if (!recMonth && (!currentRange || currentRange === "all")){
+        monthCost += costForRecord(r);
+      }
+    });
+
     if (metricEls.total) metricEls.total.textContent = totals.total;
     if (metricEls.andamento) metricEls.andamento.textContent = totals.andamento;
     if (metricEls.finalizado) metricEls.finalizado.textContent = totals.finalizado;
     if (metricEls.insucesso) metricEls.insucesso.textContent = totals.insucesso;
     if (metricEls.volume) metricEls.volume.textContent = formatInteger(totals.volume);
     if (metricEls.range) metricEls.range.textContent = formatRangeLabel();
+    if (metricEls.budgetHighlight) metricEls.budgetHighlight.textContent = formatCurrency(monthCost);
+    if (metricEls.budgetMonth) metricEls.budgetMonth.textContent = formatCurrency(monthCost);
+    if (metricEls.budgetDay) metricEls.budgetDay.textContent = formatCurrency(dayCost);
   }
 
   function updateHeaderClock(){
@@ -851,7 +960,7 @@
 
   updateHeaderClock();
   if (headerDateChip || headerTimeChip) setInterval(updateHeaderClock, 1000);
-  updateMetrics([]);
+  updateMetrics([], []);
 
   /* ========================== CONFIG ========================== */
   const API_BASE = "";
@@ -1069,6 +1178,17 @@
         if (mTagSave) mTagSave.disabled = true;
       }
     }
+    if (modalTipoEditor){
+      if (isAuthed){
+        modalTipoEditor.style.display = "";
+        if (mTipoSelect) mTipoSelect.disabled = false;
+        if (mTipoSave) mTipoSave.disabled = false;
+      }else{
+        modalTipoEditor.style.display = "none";
+        if (mTipoSelect) mTipoSelect.disabled = true;
+        if (mTipoSave) mTipoSave.disabled = true;
+      }
+    }
     if (gotFirstPaint){
       renderSnapshot(lastNonEmpty);
     }
@@ -1186,7 +1306,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function uid(){ return "tmp_" + Math.random().toString(36).slice(2); }
   function calcHash(records){
     try{
-      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.template||""}|${r.volume||""}|${r.tag||""}|${r.atualizadoEm||""}`).join("§");
+      return (records||[]).map(r => `${r.id}|${r.tipo}|${r.status}|${r.horario}|${r.tempo}|${r.potes}|${r.template||""}|${r.volume||""}|${r.tag||""}|${r.tipoDisparo||""}|${r.atualizadoEm||""}`).join("§");
     }catch{ return Math.random().toString(36); }
   }
   function fetchWithTimeout(resource, options = {}, timeout = 3000) {
@@ -1242,6 +1362,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function isValidTag(value){
     return !value || TAG_OPTIONS.includes(value);
   }
+  function isValidTipoDisparo(value){
+    return !value || TIPO_DISPARO_OPTIONS.includes(value);
+  }
   function remainingMsFromRecord(r){
     try{
       const mins = Number(r?.tempo || 0);
@@ -1286,6 +1409,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     div.dataset.data = r.data || "";
     div.dataset.tempo = r.tempo ?? "";
     div.dataset.tag = r.tag || "";
+    div.dataset.tipoDisparo = r.tipoDisparo || "";
 
     const remainingLabel = formatRemainingLabel(remainingMsFromRecord(r));
     const metaParts = [
@@ -1298,14 +1422,19 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     if (r.volume) {
       metaParts.push(`Vol.: <strong>${r.volume}</strong>`);
     }
+    if (r.tipoDisparo) {
+      metaParts.push(`Tipo: <strong>${escapeHtml(r.tipoDisparo)}</strong>`);
+    }
     const deleteMarkup = isAuthed ? `<button class="card-delete" type="button" data-role="delete" title="Excluir disparo">×</button>` : "";
     const statusLabel = escapeHtml(r.status || "Em andamento");
     const tagMarkup = r.tag ? `<span class="tag-pill" data-role="tag">${escapeHtml(r.tag)}</span>` : "";
+    const tipoMarkup = r.tipoDisparo ? `<span class="type-pill" data-role="tipo">${escapeHtml(r.tipoDisparo)}</span>` : "";
     div.innerHTML = `
       ${deleteMarkup}
       <div class="status-row">
         <span class="badge" data-role="badge">${statusLabel}</span>
         ${tagMarkup}
+        ${tipoMarkup}
       </div>
       <div class="title">${r.tipo || ""}</div>
       <div class="meta">${metaParts.join(' • ')}</div>
@@ -1526,10 +1655,12 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }
   }
 
-  function renderSnapshot(records){
+  function renderSnapshot(records, filteredOverride = null){
     clearColumns();
-    const filtered = (records||[]).filter(inRange);
-    updateMetrics(filtered);
+    const filtered = filteredOverride ?? (records||[]).filter(inRange);
+    if (filteredOverride === null){
+      updateMetrics(filtered, records);
+    }
     countdownEntries.clear();
     if (countdownEntries.size === 0 && countdownInterval){
       clearInterval(countdownInterval);
@@ -1640,6 +1771,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   const mHora  = document.getElementById('mHora');
   const mTpl   = document.getElementById('mTpl');
   const mTag   = document.getElementById('mTag');
+  const mTipo  = document.getElementById('mTipoDisparo');
   const mText  = document.getElementById('mText');
   const mCopy  = document.getElementById('mCopy');
   const mRefresh = document.getElementById('mRefresh');
@@ -1647,6 +1779,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   const modalTagEditor = document.getElementById('modalTagEditor');
   const mTagSelect = document.getElementById('mTagSelect');
   const mTagSave = document.getElementById('mTagSave');
+  const modalTipoEditor = document.getElementById('modalTipoEditor');
+  const mTipoSelect = document.getElementById('mTipoSelect');
+  const mTipoSave = document.getElementById('mTipoSave');
 
   let currentRecord = null;
   let modalTimer = null;
@@ -1682,6 +1817,19 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     }
     if (modalTagEditor){
       modalTagEditor.style.display = isAuthed ? "" : "none";
+    }
+
+    const tipoDisparoValue = (r.tipoDisparo || "").trim();
+    if (mTipo) mTipo.textContent = tipoDisparoValue || "—";
+    if (mTipoSelect){
+      mTipoSelect.value = isValidTipoDisparo(tipoDisparoValue) ? tipoDisparoValue : "";
+      mTipoSelect.disabled = !isAuthed;
+    }
+    if (mTipoSave){
+      mTipoSave.disabled = !isAuthed;
+    }
+    if (modalTipoEditor){
+      modalTipoEditor.style.display = isAuthed ? "" : "none";
     }
 
     mRest.textContent = calcRestante(r);
@@ -1811,6 +1959,67 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     });
   }
 
+  if (mTipoSave){
+    mTipoSave.addEventListener('click', async () => {
+      if (!currentRecord) return;
+      if (!isAuthed){ toast("Faça login para alterar.", "warn"); return; }
+      const newTipo = (mTipoSelect?.value || "").trim();
+      if (!isValidTipoDisparo(newTipo)){
+        toast("Selecione um tipo válido.", "warn", 2200, "tipo-invalid");
+        return;
+      }
+
+      const applyLocal = () => {
+        if (mTipo) mTipo.textContent = newTipo || "—";
+        if (mTipoSelect) mTipoSelect.value = newTipo;
+        if (currentRecord) currentRecord.tipoDisparo = newTipo;
+        if (Array.isArray(lastNonEmpty)){
+          const idx = lastNonEmpty.findIndex(r => `${r.id}` === `${currentRecord.id}`);
+          if (idx >= 0){
+            lastNonEmpty[idx] = { ...lastNonEmpty[idx], tipoDisparo: newTipo };
+            currentRecord = lastNonEmpty[idx];
+          }
+        }
+        softRender((lastNonEmpty || []).slice());
+      };
+
+      if (OFFLINE_MODE || !currentRecord.id || String(currentRecord.id).startsWith('tmp_')){
+        applyLocal();
+        toast("Tipo atualizado localmente.", "warn", 2400, `tipo-offline-${currentRecord.id || currentRecord.tipo || ''}`);
+        return;
+      }
+
+      try{
+        const resp = await fetch(url(`/api/disparos/${currentRecord.id}`), {
+          method:"PATCH",
+          headers:{"Content-Type":"application/json"},
+          credentials:"include",
+          body: JSON.stringify({ tipoDisparo: newTipo })
+        });
+        if (resp.status === 401){
+          isAuthed = false;
+          localStorage.removeItem(AUTH_KEY);
+          updateAuthUI();
+          switchTab("login");
+          toast("Sessão expirada.", "warn", 2600, "tipo-auth");
+          return;
+        }
+        if (!resp.ok){
+          const msg = await resp.text().catch(() => "");
+          console.error("Falha ao atualizar tipo", msg || resp.status);
+          toast("Não consegui atualizar o tipo.", "error", 2600, "tipo-error");
+          return;
+        }
+        applyLocal();
+        toast("Tipo atualizado.", "ok", 2000, `tipo-ok-${currentRecord.id}`);
+        setTimeout(softRefresh, 300);
+      }catch(err){
+        console.error("Erro de rede ao atualizar tipo", err);
+        toast("Rede instável ao atualizar tipo.", "error", 2600, "tipo-network");
+      }
+    });
+  }
+
   /* ============= Data (Cache + SSE + Polling Backoff) ========= */
   const CACHE_KEY = "painel_snapshot_v2";
   const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6h
@@ -1841,10 +2050,10 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
 
   function softRender(records){
     const filtered = (records||[]).filter(inRange);
-    updateMetrics(filtered);
+    updateMetrics(filtered, records);
     const incomingHash = calcHash(filtered);
     if (incomingHash === lastHash) return;
-    renderSnapshot(records);
+    renderSnapshot(records, filtered);
     lastHash = incomingHash;
     if ((records?.length || 0) > 0) { lastNonEmpty = records; saveCache(records); }
     if (!gotFirstPaint){ gotFirstPaint = true; clearTimeout(splashTimer); hideSplashSoon(); }
@@ -1937,11 +2146,13 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const horario  = document.getElementById("horario").value;
     const template = document.getElementById("template").value;
     const tag      = document.getElementById("tag").value;
+    const tipoDisparo = document.getElementById("tipoDisparo").value;
     const volume   = Number(document.getElementById("volume").value || 0);
 
     if(!tipo && !template){ toast("Preencha o nome do disparo ou escolha um template.", "warn"); return; }
     if(tempo <= 0){ toast("Informe um tempo médio válido.", "warn"); return; }
     if(!isValidTag(tag)){ toast("Selecione uma tag válida.", "warn"); return; }
+    if(!isValidTipoDisparo(tipoDisparo)){ toast("Selecione um tipo válido.", "warn"); return; }
 
     const optimisticRecord = {
       id: uid(),
@@ -1953,6 +2164,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       template,
       volume,
       tag,
+      tipoDisparo,
       data: data,
       atualizadoEm: new Date().toISOString()
     };
@@ -1977,6 +2189,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
       template: optimisticRecord.template,
       volume: optimisticRecord.volume,
       tag: optimisticRecord.tag,
+      tipoDisparo: optimisticRecord.tipoDisparo,
       data: optimisticRecord.data
     };
 

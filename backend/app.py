@@ -17,6 +17,13 @@ VALID_TAGS = {
     "Recup de Crédito",
 }
 
+VALID_TIPO_DISPARO = {
+    "Marketing",
+    "Marketing Lite",
+    "Utilidade",
+    "Autenticação",
+}
+
 # ===== Airtable =====
 AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
@@ -105,6 +112,7 @@ def _normalize_records(records):
             "atualizadoEm": f.get("AtualizadoEm", ""),
             "data": f.get("Data", ""),
             "tag": f.get("Tags", "") or "",
+            "tipoDisparo": f.get("Tipo Disparo", "") or "",
         })
     return out
 
@@ -215,6 +223,12 @@ def create_disparo():
             return jsonify({"error": "invalid_tag"}), 400
         fields["Tags"] = raw_tag
 
+    raw_tipo = (b.get("tipoDisparo") or "").strip()
+    if raw_tipo:
+        if raw_tipo not in VALID_TIPO_DISPARO:
+            return jsonify({"error": "invalid_tipo_disparo"}), 400
+        fields["Tipo Disparo"] = raw_tipo
+
     r = _airtable_request("POST", AIRTABLE_API, json={"fields": fields}, params={"typecast":"true"})
     
     if r.ok:
@@ -245,6 +259,12 @@ def update_disparo(rid):
         if raw_tag and raw_tag not in VALID_TAGS:
             return jsonify({"error": "invalid_tag"}), 400
         fields["Tags"] = raw_tag or None
+
+    if "tipoDisparo" in b:
+        raw_tipo = (b.get("tipoDisparo") or "").strip()
+        if raw_tipo and raw_tipo not in VALID_TIPO_DISPARO:
+            return jsonify({"error": "invalid_tipo_disparo"}), 400
+        fields["Tipo Disparo"] = raw_tipo or None
 
 
     r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields}, params={"typecast":"true"})
