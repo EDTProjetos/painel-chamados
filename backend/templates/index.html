@@ -1018,6 +1018,138 @@
       setTimeout(removeToast, ms);
   }
 
+  /* ======================= BLIP ANALYTICS ===================== */
+  const analyticsList = document.getElementById("blipEvents");
+  const analyticsEmpty = document.getElementById("blipEmpty");
+  const analyticsUpdated = document.getElementById("blipUpdated");
+  const analyticsCount = document.getElementById("blipCount");
+  const analyticsRefreshBtn = document.getElementById("blipRefresh");
+  const analyticsEmptyDefault = analyticsEmpty ? analyticsEmpty.textContent : "";
+  const ANALYTICS_OFFLINE_MSG = "Painel em modo offline. Dados do Blip indisponíveis.";
+  const BLIP_POLL_INTERVAL = 15000;
+  let blipPollTimer = null;
+  let blipLoading = false;
+
+  function formatBlipTimestamp(value){
+    if (!value) return "—";
+    try{
+      return new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "medium" });
+    }catch{
+      return value;
+    }
+  }
+
+  function renderBlipEvents(events = []){
+    if (analyticsCount) analyticsCount.textContent = String(events.length || 0);
+    if (!analyticsList) return;
+    analyticsList.innerHTML = "";
+    if (!events.length){
+      analyticsList.hidden = true;
+      if (analyticsEmpty){
+        if (analyticsEmpty.textContent !== ANALYTICS_OFFLINE_MSG && analyticsEmptyDefault){
+          analyticsEmpty.textContent = analyticsEmptyDefault;
+        }
+        analyticsEmpty.hidden = false;
+      }
+      if (analyticsUpdated) analyticsUpdated.textContent = "—";
+      return;
+    }
+    analyticsList.hidden = false;
+    if (analyticsEmpty){
+      analyticsEmpty.hidden = true;
+    }
+    events.forEach((evt, index) => {
+      const li = document.createElement("li");
+      li.className = "analytics-event";
+      let pretty;
+      const payload = evt?.payload;
+      try{
+        const normalized = (payload === null || typeof payload === "undefined") ? {} : payload;
+        pretty = JSON.stringify(normalized, null, 2);
+      }catch{
+        pretty = String(payload ?? "");
+      }
+      const badgeLabel = (() => {
+        const candidate = evt?.payload?.type || evt?.payload?.event || evt?.payload?.categoria || evt?.payload?.nome;
+        if (candidate) return candidate;
+        return `Evento ${index + 1}`;
+      })();
+      const received = formatBlipTimestamp(evt?.received_at);
+      li.innerHTML = `
+        <div class="analytics-event-header">
+          <span class="analytics-event-badge">${escapeHtml(String(badgeLabel))}</span>
+          <span>${escapeHtml(received)}</span>
+        </div>
+        <pre class="analytics-event-pre">${escapeHtml(pretty || "{}")}</pre>
+      `;
+      analyticsList.appendChild(li);
+    });
+    if (analyticsUpdated) analyticsUpdated.textContent = formatBlipTimestamp(events[0]?.received_at);
+  }
+
+  async function loadBlipEvents({ notifyOnError = false } = {}){
+    if (!analyticsList){
+      return;
+    }
+    if (blipLoading){
+      return;
+    }
+    if (OFFLINE_MODE){
+      renderBlipEvents([]);
+      if (analyticsEmpty){
+        analyticsEmpty.textContent = ANALYTICS_OFFLINE_MSG;
+        analyticsEmpty.hidden = false;
+      }
+      if (analyticsUpdated) analyticsUpdated.textContent = "—";
+      return;
+    }
+    if (analyticsEmpty && analyticsEmptyDefault){
+      analyticsEmpty.textContent = analyticsEmptyDefault;
+    }
+    blipLoading = true;
+    if (analyticsRefreshBtn){
+      analyticsRefreshBtn.disabled = true;
+      analyticsRefreshBtn.setAttribute("aria-busy", "true");
+    }
+    try{
+      const resp = await fetchWithTimeout(url("/api/blip/events"), { cache: "no-store" }, 5000);
+      if (!resp.ok){
+        throw new Error(`status_${resp.status}`);
+      }
+      const data = await resp.json();
+      renderBlipEvents(data?.events || []);
+    }catch(err){
+      console.error("Falha ao carregar eventos do Blip", err);
+      if (notifyOnError){
+        toast("Não consegui carregar os dados do Blip.", "warn", 3200, "blip-load");
+      }
+    }finally{
+      if (analyticsRefreshBtn){
+        analyticsRefreshBtn.disabled = false;
+        analyticsRefreshBtn.removeAttribute("aria-busy");
+      }
+      blipLoading = false;
+    }
+  }
+
+  function startBlipPolling(){
+    if (blipPollTimer || OFFLINE_MODE || !analyticsList){
+      return;
+    }
+    blipPollTimer = setInterval(() => loadBlipEvents(), BLIP_POLL_INTERVAL);
+  }
+
+  function stopBlipPolling(){
+    if (blipPollTimer){
+      clearInterval(blipPollTimer);
+      blipPollTimer = null;
+    }
+  }
+
+  if (analyticsRefreshBtn){
+    analyticsRefreshBtn.addEventListener("click", () => loadBlipEvents({ notifyOnError: true }));
+  }
+
   /* ============================ AUTH =========================== */
   const AUTH_KEY = "painel_auth_ok";
   let isAuthed = localStorage.getItem(AUTH_KEY) === "1";
