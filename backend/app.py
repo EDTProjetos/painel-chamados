@@ -9,6 +9,20 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 log = logging.getLogger("app")
 
+VALID_TAGS = {
+    "Vendas",
+    "Conciliação",
+    "SAC",
+    "Recup de Crédito",
+}
+
+VALID_TIPO_DISPARO = {
+    "Marketing",
+    "Marketing Lite",
+    "Utilidade",
+    "Autenticação",
+}
+
 # ===== Airtable =====
 AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
@@ -93,6 +107,8 @@ def _normalize_records(records):
             "template": f.get("Template", ""),
             "atualizadoEm": f.get("AtualizadoEm", ""),
             "data": f.get("Data", ""),
+            "tag": f.get("Tags", "") or "",
+            "tipoDisparo": f.get("Tipo Disparo", "") or "",
         })
     return out
 
@@ -193,9 +209,21 @@ def create_disparo():
         log.error(f"Erro de tipo de dado ao criar disparo: {e}")
         return jsonify({"error": "invalid_data_type", "message": "Os campos de tempo, potes e volume devem ser números inteiros."}), 400
 
-    
+
     if "template" in b and b["template"]:
         fields["Template"] = b["template"]
+
+    raw_tag = (b.get("tag") or "").strip()
+    if raw_tag:
+        if raw_tag not in VALID_TAGS:
+            return jsonify({"error": "invalid_tag"}), 400
+        fields["Tags"] = raw_tag
+
+    raw_tipo = (b.get("tipoDisparo") or "").strip()
+    if raw_tipo:
+        if raw_tipo not in VALID_TIPO_DISPARO:
+            return jsonify({"error": "invalid_tipo_disparo"}), 400
+        fields["Tipo Disparo"] = raw_tipo
 
     r = _airtable_request("POST", AIRTABLE_API, json={"fields": fields}, params={"typecast":"true"})
     
@@ -222,12 +250,35 @@ def update_disparo(rid):
     if "template" in b: fields["Template"] = b["template"] or ""
     if "data" in b:     fields["Data"] = b.get("data")
 
+    if "tag" in b:
+        raw_tag = (b.get("tag") or "").strip()
+        if raw_tag and raw_tag not in VALID_TAGS:
+            return jsonify({"error": "invalid_tag"}), 400
+        fields["Tags"] = raw_tag or None
+
+    if "tipoDisparo" in b:
+        raw_tipo = (b.get("tipoDisparo") or "").strip()
+        if raw_tipo and raw_tipo not in VALID_TIPO_DISPARO:
+            return jsonify({"error": "invalid_tipo_disparo"}), 400
+        fields["Tipo Disparo"] = raw_tipo or None
+
 
     r = _airtable_request("PATCH", f"{AIRTABLE_API}/{rid}", json={"fields": fields}, params={"typecast":"true"})
     if r.ok:
         try: get_snapshot(force=True)
         except: pass
     return (r.text, r.status_code, {"Content-Type": "application/json"})
+
+
+@app.delete("/api/disparos/<rid>")
+@require_auth
+def delete_disparo(rid):
+    r = _airtable_request("DELETE", f"{AIRTABLE_API}/{rid}")
+    if r.ok:
+        try: get_snapshot(force=True)
+        except: pass
+    return (r.text, r.status_code, {"Content-Type": "application/json"})
+
 
 # ---- SSE ----
 @app.get("/api/stream")
