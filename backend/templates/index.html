@@ -122,29 +122,21 @@
     .metric-card.content-error::after{background:radial-gradient(circle, rgba(220,38,38,.24) 0%, transparent 70%);}
   html.dark .metric-card{border-color:rgba(59,130,246,.25); box-shadow:0 30px 55px -32px rgba(15,23,42,.9);}
   html.dark .metric-card::after{opacity:.35;}
-  .metric-card.budget-card{
-    background:#ffffff;
-    border:1px solid rgba(15,23,42,.08);
-    color:#0f172a;
-  }
   .metric-card.budget-card::after{
-    background:radial-gradient(circle, rgba(14,165,233,.24) 0%, transparent 70%);
+    background:radial-gradient(circle, rgba(124,58,237,.28) 0%, transparent 70%);
   }
-  html.dark .metric-card.budget-card{
-    background:#ffffff;
-    border-color:rgba(15,23,42,.18);
-    box-shadow:0 26px 48px -28px rgba(15,23,42,.85);
+  html.dark .metric-card.budget-card::after{opacity:.42;}
+  .metric-card.budget-card .metric-value{
+    font-size:clamp(26px,4.5vw,38px);
+    word-break:break-word;
   }
-  html.dark .metric-card.budget-card::after{opacity:.45;}
-  .metric-card.budget-card .metric-label{color:#2563eb;}
-  .metric-card.budget-card .metric-foot{color:#475569;}
   .metric-icon{width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:#fff; z-index:1;}
   .metric-icon svg{width:22px; height:22px;}
   .icon-total{background:linear-gradient(135deg,var(--primary),var(--primary-2));}
   .icon-progress{background:linear-gradient(135deg,#f59e0b,#f97316);}
   .icon-done{background:linear-gradient(135deg,#059669,#10b981);}
   .icon-error{background:linear-gradient(135deg,#dc2626,#ef4444);}
-  .icon-budget{background:linear-gradient(135deg,#0ea5e9,#6366f1);}
+  .icon-budget{background:linear-gradient(135deg,#7c3aed,#6366f1); font-weight:700; font-size:18px;}
   .metric-label{font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); z-index:1;}
   .metric-value{font-size:34px; font-weight:800; line-height:1; z-index:1;}
   .metric-foot{font-size:13px; color:var(--muted); margin-top:auto; z-index:1;}
@@ -585,12 +577,7 @@
         <span class="metric-foot">Atenção necessária</span>
       </article>
       <article class="metric-card budget-card">
-        <span class="metric-icon icon-budget" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-9h6m-9 6h12" />
-            <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
+        <span class="metric-icon icon-budget" aria-hidden="true">$</span>
         <span class="metric-label">Orçamento total</span>
         <strong class="metric-value" id="metricBudgetHighlight">R$ 0,00</strong>
         <span class="metric-foot">Gasto mês: <strong id="metricBudgetMonth">R$ 0,00</strong></span>
