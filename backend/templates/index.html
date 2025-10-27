@@ -138,7 +138,7 @@
   .icon-error{background:linear-gradient(135deg,#dc2626,#ef4444);}
   .icon-budget{background:linear-gradient(135deg,#7c3aed,#6366f1); font-weight:700; font-size:18px;}
   .metric-label{font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); z-index:1;}
-  .metric-value{font-size:34px; font-weight:300; line-height:1; z-index:1;}
+  .metric-value{font-size:34px; font-weight:800; line-height:1; z-index:1;}
   .metric-foot{font-size:13px; color:var(--muted); margin-top:auto; z-index:1;}
   html.dark .metric-label, html.dark .metric-foot{color:#9ca3af;}
 
@@ -190,6 +190,27 @@
 
   .table-card{background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:0 26px 50px -32px rgba(15,106,216,.45); overflow:hidden; backdrop-filter:blur(4px)}
   html.dark .table-card{background:rgba(17,24,39,.95); border-color:rgba(59,130,246,.25);}
+
+  .dashboard-view{display:flex; flex-direction:column; gap:18px; margin-top:20px;}
+  .analytics-controls{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px 20px; box-shadow:0 22px 38px -26px rgba(15,106,216,.45);}
+  html.dark .analytics-controls{background:rgba(17,24,39,.92); border-color:rgba(59,130,246,.25); box-shadow:0 28px 55px -30px rgba(15,23,42,.9);}
+  .analytics-controls .control{display:flex; flex-direction:column; gap:6px; min-width:160px;}
+  .analytics-controls label{font-size:12px; text-transform:uppercase; letter-spacing:.16em; color:var(--muted); font-weight:600;}
+  .analytics-controls select{min-width:180px;}
+  .chart-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px;}
+  .chart-card{background:var(--card); border:1px solid rgba(15,106,216,.12); border-radius:20px; padding:20px 22px; box-shadow:0 26px 48px -32px rgba(15,106,216,.55); position:relative; overflow:hidden;}
+  .chart-card::after{content:""; position:absolute; inset:auto -50px -90px auto; width:200px; height:200px; border-radius:44%; background:radial-gradient(circle, rgba(15,106,216,.18) 0%, transparent 70%); opacity:.55;}
+  html.dark .chart-card{background:rgba(17,24,39,.92); border-color:rgba(59,130,246,.25); box-shadow:0 32px 58px -34px rgba(15,23,42,.9);}
+  html.dark .chart-card::after{opacity:.38;}
+  .chart-title{margin:0 0 14px; font-size:18px; font-weight:700; display:flex; align-items:center; gap:10px; color:var(--text);}
+  .chart-title svg{width:20px; height:20px; color:var(--primary);}
+  html.dark .chart-title svg{color:#93c5fd;}
+  .chart-wrapper{position:relative; min-height:260px;}
+  .chart-wrapper canvas{width:100%; height:100%; max-height:320px;}
+  .chart-empty{position:absolute; inset:0; display:grid; place-items:center; font-size:14px; color:var(--muted); text-align:center; padding:24px;}
+  .chart-card.animate-in{animation:dashFade .6s ease var(--delay,0s) both;}
+  .analytics-controls.animate-in{animation:dashFade .55s ease var(--delay,0s) both;}
+  @keyframes dashFade{from{opacity:0; transform:translateY(20px);}to{opacity:1; transform:translateY(0);}}
   .grid{display:grid; grid-template-columns: 140px repeat(4, minmax(180px,1fr)); width:100%; position:relative}
   .grid::after{
     content:""; position:absolute; inset:0; background:linear-gradient(135deg, rgba(15,106,216,.04), transparent 70%);
@@ -402,6 +423,12 @@
     .tabs{margin-top:20px;}
     .metric-card{min-height:120px; padding:16px;}
     .metric-value{font-size:30px;}
+    .dashboard-view{margin-top:16px;}
+    .analytics-controls{flex-direction:column; align-items:stretch;}
+    .analytics-controls .control{width:100%;}
+    .analytics-controls select{width:100%;}
+    .chart-grid{grid-template-columns:1fr;}
+    .chart-wrapper{min-height:220px;}
     .legenda{justify-content:flex-start;}
     .date-filters{flex-direction:column; align-items:stretch; gap:10px;}
     .date-filter-group{width:100%; justify-content:space-between;}
@@ -475,6 +502,9 @@
     .app-title{font-size:20px;}
     .app-subtitle{font-size:12px;}
     .header-chip{font-size:11px; padding:8px 12px;}
+    .analytics-controls{padding:16px;}
+    .chart-card{padding:18px;}
+    .chart-title{font-size:16px;}
     .metric-card{padding:14px;}
     .metric-label{font-size:11px;}
     .metric-value{font-size:26px;}
@@ -513,6 +543,7 @@
       <div class="header-actions">
         <div class="header-nav" role="tablist" aria-label="Navegação principal">
           <button class="tab active" type="button" data-tab="painel">Painel</button>
+          <button class="tab" type="button" data-tab="dashboard">Dashboard</button>
           <button class="tab" type="button" data-tab="login">Login</button>
         </div>
         <span class="header-chip" id="currentTimeChip" aria-live="polite">—</span>
@@ -591,6 +622,60 @@
             <input type="date" id="datePick" title="Escolher dia" />
         </div>
     </div>
+
+    <section id="view-dashboard" class="dashboard-view" style="display:none;">
+      <div class="analytics-controls" id="dashboardControls">
+        <div class="control">
+          <label for="dashboardTipoFilter">Tipo do disparo</label>
+          <select id="dashboardTipoFilter">
+            <option value="">Todos os tipos</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Marketing Lite">Marketing Lite</option>
+            <option value="Utilidade">Utilidade</option>
+            <option value="Autenticação">Autenticação</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="dashboardTagFilter">Tag do disparo</label>
+          <select id="dashboardTagFilter">
+            <option value="">Todas as tags</option>
+            <option value="Vendas">Vendas</option>
+            <option value="Conciliação">Conciliação</option>
+            <option value="SAC">SAC</option>
+            <option value="Recup de Crédito">Recup de Crédito</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-grid">
+        <article class="chart-card" id="volumeChartCard">
+          <h3 class="chart-title">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.25 2.25L18 9" />
+            </svg>
+            Volume disparado por dia
+          </h3>
+          <div class="chart-wrapper">
+            <canvas id="volumeChart" role="img" aria-label="Volume disparado por dia"></canvas>
+            <div class="chart-empty" id="volumeChartEmpty" hidden>Nenhum dado para exibir com os filtros atuais.</div>
+          </div>
+        </article>
+        <article class="chart-card" id="spendChartCard">
+          <h3 class="chart-title">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 13.5C9 9 11 6 13.5 6s3 3 5.5 3" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 17h5m0 0l-2 2m2-2l-2-2" />
+            </svg>
+            Valor gasto por dia
+          </h3>
+          <div class="chart-wrapper">
+            <canvas id="spendChart" role="img" aria-label="Valor gasto por dia"></canvas>
+            <div class="chart-empty" id="spendChartEmpty" hidden>Nenhum dado para exibir com os filtros atuais.</div>
+          </div>
+        </article>
+      </div>
+    </section>
 
     <section id="view-painel">
       <div class="legenda">
@@ -784,6 +869,7 @@
     Desenvolvido por Leahpar Code &copy; 2025
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-g6x9eruqbWtaXDpUe1koRaSPoaqe7iT730cdpShUMHbOWcZH/5LiCFYI8aAkaI0s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
   /* ========================= THEME TOGGLE ======================= */
   const themeToggleBtn = document.getElementById("themeToggle");
@@ -807,6 +893,12 @@
       if (themeToggleBtn){
         themeToggleBtn.innerHTML = isDark ? sunIcon : moonIcon;
       }
+      refreshDashboardPalette();
+  }
+
+  function detectPreferredTheme(){
+      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      catch{ return 'light'; }
   }
 
   function detectPreferredTheme(){
@@ -867,6 +959,16 @@
   };
   const headerDateChip = document.getElementById("currentDateChip");
   const headerTimeChip = document.getElementById("currentTimeChip");
+  const dashboardViewEl = document.getElementById("view-dashboard");
+  const dashboardControls = document.getElementById("dashboardControls");
+  const dashboardTipoFilter = document.getElementById("dashboardTipoFilter");
+  const dashboardTagFilter = document.getElementById("dashboardTagFilter");
+  const volumeChartCard = document.getElementById("volumeChartCard");
+  const spendChartCard = document.getElementById("spendChartCard");
+  const volumeChartEmpty = document.getElementById("volumeChartEmpty");
+  const spendChartEmpty = document.getElementById("spendChartEmpty");
+  let volumeChart = null;
+  let spendChart = null;
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 
@@ -882,6 +984,211 @@
       return capitalize(formatted);
     }catch{
       return dp.value;
+    }
+  }
+
+  function formatChartDateLabel(isoDate){
+    if (!isoDate) return "—";
+    try{
+      return new Date(`${isoDate}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    }catch{
+      return isoDate;
+    }
+  }
+
+  function getDashboardFilters(){
+    return {
+      tipo: (dashboardTipoFilter?.value || "").trim(),
+      tag: (dashboardTagFilter?.value || "").trim(),
+    };
+  }
+
+  function buildLineOptions(kind){
+    const isCurrency = kind === "currency";
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: "index" },
+      plugins: {
+        legend: {
+          labels: {
+            usePointStyle: true,
+            padding: 18,
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const value = Number(ctx.parsed?.y || 0);
+              const label = ctx.dataset?.label ? `${ctx.dataset.label}: ` : "";
+              return label + (isCurrency ? formatCurrency(value) : formatInteger(value));
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { autoSkip: true, maxRotation: 0 }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => isCurrency ? formatCurrency(value) : formatInteger(value)
+          }
+        }
+      }
+    };
+  }
+
+  function ensureDashboardCharts(){
+    if (typeof Chart === "undefined") return false;
+    if (volumeChart && spendChart) return true;
+    const volumeCtx = document.getElementById("volumeChart");
+    const spendCtx = document.getElementById("spendChart");
+    if (!volumeCtx || !spendCtx) return false;
+
+    volumeChart = new Chart(volumeCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Volume disparado",
+          data: [],
+          borderColor: "#0f6ad8",
+          backgroundColor: "rgba(15,106,216,0.18)",
+          tension: 0.35,
+          fill: true,
+          borderWidth: 2.5,
+          pointRadius: 3.5,
+          pointHoverRadius: 6,
+          pointBackgroundColor: "#0f6ad8",
+          pointBorderColor: "#0f6ad8"
+        }]
+      },
+      options: buildLineOptions("count")
+    });
+
+    spendChart = new Chart(spendCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Gasto diário",
+          data: [],
+          borderColor: "#7c3aed",
+          backgroundColor: "rgba(124,58,237,0.18)",
+          tension: 0.35,
+          fill: true,
+          borderWidth: 2.5,
+          pointRadius: 3.5,
+          pointHoverRadius: 6,
+          pointBackgroundColor: "#7c3aed",
+          pointBorderColor: "#7c3aed"
+        }]
+      },
+      options: buildLineOptions("currency")
+    });
+
+    refreshDashboardPalette();
+    return true;
+  }
+
+  function refreshDashboardPalette(){
+    if (!volumeChart || !spendChart) return;
+    const styles = getComputedStyle(document.documentElement);
+    const textColor = (styles.getPropertyValue('--text') || '#1f2937').trim() || '#1f2937';
+    const gridColor = (styles.getPropertyValue('--border') || 'rgba(148,163,184,.25)').trim() || 'rgba(148,163,184,.25)';
+    [volumeChart, spendChart].forEach(chart => {
+      if (!chart) return;
+      if (chart.options?.scales?.x){
+        chart.options.scales.x.ticks.color = textColor;
+        chart.options.scales.x.grid.color = gridColor;
+      }
+      if (chart.options?.scales?.y){
+        chart.options.scales.y.ticks.color = textColor;
+        chart.options.scales.y.grid.color = gridColor;
+      }
+      if (chart.options?.plugins?.legend?.labels){
+        chart.options.plugins.legend.labels.color = textColor;
+      }
+      chart.update('none');
+    });
+  }
+
+  function animateDashboardCards(){
+    const targets = [dashboardControls, volumeChartCard, spendChartCard].filter(Boolean);
+    targets.forEach((el, idx) => {
+      el.classList.remove('animate-in');
+      el.style.removeProperty('--delay');
+      void el.offsetWidth;
+      el.style.setProperty('--delay', `${idx * 0.08}s`);
+      el.classList.add('animate-in');
+      setTimeout(() => {
+        el.classList.remove('animate-in');
+        el.style.removeProperty('--delay');
+      }, 800);
+    });
+  }
+
+  function updateDashboardCharts(records = []){
+    if (!dashboardViewEl) return;
+    const chartReady = ensureDashboardCharts();
+    if (!chartReady){
+      if (volumeChartEmpty){
+        volumeChartEmpty.textContent = "Carregando gráficos...";
+        volumeChartEmpty.hidden = false;
+      }
+      if (spendChartEmpty){
+        spendChartEmpty.textContent = "Carregando gráficos...";
+        spendChartEmpty.hidden = false;
+      }
+      return;
+    }
+
+    if (volumeChartEmpty) volumeChartEmpty.textContent = "Nenhum dado para exibir com os filtros atuais.";
+    if (spendChartEmpty) spendChartEmpty.textContent = "Nenhum dado para exibir com os filtros atuais.";
+
+    const filters = getDashboardFilters();
+    const usable = Array.isArray(records) ? records : [];
+    const filtered = usable.filter(rec => {
+      if (!inRange(rec)) return false;
+      const tag = (rec?.tag || "").trim();
+      const tipo = (rec?.tipoDisparo || "").trim();
+      if (filters.tag && tag !== filters.tag) return false;
+      if (filters.tipo && tipo !== filters.tipo) return false;
+      return true;
+    });
+
+    const grouped = new Map();
+    filtered.forEach(rec => {
+      const dateKey = fmtDateOnly(rec?.data || "");
+      if (!dateKey) return;
+      const entry = grouped.get(dateKey) || { volume: 0, spend: 0 };
+      entry.volume += Number(rec?.volume || 0) || 0;
+      entry.spend += costForRecord(rec);
+      grouped.set(dateKey, entry);
+    });
+
+    const sorted = Array.from(grouped.entries()).sort((a,b) => a[0].localeCompare(b[0]));
+    const labels = sorted.map(([date]) => formatChartDateLabel(date));
+    const volumeSeries = sorted.map(([,vals]) => vals.volume);
+    const spendSeries = sorted.map(([,vals]) => Number(vals.spend.toFixed(2)));
+
+    if (volumeChart){
+      volumeChart.data.labels = labels;
+      volumeChart.data.datasets[0].data = volumeSeries;
+      const hasVolume = volumeSeries.length > 0;
+      if (volumeChartEmpty) volumeChartEmpty.hidden = hasVolume;
+      volumeChart.update('none');
+    }
+
+    if (spendChart){
+      spendChart.data.labels = labels;
+      spendChart.data.datasets[0].data = spendSeries;
+      const hasSpend = spendSeries.length > 0;
+      if (spendChartEmpty) spendChartEmpty.hidden = hasSpend;
+      spendChart.update('none');
     }
   }
 
@@ -969,6 +1276,21 @@
   const dropZones = [];
   const deletingIds = new Set();
   const TAG_OPTIONS = ["Vendas","Conciliação","SAC","Recup de Crédito"];
+
+  if (dashboardTipoFilter){
+    dashboardTipoFilter.addEventListener('change', () => {
+      updateDashboardCharts(lastNonEmpty || []);
+      animateDashboardCards();
+    });
+  }
+  if (dashboardTagFilter){
+    dashboardTagFilter.addEventListener('change', () => {
+      updateDashboardCharts(lastNonEmpty || []);
+      animateDashboardCards();
+    });
+  }
+
+  updateDashboardCharts(lastNonEmpty);
 
   /* ====================== SPLASH & TOASTS ===================== */
   const splash = document.getElementById("splash");
@@ -1193,8 +1515,15 @@
     });
     const painelView = document.getElementById("view-painel");
     if (painelView) painelView.style.display = (name === "painel") ? "" : "none";
+    const dashboardView = dashboardViewEl || document.getElementById("view-dashboard");
+    if (dashboardView) dashboardView.style.display = (name === "dashboard") ? "" : "none";
     const loginView = document.getElementById("view-login");
     if (loginView) loginView.style.display = (name === "login") ? "" : "none";
+    if (name === "dashboard"){
+      ensureDashboardCharts();
+      updateDashboardCharts(lastNonEmpty || []);
+      animateDashboardCards();
+    }
     if (name === "login") setTimeout(()=>document.getElementById("loginUser")?.focus(), 50);
   }
   tabs.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
@@ -1370,6 +1699,9 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function setRange(range){
     currentRange = range || "all";
     softRender(lastNonEmpty);
+    if (dashboardViewEl && dashboardViewEl.style.display !== "none"){
+      animateDashboardCards();
+    }
   }
   function inRange(rec){
     if (!rec || !rec.data) return true; 
@@ -1648,6 +1980,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const filtered = filteredOverride ?? (records||[]).filter(inRange);
     if (filteredOverride === null){
       updateMetrics(filtered, records);
+      updateDashboardCharts(records);
     }
     countdownEntries.clear();
     if (countdownEntries.size === 0 && countdownInterval){
@@ -2039,6 +2372,7 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   function softRender(records){
     const filtered = (records||[]).filter(inRange);
     updateMetrics(filtered, records);
+    updateDashboardCharts(records);
     const incomingHash = calcHash(filtered);
     if (incomingHash === lastHash) return;
     renderSnapshot(records, filtered);
