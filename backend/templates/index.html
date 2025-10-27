@@ -626,6 +626,14 @@
     <section id="view-dashboard" class="dashboard-view" style="display:none;">
       <div class="analytics-controls" id="dashboardControls">
         <div class="control">
+          <label for="dashboardDateFrom">Período - De</label>
+          <input type="date" id="dashboardDateFrom" />
+        </div>
+        <div class="control">
+          <label for="dashboardDateTo">Período - Até</label>
+          <input type="date" id="dashboardDateTo" />
+        </div>
+        <div class="control">
           <label for="dashboardTipoFilter">Tipo do disparo</label>
           <select id="dashboardTipoFilter">
             <option value="">Todos os tipos</option>
@@ -899,12 +907,6 @@
       if (typeof refreshDashboardPalette === "function") {
         refreshDashboardPalette();
       }
-      refreshDashboardPalette();
-  }
-
-  function detectPreferredTheme(){
-      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-      catch{ return 'light'; }
   }
 
   function detectPreferredTheme(){
@@ -967,6 +969,8 @@
   const headerTimeChip = document.getElementById("currentTimeChip");
   const dashboardViewEl = document.getElementById("view-dashboard");
   const dashboardControls = document.getElementById("dashboardControls");
+  const dashboardDateFrom = document.getElementById("dashboardDateFrom");
+  const dashboardDateTo = document.getElementById("dashboardDateTo");
   const dashboardTipoFilter = document.getElementById("dashboardTipoFilter");
   const dashboardTagFilter = document.getElementById("dashboardTagFilter");
   const volumeChartCard = document.getElementById("volumeChartCard");
@@ -1004,6 +1008,8 @@
     return {
       tipo: (dashboardTipoFilter?.value || "").trim(),
       tag: (dashboardTagFilter?.value || "").trim(),
+      from: (dashboardDateFrom?.value || "").trim(),
+      to: (dashboardDateTo?.value || "").trim(),
     };
   }
 
@@ -1135,6 +1141,42 @@
     });
   }
 
+  function matchesDashboardRange(dateValue, filters){
+    if (!filters) return true;
+    const from = filters.from;
+    const to = filters.to;
+    if (!from && !to) return true;
+    if (!dateValue) return false;
+    if (from && dateValue < from) return false;
+    if (to && dateValue > to) return false;
+    return true;
+  }
+
+  function normalizeDashboardRange(changedEl){
+    if (!dashboardDateFrom || !dashboardDateTo) return;
+    const fromVal = dashboardDateFrom.value;
+    const toVal = dashboardDateTo.value;
+    if (fromVal && toVal && fromVal > toVal){
+      if (changedEl === dashboardDateFrom){
+        dashboardDateTo.value = fromVal;
+        dashboardDateTo.dataset.touched = "1";
+      } else {
+        dashboardDateFrom.value = toVal;
+        dashboardDateFrom.dataset.touched = "1";
+      }
+    }
+  }
+
+  function syncDashboardRangeTo(value){
+    if (!value) return;
+    if (dashboardDateFrom && !dashboardDateFrom.dataset.touched){
+      dashboardDateFrom.value = value;
+    }
+    if (dashboardDateTo && !dashboardDateTo.dataset.touched){
+      dashboardDateTo.value = value;
+    }
+  }
+
   function updateDashboardCharts(records = []){
     if (!dashboardViewEl) return;
     const chartReady = ensureDashboardCharts();
@@ -1155,8 +1197,14 @@
 
     const filters = getDashboardFilters();
     const usable = Array.isArray(records) ? records : [];
+    const rangeActive = Boolean(filters.from || filters.to);
     const filtered = usable.filter(rec => {
-      if (!inRange(rec)) return false;
+      const recordDate = fmtDateOnly(rec?.data || "");
+      if (rangeActive){
+        if (!matchesDashboardRange(recordDate, filters)) return false;
+      } else if (!inRange(rec)) {
+        return false;
+      }
       const tag = (rec?.tag || "").trim();
       const tipo = (rec?.tipoDisparo || "").trim();
       if (filters.tag && tag !== filters.tag) return false;
@@ -1293,6 +1341,16 @@
       animateDashboardCards();
     });
   }
+  [dashboardDateFrom, dashboardDateTo].forEach(input => {
+    if (!input) return;
+    input.addEventListener('change', (evt) => {
+      const target = evt?.target || null;
+      if (target) target.dataset.touched = "1";
+      normalizeDashboardRange(target);
+      updateDashboardCharts(lastNonEmpty || []);
+      animateDashboardCards();
+    });
+  });
 
   updateDashboardCharts(lastNonEmpty);
 
@@ -2613,12 +2671,16 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayString = `${yyyy}-${mm}-${dd}`;
-    
+
     dp.value = todayString;
+    syncDashboardRangeTo(todayString);
     setRange(todayString);
-    
+
     dp.addEventListener('change', () => {
       setRange(dp.value || "all");
+      if (dp.value){
+        syncDashboardRangeTo(dp.value);
+      }
     });
   })();
 
