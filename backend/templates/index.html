@@ -869,7 +869,7 @@
     Desenvolvido por Leahpar Code &copy; 2025
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-g6x9eruqbWtaXDpUe1koRaSPoaqe7iT730cdpShUMHbOWcZH/5LiCFYI8aAkaI0s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
   /* ========================= THEME TOGGLE ======================= */
   const themeToggleBtn = document.getElementById("themeToggle");
@@ -894,11 +894,6 @@
         themeToggleBtn.innerHTML = isDark ? sunIcon : moonIcon;
       }
       refreshDashboardPalette();
-  }
-
-  function detectPreferredTheme(){
-      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-      catch{ return 'light'; }
   }
 
   function detectPreferredTheme(){
