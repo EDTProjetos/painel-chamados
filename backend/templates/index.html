@@ -872,6 +872,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
   /* ========================= THEME TOGGLE ======================= */
+  let volumeChart = null;
+  let spendChart = null;
+
   const themeToggleBtn = document.getElementById("themeToggle");
   const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591M12 12a2.25 2.25 0 00-2.25 2.25 2.25 2.25 0 002.25 2.25 2.25 2.25 0 002.25-2.25A2.25 2.25 0 0012 12z" /></svg>`;
   const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>`;
@@ -893,7 +896,15 @@
       if (themeToggleBtn){
         themeToggleBtn.innerHTML = isDark ? sunIcon : moonIcon;
       }
+      if (typeof refreshDashboardPalette === "function") {
+        refreshDashboardPalette();
+      }
       refreshDashboardPalette();
+  }
+
+  function detectPreferredTheme(){
+      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      catch{ return 'light'; }
   }
 
   function detectPreferredTheme(){
@@ -962,8 +973,6 @@
   const spendChartCard = document.getElementById("spendChartCard");
   const volumeChartEmpty = document.getElementById("volumeChartEmpty");
   const spendChartEmpty = document.getElementById("spendChartEmpty");
-  let volumeChart = null;
-  let spendChart = null;
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 
@@ -1262,7 +1271,7 @@
   const url = (p) => `${BASE}${p}`;
 
   let lastNonEmpty = [];
-  let lastHash = "";
+  let lastHash = null;
   let sse = null, pollTimer = null, backoffMs = 5000, gotFirstPaint = false;
   const countdownEntries = new Map();
   const autoFinalizedIds = new Set();
