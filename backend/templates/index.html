@@ -920,6 +920,14 @@
       if (typeof refreshDashboardPalette === "function") {
         refreshDashboardPalette();
       }
+      if (typeof refreshDashboardPalette === "function") {
+        refreshDashboardPalette();
+      }
+  }
+
+  function detectPreferredTheme(){
+      try{ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      catch{ return 'light'; }
   }
 
   function detectPreferredTheme(){
@@ -997,6 +1005,7 @@
   const datePickInput = document.getElementById("datePick");
   const dateRangeFrom = document.getElementById("dateRangeFrom");
   const dateRangeTo = document.getElementById("dateRangeTo");
+  const dateFiltersWrap = document.getElementById("dateFilters");
   const headerDateChip = document.getElementById("currentDateChip");
   const headerTimeChip = document.getElementById("currentTimeChip");
   const dashboardViewEl = document.getElementById("view-dashboard");
@@ -1318,6 +1327,31 @@
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   }
 
+  let budgetFitFrame = null;
+  function scheduleBudgetFit(){
+    const el = metricEls.budgetHighlight;
+    if (!el) return;
+    if (budgetFitFrame) cancelAnimationFrame(budgetFitFrame);
+    budgetFitFrame = requestAnimationFrame(() => {
+      const target = metricEls.budgetHighlight;
+      if (!target) return;
+      target.style.fontSize = "";
+      budgetFitFrame = requestAnimationFrame(() => {
+        budgetFitFrame = null;
+        const active = metricEls.budgetHighlight;
+        if (!active) return;
+        let size = parseFloat(window.getComputedStyle(active).fontSize) || 34;
+        const minSize = 18;
+        let guard = 0;
+        while (active.scrollWidth > active.clientWidth && size > minSize && guard < 24){
+          size -= 1;
+          active.style.fontSize = `${size}px`;
+          guard += 1;
+        }
+      });
+    });
+  }
+
   function updateMetrics(filteredRecords = [], allRecords = []){
     const totals = { total: filteredRecords.length, andamento: 0, finalizado: 0, insucesso: 0, volume: 0 };
     filteredRecords.forEach(r => {
@@ -1372,6 +1406,7 @@
     if (metricEls.budgetHighlight) metricEls.budgetHighlight.textContent = formatCurrency(highlightValue);
     if (metricEls.budgetMonth) metricEls.budgetMonth.textContent = formatCurrency(monthCost);
     if (metricEls.budgetDay) metricEls.budgetDay.textContent = formatCurrency(dayCost);
+    scheduleBudgetFit();
   }
 
   function updateHeaderClock(){
@@ -1388,6 +1423,7 @@
   updateHeaderClock();
   if (headerDateChip || headerTimeChip) setInterval(updateHeaderClock, 1000);
   updateMetrics([], []);
+  window.addEventListener("resize", scheduleBudgetFit);
 
   /* ========================== CONFIG ========================== */
   const API_BASE = "";
@@ -1676,6 +1712,7 @@
     if (dashboardView) dashboardView.style.display = (name === "dashboard") ? "" : "none";
     const loginView = document.getElementById("view-login");
     if (loginView) loginView.style.display = (name === "login") ? "" : "none";
+    if (dateFiltersWrap) dateFiltersWrap.style.display = (name === "dashboard") ? "none" : "";
     if (name === "dashboard"){
       ensureDashboardCharts();
       updateDashboardCharts(lastNonEmpty || []);
