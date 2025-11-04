@@ -110,7 +110,7 @@
   .metric-card{
     background:var(--card); border:1px solid rgba(15,106,216,.12); border-radius:18px; padding:18px 20px;
     box-shadow:0 22px 38px -26px rgba(15,106,216,.55); position:relative; overflow:hidden;
-    display:flex; flex-direction:column; gap:10px; min-height:140px;
+    display:flex; flex-direction:column; gap:10px; min-height:140px; min-width:0;
   }
   .metric-card::after{
     content:""; position:absolute; inset:auto -40px -80px auto; width:160px; height:160px; border-radius:40%;
@@ -127,8 +127,10 @@
   }
   html.dark .metric-card.budget-card::after{opacity:.42;}
   .metric-card.budget-card .metric-value{
-    font-size:clamp(26px,4.5vw,38px);
-    word-break:break-word;
+    font-size:clamp(26px,3.8vw,40px);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .metric-icon{width:42px; height:42px; border-radius:14px; display:grid; place-items:center; color:#fff; z-index:1;}
   .metric-icon svg{width:22px; height:22px;}
@@ -287,17 +289,19 @@
 
   /* ===== Filtro por data (Aprimorado) ===== */
   .date-filters{
-    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center;
-    margin:18px 0 12px; background:rgba(255,255,255,.92); padding:12px 16px; border-radius:14px;
-    box-shadow:0 16px 28px -26px rgba(15,106,216,.45); border:1px solid var(--border);
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center;
+    margin:16px 0 12px; background:rgba(255,255,255,.92); padding:8px 12px; border-radius:12px;
+    box-shadow:0 14px 24px -24px rgba(15,106,216,.45); border:1px solid var(--border);
   }
   html.dark .date-filters{background:rgba(17,24,39,.9); border-color:rgba(59,130,246,.25); box-shadow:0 18px 30px -28px rgba(15,23,42,.9);}
   .date-filter-group{
-    display:flex; align-items:center; gap:8px; background:#f8fafc;
+    display:flex; align-items:center; gap:6px; background:#f8fafc;
     border:1px solid var(--border); border-radius:10px; padding:6px 10px;
+    min-width:150px;
   }
   html.dark .date-filter-group { background: #111827; border-color:#1f2937; }
-  .date-filter-group .label{ color:var(--muted); font-weight:700; font-size:12px; letter-spacing:.08em; }
+  .date-filter-group .label{ color:var(--muted); font-weight:700; font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+  .date-filter-group input{flex:1 1 auto; min-width:0;}
   .date-filters input[type="date"]{
     background:transparent; border:none; color:var(--text); font-size:13px; padding:2px;
   }
@@ -432,7 +436,7 @@
     .chart-wrapper{min-height:220px;}
     .legenda{justify-content:flex-start;}
     .date-filters{flex-direction:column; align-items:stretch; gap:10px;}
-    .date-filter-group{width:100%; justify-content:space-between;}
+    .date-filter-group{width:100%; min-width:0; justify-content:space-between;}
     .form-container{padding:18px;}
     .form-grid{grid-template-columns:1fr;}
     .tempo-group{width:100%;}
@@ -619,8 +623,16 @@
 
     <div id="dateFilters" class="date-filters">
         <div class="date-filter-group">
-            <span class="label">Data:</span>
+            <span class="label">Dia</span>
             <input type="date" id="datePick" title="Escolher dia" />
+        </div>
+        <div class="date-filter-group">
+            <span class="label">De</span>
+            <input type="date" id="dateRangeFrom" title="Data inicial" />
+        </div>
+        <div class="date-filter-group">
+            <span class="label">Até</span>
+            <input type="date" id="dateRangeTo" title="Data final" />
         </div>
     </div>
 
@@ -982,6 +994,9 @@
     budgetMonth: document.getElementById("metricBudgetMonth"),
     budgetDay: document.getElementById("metricBudgetDay"),
   };
+  const datePickInput = document.getElementById("datePick");
+  const dateRangeFrom = document.getElementById("dateRangeFrom");
+  const dateRangeTo = document.getElementById("dateRangeTo");
   const headerDateChip = document.getElementById("currentDateChip");
   const headerTimeChip = document.getElementById("currentTimeChip");
   const dashboardViewEl = document.getElementById("view-dashboard");
@@ -995,21 +1010,37 @@
   const volumeChartEmpty = document.getElementById("volumeChartEmpty");
   const spendChartEmpty = document.getElementById("spendChartEmpty");
 
+  let rangeFilter = { from: "", to: "" };
+
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 
-  function formatRangeLabel(){
-    const dp = document.getElementById("datePick");
-    if (!dp || !dp.value) return "Todos os disparos";
+  function formatDateForLabel(isoDate, includeWeekday=false){
+    if (!isoDate) return "";
     try{
-      const formatted = new Date(`${dp.value}T00:00:00`).toLocaleDateString("pt-BR", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long"
-      });
-      return capitalize(formatted);
+      const opts = includeWeekday
+        ? { weekday: "long", day: "2-digit", month: "long", year: "numeric" }
+        : { day: "2-digit", month: "short", year: "numeric" };
+      const formatted = new Date(`${isoDate}T00:00:00`).toLocaleDateString("pt-BR", opts);
+      return includeWeekday ? capitalize(formatted) : formatted;
     }catch{
-      return dp.value;
+      return isoDate;
     }
+  }
+
+  function formatRangeLabel(){
+    const hasRange = Boolean(rangeFilter.from || rangeFilter.to);
+    if (hasRange){
+      const start = rangeFilter.from || rangeFilter.to;
+      const end = rangeFilter.to || rangeFilter.from;
+      if (start === end){
+        return formatDateForLabel(start, true);
+      }
+      const fromLabel = formatDateForLabel(start, false);
+      const toLabel = formatDateForLabel(end, false);
+      return `Período: ${fromLabel} – ${toLabel}`;
+    }
+    if (!currentRange || currentRange === "all") return "Todos os disparos";
+    return formatDateForLabel(currentRange, true);
   }
 
   function formatChartDateLabel(isoDate){
@@ -1175,28 +1206,34 @@
     return true;
   }
 
-  function normalizeDashboardRange(changedEl){
-    if (!dashboardDateFrom || !dashboardDateTo) return;
-    const fromVal = dashboardDateFrom.value;
-    const toVal = dashboardDateTo.value;
-    if (fromVal && toVal && fromVal > toVal){
-      if (changedEl === dashboardDateFrom){
-        dashboardDateTo.value = fromVal;
-        dashboardDateTo.dataset.touched = "1";
+  function normalizeRangePair(startInput, endInput, changedEl){
+    if (!startInput || !endInput) return;
+    const startVal = startInput.value;
+    const endVal = endInput.value;
+    if (startVal && endVal && startVal > endVal){
+      if (changedEl === startInput){
+        endInput.value = startVal;
+        endInput.dataset.touched = "1";
       } else {
-        dashboardDateFrom.value = toVal;
-        dashboardDateFrom.dataset.touched = "1";
+        startInput.value = endVal;
+        startInput.dataset.touched = "1";
       }
     }
   }
 
+  function normalizeDashboardRange(changedEl){
+    normalizeRangePair(dashboardDateFrom, dashboardDateTo, changedEl);
+  }
+
   function syncDashboardRangeTo(value){
     if (!value) return;
-    if (dashboardDateFrom && !dashboardDateFrom.dataset.touched){
+    if (dashboardDateFrom){
       dashboardDateFrom.value = value;
+      delete dashboardDateFrom.dataset.touched;
     }
-    if (dashboardDateTo && !dashboardDateTo.dataset.touched){
+    if (dashboardDateTo){
       dashboardDateTo.value = value;
+      delete dashboardDateTo.dataset.touched;
     }
   }
 
@@ -1266,6 +1303,14 @@
   }
 
   function monthKeyFromRange(){
+    if (rangeFilter.from || rangeFilter.to){
+      const start = rangeFilter.from || rangeFilter.to;
+      const end = rangeFilter.to || rangeFilter.from;
+      if (start && end && start.slice(0,7) === end.slice(0,7)){
+        return start.slice(0,7);
+      }
+      return null;
+    }
     if (currentRange && currentRange !== "all"){
       return currentRange.slice(0, 7);
     }
@@ -1286,17 +1331,37 @@
     let dayCost = 0;
     filteredRecords.forEach(r => { dayCost += costForRecord(r); });
 
-    const monthKey = monthKeyFromRange();
+    const rangeActive = Boolean(rangeFilter.from || rangeFilter.to);
+    const monthsInRange = new Set();
+    if (rangeActive){
+      filteredRecords.forEach(r => {
+        const mk = ((r?.data) || "").slice(0, 7);
+        if (mk) monthsInRange.add(mk);
+      });
+    }
+
     let monthCost = 0;
     const base = Array.isArray(allRecords) && allRecords.length ? allRecords : filteredRecords;
-    base.forEach(r => {
-      const recMonth = ((r?.data) || "").slice(0, 7);
-      if (recMonth && monthKey){
-        if (recMonth === monthKey) monthCost += costForRecord(r);
-      } else if (!recMonth && (!currentRange || currentRange === "all")){
-        monthCost += costForRecord(r);
-      }
-    });
+    if (monthsInRange.size){
+      base.forEach(r => {
+        const recMonth = ((r?.data) || "").slice(0, 7);
+        if (recMonth && monthsInRange.has(recMonth)){
+          monthCost += costForRecord(r);
+        }
+      });
+    }else if (!rangeActive){
+      const monthKey = monthKeyFromRange();
+      base.forEach(r => {
+        const recMonth = ((r?.data) || "").slice(0, 7);
+        if (recMonth && monthKey){
+          if (recMonth === monthKey) monthCost += costForRecord(r);
+        } else if (!recMonth && (!currentRange || currentRange === "all")){
+          monthCost += costForRecord(r);
+        }
+      });
+    }
+
+    const highlightValue = rangeActive ? dayCost : monthCost;
 
     if (metricEls.total) metricEls.total.textContent = totals.total;
     if (metricEls.andamento) metricEls.andamento.textContent = totals.andamento;
@@ -1304,7 +1369,7 @@
     if (metricEls.insucesso) metricEls.insucesso.textContent = totals.insucesso;
     if (metricEls.volume) metricEls.volume.textContent = formatInteger(totals.volume);
     if (metricEls.range) metricEls.range.textContent = formatRangeLabel();
-    if (metricEls.budgetHighlight) metricEls.budgetHighlight.textContent = formatCurrency(monthCost);
+    if (metricEls.budgetHighlight) metricEls.budgetHighlight.textContent = formatCurrency(highlightValue);
     if (metricEls.budgetMonth) metricEls.budgetMonth.textContent = formatCurrency(monthCost);
     if (metricEls.budgetDay) metricEls.budgetDay.textContent = formatCurrency(dayCost);
   }
@@ -1355,14 +1420,30 @@
       animateDashboardCards();
     });
   }
+
+  const handlePrimaryRangeChange = (evt) => {
+    const target = evt?.target || null;
+    if (target) target.dataset.touched = "1";
+    normalizeRangePair(dateRangeFrom, dateRangeTo, target);
+    const fromVal = dateRangeFrom?.value || "";
+    const toVal = dateRangeTo?.value || "";
+    setCustomRange(fromVal, toVal, { source: "dateFilters" });
+  };
+
+  [dateRangeFrom, dateRangeTo].forEach(input => {
+    if (!input) return;
+    input.addEventListener('change', handlePrimaryRangeChange);
+  });
+
   [dashboardDateFrom, dashboardDateTo].forEach(input => {
     if (!input) return;
     input.addEventListener('change', (evt) => {
       const target = evt?.target || null;
       if (target) target.dataset.touched = "1";
       normalizeDashboardRange(target);
-      updateDashboardCharts(lastNonEmpty || []);
-      animateDashboardCards();
+      const fromVal = dashboardDateFrom?.value || "";
+      const toVal = dashboardDateTo?.value || "";
+      setCustomRange(fromVal, toVal, { source: "dashboard" });
     });
   });
 
@@ -1772,17 +1853,106 @@ Queremos escutar a sua proposta! 👉 Para conhecer nossas opções de parcelame
   }
 
   /* ================== FILTRO POR DATA ============ */
-  function setRange(range){
+  function setRange(range, meta = {}){
     currentRange = range || "all";
-    softRender(lastNonEmpty);
+    rangeFilter = { from: "", to: "" };
+    if (dateRangeFrom && meta.source !== "dateFilters"){
+      dateRangeFrom.value = "";
+      delete dateRangeFrom.dataset.touched;
+    }
+    if (dateRangeTo && meta.source !== "dateFilters"){
+      dateRangeTo.value = "";
+      delete dateRangeTo.dataset.touched;
+    }
+    if (dashboardDateFrom && meta.source !== "dashboard"){
+      dashboardDateFrom.value = (currentRange && currentRange !== "all") ? currentRange : "";
+      delete dashboardDateFrom.dataset.touched;
+    }
+    if (dashboardDateTo && meta.source !== "dashboard"){
+      dashboardDateTo.value = (currentRange && currentRange !== "all") ? currentRange : "";
+      delete dashboardDateTo.dataset.touched;
+    }
+    const snapshot = Array.isArray(lastNonEmpty) ? lastNonEmpty.slice() : (lastNonEmpty || []);
+    softRender(snapshot);
+    if (dashboardViewEl && dashboardViewEl.style.display !== "none"){
+      animateDashboardCards();
+    }
+  }
+
+  function setCustomRange(from, to, meta = {}){
+    let start = (from || "").trim();
+    let end = (to || "").trim();
+    if (start && end && start > end){
+      const tmp = start; start = end; end = tmp;
+    }
+    if (!start && end) start = end;
+    if (!end && start) end = start;
+
+    if (start || end){
+      rangeFilter = { from: start, to: end };
+      currentRange = "all";
+      if (datePickInput && meta.source !== "datePick"){
+        datePickInput.value = "";
+      }
+      if (meta.source !== "dateFilters"){
+        if (dateRangeFrom){
+          dateRangeFrom.value = start;
+          delete dateRangeFrom.dataset.touched;
+        }
+        if (dateRangeTo){
+          dateRangeTo.value = end;
+          delete dateRangeTo.dataset.touched;
+        }
+      }
+      if (meta.source !== "dashboard"){
+        if (dashboardDateFrom){
+          dashboardDateFrom.value = start;
+          delete dashboardDateFrom.dataset.touched;
+        }
+        if (dashboardDateTo){
+          dashboardDateTo.value = end;
+          delete dashboardDateTo.dataset.touched;
+        }
+      }
+    }else{
+      rangeFilter = { from: "", to: "" };
+      if (meta.source !== "dateFilters"){
+        if (dateRangeFrom){ dateRangeFrom.value = ""; delete dateRangeFrom.dataset.touched; }
+        if (dateRangeTo){ dateRangeTo.value = ""; delete dateRangeTo.dataset.touched; }
+      }
+      if (meta.source !== "dashboard"){
+        if (dashboardDateFrom){
+          dashboardDateFrom.value = (currentRange && currentRange !== "all") ? currentRange : "";
+          delete dashboardDateFrom.dataset.touched;
+        }
+        if (dashboardDateTo){
+          dashboardDateTo.value = (currentRange && currentRange !== "all") ? currentRange : "";
+          delete dashboardDateTo.dataset.touched;
+        }
+      }
+      if (datePickInput && currentRange !== "all" && meta.source !== "datePick"){
+        datePickInput.value = currentRange;
+      }
+    }
+
+    const snapshot = Array.isArray(lastNonEmpty) ? lastNonEmpty.slice() : (lastNonEmpty || []);
+    softRender(snapshot);
     if (dashboardViewEl && dashboardViewEl.style.display !== "none"){
       animateDashboardCards();
     }
   }
   function inRange(rec){
-    if (!rec || !rec.data) return true; 
-    if (currentRange === 'all') return true;
-    return rec.data === currentRange;
+    const hasRange = Boolean(rangeFilter.from || rangeFilter.to);
+    const recordDate = (rec?.data || "").slice(0, 10);
+    if (hasRange){
+      if (!recordDate) return false;
+      if (rangeFilter.from && recordDate < rangeFilter.from) return false;
+      if (rangeFilter.to && recordDate > rangeFilter.to) return false;
+      return true;
+    }
+    if (!rec || !recordDate) return true;
+    if (currentRange === 'all' || !currentRange) return true;
+    return recordDate === currentRange;
   }
 
   /* =========================== RENDER ========================== */
